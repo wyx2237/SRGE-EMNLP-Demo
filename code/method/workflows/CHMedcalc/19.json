@@ -1,0 +1,132 @@
+{
+    "name": "valve_area_calculation_workflow",
+    "description": "Calculate the valve area using the Gorlin formula based on cardiac output, heart rate, flow time, pressure gradient, and valve type.",
+    "inputs": [
+        {
+            "input_name": "cardiac_output_ml_min",
+            "input_desc": "Cardiac output in mL/min",
+            "input_type": "float"
+        },
+        {
+            "input_name": "valve_type",
+            "input_desc": "Type of valve (e.g., aortic, mitral, pulmonary, tricuspid). Valid options: 'aortic', 'mitral', 'pulmonary', 'tricuspid'.",
+            "input_type": "str"
+        },
+        {
+            "input_name": "heart_rate_bpm",
+            "input_desc": "Heart rate in beats per minute (bpm)",
+            "input_type": "float"
+        },
+        {
+            "input_name": "flow_time_seconds",
+            "input_desc": "Flow time in seconds (SEP for aortic, pulmonary, or tricuspid valves; DFP for mitral valves)",
+            "input_type": "float"
+        },
+        {
+            "input_name": "pressure_gradient_mmhg",
+            "input_desc": "Mean pressure gradient across the valve in mmHg",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "select_k_value_based_on_valve",
+            "step_description": "Select the appropriate K value based on the type of valve.",
+            "step_inputs": [
+                {
+                    "input_name": "valve_type",
+                    "input_desc": "Type of valve (e.g., aortic, mitral, pulmonary, tricuspid). Valid options: 'aortic', 'mitral', 'pulmonary', 'tricuspid'.",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.valve_type"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "k_value",
+                    "output_desc": "Selected K value for the specific valve type.",
+                    "output_type": "float"
+                }
+            ],
+            "category": "discrete_value_mapping",
+            "reason": "The K value depends on the type of valve, which is a discrete choice.",
+            "detail": "The K value is selected based on the valve type: 44.3 for aortic, pulmonary, or tricuspid valves, and 37.7 for mitral valves."
+        },
+        {
+            "step_id": "2",
+            "step_name": "select_flow_time_based_on_valve",
+            "step_description": "Select the appropriate flow time based on the type of valve.",
+            "step_inputs": [
+                {
+                    "input_name": "valve_type",
+                    "input_desc": "Type of valve (e.g., aortic, mitral, pulmonary, tricuspid). Valid options: 'aortic', 'mitral', 'pulmonary', 'tricuspid'.",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.valve_type"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "flow_time",
+                    "output_desc": "Selected flow time (either SEP or DFP) based on the valve type.",
+                    "output_type": "float"
+                }
+            ],
+            "category": "discrete_value_mapping",
+            "reason": "The flow time depends on the valve type, which is a discrete choice.",
+            "detail": "For aortic, pulmonary, or tricuspid valves, use the systolic ejection period (SEP) in seconds. For mitral valves, use the diastolic filling period (DFP) in seconds."
+        },
+        {
+            "step_id": "3",
+            "step_name": "calculate_valve_area_using_gorlin_formula",
+            "step_description": "Calculate the valve area using the Gorlin formula.",
+            "step_inputs": [
+                {
+                    "input_name": "cardiac_output_ml_min",
+                    "input_desc": "Cardiac output in mL/min",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.cardiac_output_ml_min"
+                },
+                {
+                    "input_name": "k_value",
+                    "input_desc": "Selected K value for the specific valve type.",
+                    "input_type": "float",
+                    "input_source": "$|1|.k_value"
+                },
+                {
+                    "input_name": "heart_rate_bpm",
+                    "input_desc": "Heart rate in beats per minute (bpm)",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.heart_rate_bpm"
+                },
+                {
+                    "input_name": "flow_time",
+                    "input_desc": "Flow time in seconds (SEP or DFP).",
+                    "input_type": "float",
+                    "input_source": "$|2|.flow_time"
+                },
+                {
+                    "input_name": "pressure_gradient_mmhg",
+                    "input_desc": "Mean pressure gradient across the valve in mmHg",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.pressure_gradient_mmhg"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "valve_area_cm2",
+                    "output_desc": "Calculated valve area in cm².",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step applies the Gorlin formula to calculate the valve area.",
+            "detail": "VA = CO / (K × HR × FT × √ΔP)"
+        }
+    ],
+    "output": {
+        "output_name": "valve_area_cm2",
+        "output_desc": "Calculated valve area in cm².",
+        "output_type": "float"
+    },
+    "code": "def solve(cardiac_output_ml_min, valve_type, heart_rate_bpm, flow_time_seconds, pressure_gradient_mmhg):\n    # Step 1: Select the appropriate K value based on the type of valve\n    # The K value is selected based on the valve type: 44.3 for aortic, pulmonary, or tricuspid valves, and 37.7 for mitral valves\n    if valve_type in ['aortic', 'pulmonary', 'tricuspid']:\n        k_value = 44.3\n    elif valve_type == 'mitral':\n        k_value = 37.7\n    else:\n        raise ValueError(\"Invalid valve type. Valid options are 'aortic', 'mitral', 'pulmonary', 'tricuspid'.\")\n    \n    yield {\n        \"step_name\": \"select_k_value_based_on_valve\",\n        \"step_description\": \"Select the appropriate K value based on the type of valve.\",\n        \"step_result\": k_value,\n        \"unit\": None\n    }\n    \n    # Step 2: Select the appropriate flow time based on the type of valve\n    # For aortic, pulmonary, or tricuspid valves, use the systolic ejection period (SEP) in seconds. For mitral valves, use the diastolic filling period (DFP) in seconds.\n    if valve_type in ['aortic', 'pulmonary', 'tricuspid']:\n        flow_time = flow_time_seconds  # Use SEP as provided\n    elif valve_type == 'mitral':\n        flow_time = flow_time_seconds  # Use DFP as provided\n    else:\n        raise ValueError(\"Invalid valve type. Valid options are 'aortic', 'mitral', 'pulmonary', 'tricuspid'.\")\n    \n    yield {\n        \"step_name\": \"select_flow_time_based_on_valve\",\n        \"step_description\": \"Select the appropriate flow time based on the type of valve.\",\n        \"step_result\": flow_time,\n        \"unit\": \"seconds\"\n    }\n    \n    # Step 3: Calculate the valve area using the Gorlin formula\n    # VA = CO / (K × HR × FT × √ΔP)\n    # Convert heart rate from bpm to per minute (already in per minute)\n    # Convert pressure gradient from mmHg to square root\n    sqrt_pressure_gradient = math.sqrt(pressure_gradient_mmhg)\n    \n    valve_area_cm2 = cardiac_output_ml_min / (k_value * heart_rate_bpm * flow_time * sqrt_pressure_gradient)\n    \n    yield {\n        \"step_name\": \"calculate_valve_area_using_gorlin_formula\",\n        \"step_description\": \"Calculate the valve area using the Gorlin formula.\",\n        \"step_result\": valve_area_cm2,\n        \"unit\": \"cm²\"\n    }\n    \n    return valve_area_cm2"
+}

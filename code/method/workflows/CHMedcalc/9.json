@@ -1,0 +1,303 @@
+{
+    "name": "shireman_rule_major_bleeding_risk_score",
+    "description": "Calculate the total risk score for major bleeding in patients on warfarin according to the Shireman Rule.",
+    "inputs": [
+        {
+            "input_name": "anemia_present",
+            "input_desc": "Whether the patient has anemia (yes/no).",
+            "input_type": "boolean"
+        },
+        {
+            "input_name": "alcohol_or_drug_abuse_present",
+            "input_desc": "Whether the patient has alcohol or drug abuse (yes/no).",
+            "input_type": "boolean"
+        },
+        {
+            "input_name": "recent_bleeding_present",
+            "input_desc": "Whether the patient has had recent bleeding within 30 days (yes/no).",
+            "input_type": "boolean"
+        },
+        {
+            "input_name": "remote_bleeding_present",
+            "input_desc": "Whether the patient has had remote bleeding between 30 days and 1 year ago (yes/no).",
+            "input_type": "boolean"
+        },
+        {
+            "input_name": "elderly_present",
+            "input_desc": "Whether the patient is aged ≥70 years (yes/no).",
+            "input_type": "boolean"
+        },
+        {
+            "input_name": "female_present",
+            "input_desc": "Whether the patient is female (yes/no).",
+            "input_type": "boolean"
+        },
+        {
+            "input_name": "antiplatelet_use_present",
+            "input_desc": "Whether the patient is using antiplatelet drugs (yes/no).",
+            "input_type": "boolean"
+        },
+        {
+            "input_name": "diabetes_present",
+            "input_desc": "Whether the patient has diabetes (yes/no).",
+            "input_type": "boolean"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "anemia_score",
+            "step_description": "Assign a score based on the presence of anemia according to the Shireman Rule.",
+            "step_inputs": [
+                {
+                    "input_name": "anemia_present",
+                    "input_desc": "Whether the patient has anemia (yes/no).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.anemia_present"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "anemia_score",
+                    "output_desc": "Score for anemia according to the Shireman Rule.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "ConditionEvaluation",
+            "reason": "This step evaluates whether the condition (anemia) is met and assigns the corresponding score. This fits the ConditionEvaluation category.",
+            "detail": "If anemia is present, assign 86 points. If not, assign 0 points."
+        },
+        {
+            "step_id": "2",
+            "step_name": "alcohol_or_drug_abuse_score",
+            "step_description": "Assign a score based on the presence of alcohol or drug abuse according to the Shireman Rule.",
+            "step_inputs": [
+                {
+                    "input_name": "alcohol_or_drug_abuse_present",
+                    "input_desc": "Whether the patient has alcohol or drug abuse (yes/no).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.alcohol_or_drug_abuse_present"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "alcohol_or_drug_abuse_score",
+                    "output_desc": "Score for alcohol or drug abuse according to the Shireman Rule.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "ConditionEvaluation",
+            "reason": "This step evaluates whether the condition (alcohol or drug abuse) is met and assigns the corresponding score. This fits the ConditionEvaluation category.",
+            "detail": "If alcohol or drug abuse is present, assign 71 points. If not, assign 0 points."
+        },
+        {
+            "step_id": "3",
+            "step_name": "recent_bleeding_score",
+            "step_description": "Assign a score based on the presence of recent bleeding according to the Shireman Rule.",
+            "step_inputs": [
+                {
+                    "input_name": "recent_bleeding_present",
+                    "input_desc": "Whether the patient has had recent bleeding within 30 days (yes/no).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.recent_bleeding_present"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "recent_bleeding_score",
+                    "output_desc": "Score for recent bleeding according to the Shireman Rule.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "ConditionEvaluation",
+            "reason": "This step evaluates whether the condition (recent bleeding) is met and assigns the corresponding score. This fits the ConditionEvaluation category.",
+            "detail": "If recent bleeding is present, assign 62 points. If not, assign 0 points."
+        },
+        {
+            "step_id": "4",
+            "step_name": "remote_bleeding_score",
+            "step_description": "Assign a score based on the presence of remote bleeding according to the Shireman Rule.",
+            "step_inputs": [
+                {
+                    "input_name": "remote_bleeding_present",
+                    "input_desc": "Whether the patient has had remote bleeding between 30 days and 1 year ago (yes/no).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.remote_bleeding_present"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "remote_bleeding_score",
+                    "output_desc": "Score for remote bleeding according to the Shireman Rule.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "ConditionEvaluation",
+            "reason": "This step evaluates whether the condition (remote bleeding) is met and assigns the corresponding score. This fits the ConditionEvaluation category.",
+            "detail": "If remote bleeding is present, assign 58 points. If not, assign 0 points."
+        },
+        {
+            "step_id": "5",
+            "step_name": "elderly_score",
+            "step_description": "Assign a score based on the presence of being elderly according to the Shireman Rule.",
+            "step_inputs": [
+                {
+                    "input_name": "elderly_present",
+                    "input_desc": "Whether the patient is aged ≥70 years (yes/no).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.elderly_present"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "elderly_score",
+                    "output_desc": "Score for being elderly according to the Shireman Rule.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "ConditionEvaluation",
+            "reason": "This step evaluates whether the condition (being elderly) is met and assigns the corresponding score. This fits the ConditionEvaluation category.",
+            "detail": "If the patient is elderly, assign 49 points. If not, assign 0 points."
+        },
+        {
+            "step_id": "6",
+            "step_name": "female_score",
+            "step_description": "Assign a score based on the presence of female sex according to the Shireman Rule.",
+            "step_inputs": [
+                {
+                    "input_name": "female_present",
+                    "input_desc": "Whether the patient is female (yes/no).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.female_present"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "female_score",
+                    "output_desc": "Score for female sex according to the Shireman Rule.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "ConditionEvaluation",
+            "reason": "This step evaluates whether the condition (female sex) is met and assigns the corresponding score. This fits the ConditionEvaluation category.",
+            "detail": "If the patient is female, assign 32 points. If not, assign 0 points."
+        },
+        {
+            "step_id": "7",
+            "step_name": "antiplatelet_use_score",
+            "step_description": "Assign a score based on the presence of antiplatelet use according to the Shireman Rule.",
+            "step_inputs": [
+                {
+                    "input_name": "antiplatelet_use_present",
+                    "input_desc": "Whether the patient is using antiplatelet drugs (yes/no).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.antiplatelet_use_present"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "antiplatelet_use_score",
+                    "output_desc": "Score for antiplatelet use according to the Shireman Rule.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "ConditionEvaluation",
+            "reason": "This step evaluates whether the condition (antiplatelet use) is met and assigns the corresponding score. This fits the ConditionEvaluation category.",
+            "detail": "If antiplatelet use is present, assign 32 points. If not, assign 0 points."
+        },
+        {
+            "step_id": "8",
+            "step_name": "diabetes_score",
+            "step_description": "Assign a score based on the presence of diabetes according to the Shireman Rule.",
+            "step_inputs": [
+                {
+                    "input_name": "diabetes_present",
+                    "input_desc": "Whether the patient has diabetes (yes/no).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.diabetes_present"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "diabetes_score",
+                    "output_desc": "Score for diabetes according to the Shireman Rule.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "ConditionEvaluation",
+            "reason": "This step evaluates whether the condition (diabetes) is met and assigns the corresponding score. This fits the ConditionEvaluation category.",
+            "detail": "If diabetes is present, assign 27 points. If not, assign 0 points."
+        },
+        {
+            "step_id": "9",
+            "step_name": "total_score_calculation",
+            "step_description": "Calculate the total risk score by summing all individual scores.",
+            "step_inputs": [
+                {
+                    "input_name": "anemia_score",
+                    "input_desc": "Score for anemia.",
+                    "input_type": "integer",
+                    "input_source": "$|step1|.anemia_score"
+                },
+                {
+                    "input_name": "alcohol_or_drug_abuse_score",
+                    "input_desc": "Score for alcohol or drug abuse.",
+                    "input_type": "integer",
+                    "input_source": "$|step2|.alcohol_or_drug_abuse_score"
+                },
+                {
+                    "input_name": "recent_bleeding_score",
+                    "input_desc": "Score for recent bleeding.",
+                    "input_type": "integer",
+                    "input_source": "$|step3|.recent_bleeding_score"
+                },
+                {
+                    "input_name": "remote_bleeding_score",
+                    "input_desc": "Score for remote bleeding.",
+                    "input_type": "integer",
+                    "input_source": "$|step4|.remote_bleeding_score"
+                },
+                {
+                    "input_name": "elderly_score",
+                    "input_desc": "Score for being elderly.",
+                    "input_type": "integer",
+                    "input_source": "$|step5|.elderly_score"
+                },
+                {
+                    "input_name": "female_score",
+                    "input_desc": "Score for female sex.",
+                    "input_type": "integer",
+                    "input_source": "$|step6|.female_score"
+                },
+                {
+                    "input_name": "antiplatelet_use_score",
+                    "input_desc": "Score for antiplatelet use.",
+                    "input_type": "integer",
+                    "input_source": "$|step7|.antiplatelet_use_score"
+                },
+                {
+                    "input_name": "diabetes_score",
+                    "input_desc": "Score for diabetes.",
+                    "input_type": "integer",
+                    "input_source": "$|step8|.diabetes_score"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_score",
+                    "output_desc": "Total risk score for major bleeding in patients on warfarin.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "This step involves summing all individual scores to get the total score, which is a simple arithmetic operation. This fits the FormulaCalculation category.",
+            "detail": "The total score is calculated by summing up all individual scores. The maximum possible score is 86 + 71 + 62 + 58 + 49 + 32 + 32 + 27 = 397."
+        }
+    ],
+    "output": {
+        "output_name": "total_score",
+        "output_desc": "Total risk score for major bleeding in patients on warfarin.",
+        "output_type": "integer"
+    },
+    "code": "def solve(anemia_present, alcohol_or_drug_abuse_present, recent_bleeding_present, remote_bleeding_present, elderly_present, female_present, antiplatelet_use_present, diabetes_present):\n    # Step 1: Anemia Score Calculation\n    # Assign a score based on the presence of anemia according to the Shireman Rule.\n    anemia_score = 86 if anemia_present else 0\n    yield {\n        \"step_name\": \"anemia_score\",\n        \"step_description\": \"Assign a score based on the presence of anemia according to the Shireman Rule.\",\n        \"step_result\": anemia_score,\n        \"unit\": None\n    }\n\n    # Step 2: Alcohol or Drug Abuse Score Calculation\n    # Assign a score based on the presence of alcohol or drug abuse according to the Shireman Rule.\n    alcohol_or_drug_abuse_score = 71 if alcohol_or_drug_abuse_present else 0\n    yield {\n        \"step_name\": \"alcohol_or_drug_abuse_score\",\n        \"step_description\": \"Assign a score based on the presence of alcohol or drug abuse according to the Shireman Rule.\",\n        \"step_result\": alcohol_or_drug_abuse_score,\n        \"unit\": None\n    }\n\n    # Step 3: Recent Bleeding Score Calculation\n    # Assign a score based on the presence of recent bleeding according to the Shireman Rule.\n    recent_bleeding_score = 62 if recent_bleeding_present else 0\n    yield {\n        \"step_name\": \"recent_bleeding_score\",\n        \"step_description\": \"Assign a score based on the presence of recent bleeding according to the Shireman Rule.\",\n        \"step_result\": recent_bleeding_score,\n        \"unit\": None\n    }\n\n    # Step 4: Remote Bleeding Score Calculation\n    # Assign a score based on the presence of remote bleeding according to the Shireman Rule.\n    remote_bleeding_score = 58 if remote_bleeding_present else 0\n    yield {\n        \"step_name\": \"remote_bleeding_score\",\n        \"step_description\": \"Assign a score based on the presence of remote bleeding according to the Shireman Rule.\",\n        \"step_result\": remote_bleeding_score,\n        \"unit\": None\n    }\n\n    # Step 5: Elderly Score Calculation\n    # Assign a score based on the presence of being elderly according to the Shireman Rule.\n    elderly_score = 49 if elderly_present else 0\n    yield {\n        \"step_name\": \"elderly_score\",\n        \"step_description\": \"Assign a score based on the presence of being elderly according to the Shireman Rule.\",\n        \"step_result\": elderly_score,\n        \"unit\": None\n    }\n\n    # Step 6: Female Score Calculation\n    # Assign a score based on the presence of female sex according to the Shireman Rule.\n    female_score = 32 if female_present else 0\n    yield {\n        \"step_name\": \"female_score\",\n        \"step_description\": \"Assign a score based on the presence of female sex according to the Shireman Rule.\",\n        \"step_result\": female_score,\n        \"unit\": None\n    }\n\n    # Step 7: Antiplatelet Use Score Calculation\n    # Assign a score based on the presence of antiplatelet use according to the Shireman Rule.\n    antiplatelet_use_score = 32 if antiplatelet_use_present else 0\n    yield {\n        \"step_name\": \"antiplatelet_use_score\",\n        \"step_description\": \"Assign a score based on the presence of antiplatelet use according to the Shireman Rule.\",\n        \"step_result\": antiplatelet_use_score,\n        \"unit\": None\n    }\n\n    # Step 8: Diabetes Score Calculation\n    # Assign a score based on the presence of diabetes according to the Shireman Rule.\n    diabetes_score = 27 if diabetes_present else 0\n    yield {\n        \"step_name\": \"diabetes_score\",\n        \"step_description\": \"Assign a score based on the presence of diabetes according to the Shireman Rule.\",\n        \"step_result\": diabetes_score,\n        \"unit\": None\n    }\n\n    # Step 9: Total Score Calculation\n    # Calculate the total risk score by summing all individual scores.\n    total_score = (\n        anemia_score +\n        alcohol_or_drug_abuse_score +\n        recent_bleeding_score +\n        remote_bleeding_score +\n        elderly_score +\n        female_score +\n        antiplatelet_use_score +\n        diabetes_score\n    )\n    yield {\n        \"step_name\": \"total_score_calculation\",\n        \"step_description\": \"Calculate the total risk score by summing all individual scores.\",\n        \"step_result\": total_score,\n        \"unit\": None\n    }\n\n    return total_score"
+}

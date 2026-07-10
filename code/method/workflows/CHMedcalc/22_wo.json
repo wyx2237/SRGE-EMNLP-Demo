@@ -1,0 +1,99 @@
+{
+    "name": "daily_protein_intake_calculation_workflow",
+    "description": "Calculate the patient's daily protein intake (DPI) in grams per 24 hours based on 24-hour urine urea nitrogen and body weight.",
+    "inputs": [
+        {
+            "input_name": "uun",
+            "input_desc": "24-hour urine urea nitrogen in grams per 24 hours (g/24h)",
+            "input_type": "float"
+        },
+        {
+            "input_name": "weight_kg",
+            "input_desc": "Patient's body weight in kilograms (kg)",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "calculate_non_urea_nitrogen_loss",
+            "step_description": "Estimate the daily non-urea nitrogen loss based on patient's body weight.",
+            "step_inputs": [
+                {
+                    "input_name": "weight_kg",
+                    "input_desc": "Patient's body weight in kilograms (kg)",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.weight_kg"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "non_urea_nitrogen_loss",
+                    "output_desc": "Daily non-urea nitrogen loss in grams (g/24h)",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step involves multiplying a constant coefficient (0.031) by the patient's weight to estimate non-urea nitrogen loss.",
+            "detail": "non_urea_nitrogen_loss = 0.031 * weight_kg"
+        },
+        {
+            "step_id": "2",
+            "step_name": "calculate_total_nitrogen_loss",
+            "step_description": "Compute the total daily nitrogen loss from urine urea nitrogen and non-urea sources.",
+            "step_inputs": [
+                {
+                    "input_name": "uun",
+                    "input_desc": "24-hour urine urea nitrogen in grams per 24 hours (g/24h)",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.uun"
+                },
+                {
+                    "input_name": "non_urea_nitrogen_loss",
+                    "input_desc": "Daily non-urea nitrogen loss in grams (g/24h)",
+                    "input_type": "float",
+                    "input_source": "$|1|.non_urea_nitrogen_loss"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_nitrogen_loss",
+                    "output_desc": "Total daily nitrogen loss in grams (g/24h)",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step adds urine urea nitrogen and non-urea nitrogen loss to obtain total nitrogen loss.",
+            "detail": "total_nitrogen_loss = uun + non_urea_nitrogen_loss"
+        },
+        {
+            "step_id": "3",
+            "step_name": "calculate_daily_protein_intake",
+            "step_description": "Convert total nitrogen loss to daily protein intake using the protein conversion factor.",
+            "step_inputs": [
+                {
+                    "input_name": "total_nitrogen_loss",
+                    "input_desc": "Total daily nitrogen loss in grams (g/24h)",
+                    "input_type": "float",
+                    "input_source": "$|step2|.total_nitrogen_loss"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "dpi",
+                    "output_desc": "Daily protein intake in grams per 24 hours (g/24h)",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step multiplies the total nitrogen loss by the protein conversion factor (6.25) to get the daily protein intake.",
+            "detail": "DPI = 6.25 * total_nitrogen_loss"
+        }
+    ],
+    "output": {
+        "output_name": "dpi",
+        "output_desc": "Daily protein intake in grams per 24 hours (g/24h)",
+        "output_type": "float"
+    },
+    "code": "def solve(uun, weight_kg):\n    # Step 1: calculate_non_urea_nitrogen_loss\n    # Estimate the daily non-urea nitrogen loss based on patient's body weight.\n    non_urea_nitrogen_loss = 0.031 * weight_kg\n    yield {\n        \"step_name\": \"calculate_non_urea_nitrogen_loss\",\n        \"step_description\": \"Estimate the daily non-urea nitrogen loss based on patient's body weight.\",\n        \"step_result\": non_urea_nitrogen_loss,\n        \"unit\": \"g/24h\"\n    }\n    \n    # Step 2: calculate_total_nitrogen_loss\n    # Compute the total daily nitrogen loss from urine urea nitrogen and non-urea sources.\n    total_nitrogen_loss = uun + non_urea_nitrogen_loss\n    yield {\n        \"step_name\": \"calculate_total_nitrogen_loss\",\n        \"step_description\": \"Compute the total daily nitrogen loss from urine urea nitrogen and non-urea sources.\",\n        \"step_result\": total_nitrogen_loss,\n        \"unit\": \"g/24h\"\n    }\n    \n    # Step 3: calculate_daily_protein_intake\n    # Convert total nitrogen loss to daily protein intake using the protein conversion factor.\n    dpi = 6.25 * total_nitrogen_loss\n    yield {\n        \"step_name\": \"calculate_daily_protein_intake\",\n        \"step_description\": \"Convert total nitrogen loss to daily protein intake using the protein conversion factor.\",\n        \"step_result\": dpi,\n        \"unit\": \"g/24h\"\n    }\n    \n    return dpi"
+}

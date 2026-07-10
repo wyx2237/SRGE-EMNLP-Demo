@@ -1,0 +1,119 @@
+{
+    "name": "perc_rule_for_pe_criteria_count",
+    "description": "Calculate the total number of criteria met for the PERC Rule for Pulmonary Embolism by summing the 8 binary criterion scores.",
+    "inputs": [
+        {
+            "input_name": "age_criterion",
+            "input_desc": "Whether age >= 50 is met (1 if yes, 0 if no)",
+            "input_type": "int"
+        },
+        {
+            "input_name": "hr_criterion",
+            "input_desc": "Whether heart rate >= 100 bpm is met (1 if yes, 0 if no)",
+            "input_type": "int"
+        },
+        {
+            "input_name": "o2_criterion",
+            "input_desc": "Whether O2 saturation on room air < 95% is met (1 if yes, 0 if no)",
+            "input_type": "int"
+        },
+        {
+            "input_name": "swelling_criterion",
+            "input_desc": "Whether unilateral leg swelling is met (1 if yes, 0 if no)",
+            "input_type": "int"
+        },
+        {
+            "input_name": "hemoptysis_criterion",
+            "input_desc": "Whether hemoptysis is met (1 if yes, 0 if no)",
+            "input_type": "int"
+        },
+        {
+            "input_name": "surgery_criterion",
+            "input_desc": "Whether recent surgery or trauma (within 4 weeks, requiring general anesthesia) is met (1 if yes, 0 if no)",
+            "input_type": "int"
+        },
+        {
+            "input_name": "prior_dvt_pe_criterion",
+            "input_desc": "Whether prior pulmonary embolism or deep vein thrombosis is met (1 if yes, 0 if no)",
+            "input_type": "int"
+        },
+        {
+            "input_name": "hormone_criterion",
+            "input_desc": "Whether hormone use (oral contraceptives, hormone replacement, or estrogenic hormone use) is met (1 if yes, 0 if no)",
+            "input_type": "int"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "perc_rule_summation",
+            "step_description": "Sum the points for all 8 PERC criteria to determine the total number of criteria met.",
+            "step_inputs": [
+                {
+                    "input_name": "age_criterion",
+                    "input_desc": "Whether age >= 50 is met (1 if yes, 0 if no)",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.age_criterion"
+                },
+                {
+                    "input_name": "hr_criterion",
+                    "input_desc": "Whether heart rate >= 100 bpm is met (1 if yes, 0 if no)",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.hr_criterion"
+                },
+                {
+                    "input_name": "o2_criterion",
+                    "input_desc": "Whether O2 saturation < 95% on room air is met (1 if yes, 0 if no)",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.o2_criterion"
+                },
+                {
+                    "input_name": "swelling_criterion",
+                    "input_desc": "Whether unilateral leg swelling is met (1 if yes, 0 if no)",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.swelling_criterion"
+                },
+                {
+                    "input_name": "hemoptysis_criterion",
+                    "input_desc": "Whether hemoptysis is met (1 if yes, 0 if no)",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.hemoptysis_criterion"
+                },
+                {
+                    "input_name": "surgery_criterion",
+                    "input_desc": "Whether recent surgery or trauma is met (1 if yes, 0 if no)",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.surgery_criterion"
+                },
+                {
+                    "input_name": "prior_dvt_pe_criterion",
+                    "input_desc": "Whether prior PE or DVT is met (1 if yes, 0 if no)",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.prior_dvt_pe_criterion"
+                },
+                {
+                    "input_name": "hormone_criterion",
+                    "input_desc": "Whether hormone use is met (1 if yes, 0 if no)",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.hormone_criterion"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_criteria_met",
+                    "output_desc": "Total number of PERC criteria met (sum of points)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "The computation is a simple summation of 8 binary (0/1) values according to a defined formula, with no conditional branching or threshold mapping involved.",
+            "detail": "Total criteria met = age_criterion + hr_criterion + o2_criterion + swelling_criterion + hemoptysis_criterion + surgery_criterion + prior_dvt_pe_criterion + hormone_criterion. Each criterion is scored as 1 if the condition is met, 0 otherwise."
+        }
+    ],
+    "output": {
+        "output_name": "total_criteria_met",
+        "output_desc": "The total number of PERC rule criteria met for Pulmonary Embolism.",
+        "output_type": "int"
+    },
+    "code": "def solve(age_criterion, hr_criterion, o2_criterion, swelling_criterion, hemoptysis_criterion, surgery_criterion, prior_dvt_pe_criterion, hormone_criterion):\n    \"\"\"\n    Calculate the total number of criteria met for the PERC Rule for Pulmonary Embolism by summing the 8 binary criterion scores.\n    \"\"\"\n    # Step 1: perc_rule_summation - Sum the points for all 8 PERC criteria to determine the total number of criteria met.\n    total_criteria_met = (\n        age_criterion + hr_criterion + o2_criterion + swelling_criterion +\n        hemoptysis_criterion + surgery_criterion + prior_dvt_pe_criterion + hormone_criterion\n    )\n    yield {\n        \"step_name\": \"perc_rule_summation\",\n        \"step_description\": \"Sum the points for all 8 PERC criteria (age>=50, HR>=100, O2 sat<95%, unilateral leg swelling, hemoptysis, recent surgery/trauma, prior PE/DVT, hormone use) to determine total number of criteria met.\",\n        \"step_result\": total_criteria_met,\n        \"unit\": None\n    }\n    return total_criteria_met"
+}

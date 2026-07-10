@@ -1,0 +1,182 @@
+{
+    "name": "wells_criteria_for_pe_score_calculation",
+    "description": "Calculate the total Wells' Criteria for Pulmonary Embolism score by evaluating seven clinical criteria and summing their points.",
+    "inputs": [
+        {
+            "input_name": "has_dvt_signs",
+            "input_desc": "Whether the patient has clinical signs and symptoms of DVT (true or false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "is_pe_primary",
+            "input_desc": "Whether PE is the #1 diagnosis or equally likely (true or false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "heart_rate_gt_100",
+            "input_desc": "Whether heart rate is greater than 100 beats per minute (true or false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "has_immobilization_or_surgery",
+            "input_desc": "Whether patient had immobilization >=3 days or surgery in past 4 weeks (true or false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "has_previous_pe_dvt",
+            "input_desc": "Whether patient has previous objectively diagnosed PE or DVT (true or false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "has_hemoptysis",
+            "input_desc": "Whether patient has hemoptysis (true or false)",
+            "input_type": "bool"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "evaluate_dvt_clinical_signs_score",
+            "step_description": "Assign points for criterion 1: Clinical signs and symptoms of DVT.",
+            "step_inputs": [
+                {
+                    "input_name": "has_dvt_signs",
+                    "input_desc": "Whether the patient has clinical signs and symptoms of DVT (true or false)",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.has_dvt_signs"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "dvt_score",
+                    "output_desc": "Points for clinical signs and symptoms of DVT",
+                    "output_type": "float"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step uses conditional logic based on a boolean input to return a predefined score.",
+            "detail": "If has_dvt_signs is true, score = 3.0; else, score = 0.0."
+        },
+        {
+            "step_id": "2",
+            "step_name": "evaluate_pe_diagnosis_score",
+            "step_description": "Assign points for criterion 2: PE is #1 diagnosis OR equally likely.",
+            "step_inputs": [
+                {
+                    "input_name": "is_pe_primary",
+                    "input_desc": "Whether PE is the #1 diagnosis or equally likely (true or false)",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.is_pe_primary"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "pe_diagnosis_score",
+                    "output_desc": "Points for PE as primary diagnosis",
+                    "output_type": "float"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step uses conditional logic based on a boolean input to return a predefined score.",
+            "detail": "If is_pe_primary is true, score = 3.0; else, score = 0.0."
+        },
+        {
+            "step_id": "3",
+            "step_name": "evaluate_heart_rate_score",
+            "step_description": "Assign points for criterion 3: Heart rate > 100.",
+            "step_inputs": [
+                {
+                    "input_name": "heart_rate_gt_100",
+                    "input_desc": "Whether heart rate is greater than 100 beats per minute (true or false)",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.heart_rate_gt_100"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "heart_rate_score",
+                    "output_desc": "Points for heart rate > 100",
+                    "output_type": "float"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step uses conditional logic based on a boolean input to return a predefined score.",
+            "detail": "If heart_rate_gt_100 is true, score = 1.5; else, score = 0.0."
+        },
+        {
+            "step_id": "4",
+            "step_name": "evaluate_immobilization_surgery_score",
+            "step_description": "Assign points for criterion 4: Immobilization at least 3 days OR surgery in the previous 4 weeks.",
+            "step_inputs": [
+                {
+                    "input_name": "has_immobilization_or_surgery",
+                    "input_desc": "Whether patient had immobilization >=3 days or surgery in past 4 weeks (true or false)",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.has_immobilization_or_surgery"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "immobilization_score",
+                    "output_desc": "Points for immobilization or surgery",
+                    "output_type": "float"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step uses conditional logic based on a boolean input to return a predefined score.",
+            "detail": "If has_immobilization_or_surgery is true, score = 1.5; else, score = 0.0."
+        },
+        {
+            "step_id": "5",
+            "step_name": "evaluate_previous_pe_dvt_score",
+            "step_description": "Assign points for criterion 5: Previous, objectively diagnosed PE or DVT.",
+            "step_inputs": [
+                {
+                    "input_name": "has_previous_pe_dvt",
+                    "input_desc": "Whether patient has previous objectively diagnosed PE or DVT (true or false)",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.has_previous_pe_dvt"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "previous_pe_dvt_score",
+                    "output_desc": "Points for previous PE or DVT",
+                    "output_type": "float"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step uses conditional logic based on a boolean input to return a predefined score.",
+            "detail": "If has_previous_pe_dvt is true, score = 1.5; else, score = 0.0."
+        },
+        {
+            "step_id": "6",
+            "step_name": "evaluate_hemoptysis_score",
+            "step_description": "Assign points for criterion 6: Hemoptysis.",
+            "step_inputs": [
+                {
+                    "input_name": "has_hemoptysis",
+                    "input_desc": "Whether patient has hemoptysis (true or false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.has_hemoptysis"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "hemoptysis_score",
+                    "output_desc": "Points for hemoptysis",
+                    "output_type": "float"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step uses conditional logic based on a boolean input to return a predefined score.",
+            "detail": "If has_hemoptysis is true, score = 1.0; else, score = 0.0."
+        }
+    ],
+    "output": {
+        "output_name": "total_wells_pe_score",
+        "output_desc": "Total Wells' Criteria for Pulmonary Embolism score, sum of all criterion points",
+        "output_type": "float"
+    },
+    "code": "def solve(has_dvt_signs, is_pe_primary, heart_rate_gt_100, has_immobilization_or_surgery, has_previous_pe_dvt, has_hemoptysis):\n    # Step 1: evaluate_dvt_clinical_signs_score\n    # Assign points for criterion 1: Clinical signs and symptoms of DVT.\n    if has_dvt_signs:\n        dvt_score = 3.0\n    else:\n        dvt_score = 0.0\n    yield {\n        \"step_name\": \"evaluate_dvt_clinical_signs_score\",\n        \"step_description\": \"Assign points for criterion 1: Clinical signs and symptoms of DVT.\",\n        \"step_result\": dvt_score,\n        \"unit\": None\n    }\n    \n    # Step 2: evaluate_pe_diagnosis_score\n    # Assign points for criterion 2: PE is #1 diagnosis OR equally likely.\n    if is_pe_primary:\n        pe_diagnosis_score = 3.0\n    else:\n        pe_diagnosis_score = 0.0\n    yield {\n        \"step_name\": \"evaluate_pe_diagnosis_score\",\n        \"step_description\": \"Assign points for criterion 2: PE is #1 diagnosis OR equally likely.\",\n        \"step_result\": pe_diagnosis_score,\n        \"unit\": None\n    }\n    \n    # Step 3: evaluate_heart_rate_score\n    # Assign points for criterion 3: Heart rate > 100.\n    if heart_rate_gt_100:\n        heart_rate_score = 1.5\n    else:\n        heart_rate_score = 0.0\n    yield {\n        \"step_name\": \"evaluate_heart_rate_score\",\n        \"step_description\": \"Assign points for criterion 3: Heart rate > 100.\",\n        \"step_result\": heart_rate_score,\n        \"unit\": None\n    }\n    \n    # Step 4: evaluate_immobilization_surgery_score\n    # Assign points for criterion 4: Immobilization at least 3 days OR surgery in the previous 4 weeks.\n    if has_immobilization_or_surgery:\n        immobilization_score = 1.5\n    else:\n        immobilization_score = 0.0\n    yield {\n        \"step_name\": \"evaluate_immobilization_surgery_score\",\n        \"step_description\": \"Assign points for criterion 4: Immobilization at least 3 days OR surgery in the previous 4 weeks.\",\n        \"step_result\": immobilization_score,\n        \"unit\": None\n    }\n    \n    # Step 5: evaluate_previous_pe_dvt_score\n    # Assign points for criterion 5: Previous, objectively diagnosed PE or DVT.\n    if has_previous_pe_dvt:\n        previous_pe_dvt_score = 1.5\n    else:\n        previous_pe_dvt_score = 0.0\n    yield {\n        \"step_name\": \"evaluate_previous_pe_dvt_score\",\n        \"step_description\": \"Assign points for criterion 5: Previous, objectively diagnosed PE or DVT.\",\n        \"step_result\": previous_pe_dvt_score,\n        \"unit\": None\n    }\n    \n    # Step 6: evaluate_hemoptysis_score\n    # Assign points for criterion 6: Hemoptysis.\n    if has_hemoptysis:\n        hemoptysis_score = 1.0\n    else:\n        hemoptysis_score = 0.0\n    yield {\n        \"step_name\": \"evaluate_hemoptysis_score\",\n        \"step_description\": \"Assign points for criterion 6: Hemoptysis.\",\n        \"step_result\": hemoptysis_score,\n        \"unit\": None\n    }\n    \n    # Calculate total Wells' Criteria for PE score\n    total_wells_pe_score = dvt_score + pe_diagnosis_score + heart_rate_score + immobilization_score + previous_pe_dvt_score + hemoptysis_score\n    return total_wells_pe_score"
+}

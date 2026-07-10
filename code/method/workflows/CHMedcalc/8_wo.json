@@ -1,0 +1,130 @@
+{
+    "name": "has_bled_score_calculation_workflow",
+    "description": "Calculate the HAS-BLED score for a patient with atrial fibrillation to assess the 1-year risk of major bleeding. The score is the sum of points from 9 clinical risk factors.",
+    "inputs": [
+        {
+            "input_name": "uncontrolled_hypertension",
+            "input_desc": "Whether systolic blood pressure is > 160 mmHg. Acceptable values: 'true' or 'false'.",
+            "input_type": "str"
+        },
+        {
+            "input_name": "renal_dysfunction",
+            "input_desc": "Whether the patient has chronic dialysis, renal transplant, or serum creatinine >= 200 umol/L (approx 2.3 mg/dL). Acceptable values: 'true' or 'false'.",
+            "input_type": "str"
+        },
+        {
+            "input_name": "liver_dysfunction",
+            "input_desc": "Whether the patient has chronic liver disease (e.g., cirrhosis) or biochemical evidence of significant liver damage (e.g., bilirubin > 2x upper limit of normal with AST/ALT/ALP > 3x upper limit of normal). Acceptable values: 'true' or 'false'.",
+            "input_type": "str"
+        },
+        {
+            "input_name": "stroke_history",
+            "input_desc": "Whether the patient has a previous history of ischemic stroke or TIA. Acceptable values: 'true' or 'false'.",
+            "input_type": "str"
+        },
+        {
+            "input_name": "bleeding_history",
+            "input_desc": "Whether the patient has a previous history of bleeding (e.g., major bleeding, intracranial hemorrhage) or a bleeding predisposition (e.g., hemophilia). Acceptable values: 'true' or 'false'.",
+            "input_type": "str"
+        },
+        {
+            "input_name": "labile_inr",
+            "input_desc": "Whether the patient on warfarin has unstable/high INR (TTR < 60%). Acceptable values: 'true' or 'false'.",
+            "input_type": "str"
+        },
+        {
+            "input_name": "age_65_plus",
+            "input_desc": "Whether the patient is aged >= 65 years. Acceptable values: 'true' or 'false'.",
+            "input_type": "str"
+        },
+        {
+            "input_name": "drug_usage",
+            "input_desc": "Whether the patient is using concomitant antiplatelet agents (aspirin, clopidogrel) or NSAIDs. Acceptable values: 'true' or 'false'.",
+            "input_type": "str"
+        },
+        {
+            "input_name": "alcohol_excess",
+            "input_desc": "Whether alcohol consumption is > 8 units per week (or > 1 liang of high-proof liquor daily by Chinese standards). Acceptable values: 'true' or 'false'.",
+            "input_type": "str"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "compute_has_bled_score",
+            "step_description": "Sum the points from 9 boolean risk factors to compute the total HAS-BLED score.",
+            "step_inputs": [
+                {
+                    "input_name": "uncontrolled_hypertension",
+                    "input_desc": "Whether systolic blood pressure is > 160 mmHg. Acceptable values: 'true' or 'false'.",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.uncontrolled_hypertension"
+                },
+                {
+                    "input_name": "renal_dysfunction",
+                    "input_desc": "Whether the patient has chronic dialysis, renal transplant, or serum creatinine >= 200 umol/L. Acceptable values: 'true' or 'false'.",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.renal_dysfunction"
+                },
+                {
+                    "input_name": "liver_dysfunction",
+                    "input_desc": "Whether the patient has chronic liver disease or significant liver damage. Acceptable values: 'true' or 'false'.",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.liver_dysfunction"
+                },
+                {
+                    "input_name": "stroke_history",
+                    "input_desc": "Whether the patient has a previous history of ischemic stroke or TIA. Acceptable values: 'true' or 'false'.",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.stroke_history"
+                },
+                {
+                    "input_name": "bleeding_history",
+                    "input_desc": "Whether the patient has a previous history of bleeding or bleeding predisposition. Acceptable values: 'true' or 'false'.",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.bleeding_history"
+                },
+                {
+                    "input_name": "labile_inr",
+                    "input_desc": "Whether the patient on warfarin has unstable/high INR (TTR < 60%). Acceptable values: 'true' or 'false'.",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.labile_inr"
+                },
+                {
+                    "input_name": "age_65_plus",
+                    "input_desc": "Whether the patient is aged >= 65 years. Acceptable values: 'true' or 'false'.",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.age_65_plus"
+                },
+                {
+                    "input_name": "drug_usage",
+                    "input_desc": "Whether the patient is using concomitant antiplatelet agents or NSAIDs. Acceptable values: 'true' or 'false'.",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.drug_usage"
+                },
+                {
+                    "input_name": "alcohol_excess",
+                    "input_desc": "Whether alcohol consumption is > 8 units per week. Acceptable values: 'true' or 'false'.",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.alcohol_excess"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "has_bled_score",
+                    "output_desc": "Total HAS-BLED score, ranging from 0 to 9.",
+                    "output_type": "int"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "The HAS-BLED score is computed by summing points from predefined clinical criteria, which is a straightforward formula-based calculation.",
+            "detail": "Sum the points from the following 9 items (each item contributes 1 point if the condition is true, 0 otherwise):\n1. Uncontrolled hypertension (H): systolic blood pressure > 160 mmHg -> 1 point\n2. Renal dysfunction (A): chronic dialysis, renal transplant, or serum creatinine >= 200 umol/L -> 1 point\n3. Liver dysfunction (A): chronic liver disease or biochemical evidence of significant liver damage -> 1 point\n4. Stroke history (S): previous ischemic stroke or TIA -> 1 point\n5. Bleeding history or predisposition (B): previous major bleeding or bleeding diathesis -> 1 point\n6. Labile INR (L): INR unstable/high, TTR < 60% (only for patients on warfarin) -> 1 point\n7. Elderly (E): age >= 65 years -> 1 point\n8. Drug usage (D): concomitant antiplatelet agents or NSAIDs -> 1 point\n9. Alcohol excess (E): > 8 alcohol units per week -> 1 point\nTotal score = H + A + A + S + B + L + E + D + E (range 0-9)."
+        }
+    ],
+    "output": {
+        "output_name": "has_bled_score",
+        "output_desc": "The final calculated HAS-BLED score.",
+        "output_type": "int"
+    },
+    "code": "def solve(uncontrolled_hypertension, renal_dysfunction, liver_dysfunction, stroke_history, bleeding_history, labile_inr, age_65_plus, drug_usage, alcohol_excess):\n    # Step 1: compute_has_bled_score\n    # Sum the points from 9 boolean risk factors to compute the total HAS-BLED score.\n    # Each factor contributes 1 point if \"true\", 0 otherwise.\n    points = 0\n    if uncontrolled_hypertension.lower() == \"true\":\n        points += 1\n    if renal_dysfunction.lower() == \"true\":\n        points += 1\n    if liver_dysfunction.lower() == \"true\":\n        points += 1\n    if stroke_history.lower() == \"true\":\n        points += 1\n    if bleeding_history.lower() == \"true\":\n        points += 1\n    if labile_inr.lower() == \"true\":\n        points += 1\n    if age_65_plus.lower() == \"true\":\n        points += 1\n    if drug_usage.lower() == \"true\":\n        points += 1\n    if alcohol_excess.lower() == \"true\":\n        points += 1\n    \n    has_bled_score = points\n    yield {\n        \"step_name\": \"compute_has_bled_score\",\n        \"step_description\": \"Sum the points from 9 boolean risk factors to compute the total HAS-BLED score.\",\n        \"step_result\": has_bled_score,\n        \"unit\": None\n    }\n    \n    return has_bled_score"
+}

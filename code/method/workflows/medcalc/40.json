@@ -1,0 +1,75 @@
+{
+    "name": "fena_calculation_workflow",
+    "description": "Calculate the Fractional Excretion of Sodium (FENa) percentage using serum and urine creatinine and sodium concentrations.",
+    "inputs": [
+        {
+            "input_name": "serum_creatinine",
+            "input_desc": "Serum creatinine concentration in mg/dL",
+            "input_type": "float"
+        },
+        {
+            "input_name": "urine_sodium",
+            "input_desc": "Urine sodium concentration in mEq/L",
+            "input_type": "float"
+        },
+        {
+            "input_name": "serum_sodium",
+            "input_desc": "Serum sodium concentration in mEq/L",
+            "input_type": "float"
+        },
+        {
+            "input_name": "urine_creatinine",
+            "input_desc": "Urine creatinine concentration in mg/dL",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "compute_fena",
+            "step_description": "FENa (%) = (serum_creatinine * urine_sodium) / (serum_sodium * urine_creatinine) * 100",
+            "step_inputs": [
+                {
+                    "input_name": "serum_creatinine",
+                    "input_desc": "Serum creatinine concentration in mg/dL",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.serum_creatinine"
+                },
+                {
+                    "input_name": "urine_sodium",
+                    "input_desc": "Urine sodium concentration in mEq/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.urine_sodium"
+                },
+                {
+                    "input_name": "serum_sodium",
+                    "input_desc": "Serum sodium concentration in mEq/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.serum_sodium"
+                },
+                {
+                    "input_name": "urine_creatinine",
+                    "input_desc": "Urine creatinine concentration in mg/dL",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.urine_creatinine"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "fena_percentage",
+                    "output_desc": "Fractional Excretion of Sodium as a percentage",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "This step computes a precise numeric value using a specific mathematical formula with four input variables, which aligns with the FormulaCalculation tool.",
+            "detail": "Multiply serum creatinine (mg/dL) by urine sodium (mEq/L). Multiply serum sodium (mEq/L) by urine creatinine (mg/dL). Divide the first product by the second product and multiply by 100. Round the result to 4 decimal places."
+        }
+    ],
+    "output": {
+        "output_name": "fena_percentage",
+        "output_desc": "Final Fractional Excretion of Sodium as a percentage",
+        "output_type": "float"
+    },
+    "code": "import math\n\ndef solve(serum_creatinine, urine_sodium, serum_sodium, urine_creatinine):\n    \"\"\"\n    Calculate the Fractional Excretion of Sodium (FENa) percentage.\n    \n    Args:\n        serum_creatinine: Serum creatinine concentration in mg/dL\n        urine_sodium: Urine sodium concentration in mEq/L\n        serum_sodium: Serum sodium concentration in mEq/L\n        urine_creatinine: Urine creatinine concentration in mg/dL\n    \n    Yields:\n        dict: Step information including name, description, result, and unit\n    \n    Returns:\n        float: FENa percentage rounded to 4 decimal places\n    \"\"\"\n    # Step 1: compute_fena - Calculate Fractional Excretion of Sodium\n    # Multiply serum creatinine by urine sodium\n    numerator = serum_creatinine * urine_sodium\n    # Multiply serum sodium by urine creatinine\n    denominator = serum_sodium * urine_creatinine\n    # Calculate FENa percentage and round to 4 decimal places\n    fena_percentage = round((numerator / denominator) * 100, 4)\n    \n    yield {\n        \"step_name\": \"compute_fena\",\n        \"step_description\": \"FENa (%) = (serum_creatinine * urine_sodium) / (serum_sodium * urine_creatinine) * 100. Multiplies serum creatinine by urine sodium, serum sodium by urine creatinine, divides the products, multiplies by 100, and rounds to 4 decimal places.\",\n        \"step_result\": fena_percentage,\n        \"unit\": \"%\"\n    }\n    \n    return fena_percentage"
+}

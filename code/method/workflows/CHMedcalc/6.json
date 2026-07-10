@@ -1,0 +1,87 @@
+{
+    "name": "calculate_required_kcl_solution_volume",
+    "description": "Calculate the volume of 10% potassium chloride solution required for a hypokalemia patient based on the difference between desired and measured potassium levels, weight, and conversion factors.",
+    "inputs": [
+        {
+            "input_name": "desired_potassium_level",
+            "input_desc": "The target potassium concentration in mmol/L, typically set to 4.0 mmol/L.",
+            "input_type": "float"
+        },
+        {
+            "input_name": "measured_potassium_level",
+            "input_desc": "The patient's current measured potassium concentration in mmol/L.",
+            "input_type": "float"
+        },
+        {
+            "input_name": "weight_kg",
+            "input_desc": "The patient's weight in kilograms.",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "calculate_potassium_deficit",
+            "step_description": "Calculate the potassium deficit based on the difference between desired and measured potassium levels, multiplied by the patient's weight and the potassium coefficient.",
+            "step_inputs": [
+                {
+                    "input_name": "desired_potassium_level",
+                    "input_desc": "The target potassium concentration in mmol/L, typically set to 4.0 mmol/L.",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.desired_potassium_level"
+                },
+                {
+                    "input_name": "measured_potassium_level",
+                    "input_desc": "The patient's current measured potassium concentration in mmol/L.",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.measured_potassium_level"
+                },
+                {
+                    "input_name": "weight_kg",
+                    "input_desc": "The patient's weight in kilograms.",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.weight_kg"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "potassium_deficit",
+                    "output_desc": "The calculated potassium deficit in millimoles (mmol).",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step calculates the potassium deficit using a mathematical formula based on the given parameters.",
+            "detail": "potassiumDeficit = (desiredPotassiumLevel - measuredPotassiumLevel) * weight * 0.3"
+        },
+        {
+            "step_id": "2",
+            "step_name": "calculate_volume_of_solution",
+            "step_description": "Calculate the volume of 10% potassium chloride solution needed based on the potassium deficit and the conversion factor.",
+            "step_inputs": [
+                {
+                    "input_name": "potassium_deficit",
+                    "input_desc": "The calculated potassium deficit in millimoles (mmol).",
+                    "input_type": "float",
+                    "input_source": "$|1|.potassium_deficit"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "volume_of_solution",
+                    "output_desc": "The volume of 10% potassium chloride solution in milliliters (mL).",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step uses a mathematical formula to determine the volume of solution based on the potassium deficit and the conversion factor.",
+            "detail": "volumeOfSolution = potassiumDeficit / 1.34"
+        }
+    ],
+    "output": {
+        "output_name": "volume_of_solution",
+        "output_desc": "The volume of 10% potassium chloride solution in milliliters (mL).",
+        "output_type": "float"
+    },
+    "code": "def solve(desired_potassium_level, measured_potassium_level, weight_kg):\n    # Step 1: Calculate the potassium deficit\n    # This step calculates the potassium deficit based on the difference between desired and measured potassium levels, multiplied by the patient's weight and the potassium coefficient.\n    potassium_deficit = (desired_potassium_level - measured_potassium_level) * weight_kg * 0.3\n    yield {\n        \"step_name\": \"calculate_potassium_deficit\",\n        \"step_description\": \"Calculate the potassium deficit based on the difference between desired and measured potassium levels, multiplied by the patient's weight and the potassium coefficient.\",\n        \"step_result\": potassium_deficit,\n        \"unit\": \"mmol\"\n    }\n\n    # Step 2: Calculate the volume of solution\n    # This step calculates the volume of 10% potassium chloride solution needed based on the potassium deficit and the conversion factor.\n    volume_of_solution = potassium_deficit / 1.34\n    yield {\n        \"step_name\": \"calculate_volume_of_solution\",\n        \"step_description\": \"Calculate the volume of 10% potassium chloride solution needed based on the potassium deficit and the conversion factor.\",\n        \"step_result\": volume_of_solution,\n        \"unit\": \"mL\"\n    }\n\n    # Return the final result\n    return volume_of_solution"
+}

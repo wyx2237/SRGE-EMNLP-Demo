@@ -1,0 +1,71 @@
+{
+    "name": "calculate_daily_maintenance_fluid_requirement",
+    "description": "Calculate the daily maintenance fluid requirement for a child using the Holliday-Segar formula based on their weight.",
+    "inputs": [
+        {
+            "input_name": "weight_kg",
+            "input_desc": "The child's weight in kilograms (kg).",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "determine_weight_category",
+            "step_description": "Determine the weight category of the child to apply the correct formula for calculating daily maintenance fluid requirement.",
+            "step_inputs": [
+                {
+                    "input_name": "weight_kg",
+                    "input_desc": "The child's weight in kilograms (kg).",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.weight_kg"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "category",
+                    "output_desc": "The weight category of the child: '≤10 kg', '11-20 kg', or '>20 kg'.",
+                    "output_type": "string"
+                }
+            ],
+            "category": "ConditionEvaluation",
+            "reason": "This step determines which formula to use based on the child's weight, as the Holliday-Segar formula has different calculations depending on the weight range.",
+            "detail": "If the weight is less than or equal to 10 kg, the category is '≤10 kg'. If the weight is between 11 and 20 kg, the category is '11-20 kg'. If the weight is greater than 20 kg, the category is '>20 kg'."
+        },
+        {
+            "step_id": "2",
+            "step_name": "calculate_maintenance_fluid_requirement",
+            "step_description": "Calculate the daily maintenance fluid requirement using the Holliday-Segar formula based on the child's weight category.",
+            "step_inputs": [
+                {
+                    "input_name": "weight_kg",
+                    "input_desc": "The child's weight in kilograms (kg).",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.weight_kg"
+                },
+                {
+                    "input_name": "category",
+                    "input_desc": "The weight category determined in the previous step ('≤10 kg', '11-20 kg', or '>20 kg').",
+                    "input_type": "string",
+                    "input_source": "$|1|.category"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "fluid_requirement_ml",
+                    "output_desc": "The calculated daily maintenance fluid requirement in milliliters (mL).",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "This step applies the appropriate formula for calculating the daily maintenance fluid requirement based on the child's weight category.",
+            "detail": "If the category is '≤10 kg', the formula is: fluid_requirement_ml = weight_kg × 100.\nIf the category is '11-20 kg', the formula is: fluid_requirement_ml = 1000 + (weight_kg - 10) × 50.\nIf the category is '>20 kg', the formula is: fluid_requirement_ml = 1500 + (weight_kg - 20) × 20. The result should not exceed 2400 mL."
+        }
+    ],
+    "output": {
+        "output_name": "fluid_requirement_ml",
+        "output_desc": "The calculated daily maintenance fluid requirement in milliliters (mL).",
+        "output_type": "float"
+    },
+    "code": "def solve(weight_kg):\n    # Step 1: Determine the weight category of the child\n    if weight_kg <= 10:\n        category = \"≤10 kg\"\n    elif 11 <= weight_kg <= 20:\n        category = \"11-20 kg\"\n    else:\n        category = \">20 kg\"\n\n    yield {\n        \"step_name\": \"determine_weight_category\",\n        \"step_description\": \"Determine the weight category of the child to apply the correct formula for calculating daily maintenance fluid requirement.\",\n        \"step_result\": category,\n        \"unit\": None\n    }\n\n    # Step 2: Calculate the maintenance fluid requirement based on the weight category\n    if category == \"≤10 kg\":\n        fluid_requirement_ml = weight_kg * 100\n    elif category == \"11-20 kg\":\n        fluid_requirement_ml = 1000 + (weight_kg - 10) * 50\n    else:  # category == \">20 kg\"\n        fluid_requirement_ml = 1500 + (weight_kg - 20) * 20\n\n    # Ensure the result does not exceed 2400 mL\n    if fluid_requirement_ml > 2400:\n        fluid_requirement_ml = 2400\n\n    yield {\n        \"step_name\": \"calculate_maintenance_fluid_requirement\",\n        \"step_description\": \"Calculate the daily maintenance fluid requirement using the Holliday-Segar formula based on the child's weight category.\",\n        \"step_result\": fluid_requirement_ml,\n        \"unit\": \"mL\"\n    }\n\n    return fluid_requirement_ml"
+}

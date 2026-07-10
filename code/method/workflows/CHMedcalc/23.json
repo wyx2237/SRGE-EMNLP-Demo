@@ -1,0 +1,269 @@
+{
+    "name": "burch_wartofsky_score_calculation",
+    "description": "Calculate the Burch-Wartofsky score for thyroid storm based on clinical parameters.",
+    "inputs": [
+        {
+            "input_name": "max_body_temperature",
+            "input_desc": "The patient's maximum body temperature in Celsius (°C).",
+            "input_type": "float"
+        },
+        {
+            "input_name": "heart_rate",
+            "input_desc": "The patient's heart rate in beats per minute.",
+            "input_type": "float"
+        },
+        {
+            "input_name": "atrial_fibrillation",
+            "input_desc": "Whether the patient has atrial fibrillation (Yes or No).",
+            "input_type": "str"
+        },
+        {
+            "input_name": "congestive_heart_failure_severity",
+            "input_desc": "The severity of congestive heart failure (None, Mild, Moderate, Severe).",
+            "input_type": "str"
+        },
+        {
+            "input_name": "central_nervous_system_symptoms",
+            "input_desc": "The severity of central nervous system symptoms (None, Mild, Moderate, Severe).",
+            "input_type": "str"
+        },
+        {
+            "input_name": "gastrointestinal_liver_impairment",
+            "input_desc": "The severity of gastrointestinal/liver function impairment (None, Moderate, Severe).",
+            "input_type": "str"
+        },
+        {
+            "input_name": "trigger_state",
+            "input_desc": "Whether the patient has a clear trigger state (Yes or No).",
+            "input_type": "str"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "body_temperature_score",
+            "step_description": "Calculate the score based on the patient's maximum body temperature.",
+            "step_inputs": [
+                {
+                    "input_name": "max_body_temperature",
+                    "input_desc": "The patient's highest body temperature in Celsius (°C).",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.max_body_temperature"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "body_temperature_score",
+                    "output_desc": "The score corresponding to the patient's body temperature.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "DiscreteValueMapping",
+            "reason": "This step maps the body temperature value to a specific score using predefined thresholds.",
+            "detail": "If max body temperature ≤37.1, score is 0. If 37.2-37.7, score is 5. If 37.8-38.2, score is 10. If 38.3-38.8, score is 15. If 38.9-39.4, score is 20. If 39.5-39.9, score is 25. If >40.0, score is 30."
+        },
+        {
+            "step_id": "2",
+            "step_name": "heart_rate_score",
+            "step_description": "Calculate the score based on the patient's heart rate.",
+            "step_inputs": [
+                {
+                    "input_name": "heart_rate",
+                    "input_desc": "The patient's heart rate in beats per minute.",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.heart_rate"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "heart_rate_score",
+                    "output_desc": "The score corresponding to the patient's heart rate.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "DiscreteValueMapping",
+            "reason": "This step maps the heart rate value to a specific score using predefined thresholds.",
+            "detail": "If heart rate <90, score is 0. If 90-109, score is 5. If 110-119, score is 10. If 120-129, score is 15. If 130-139, score is 20. If ≥140, score is 25."
+        },
+        {
+            "step_id": "3",
+            "step_name": "atrial_fibrillation_score",
+            "step_description": "Calculate the score based on the presence of atrial fibrillation.",
+            "step_inputs": [
+                {
+                    "input_name": "atrial_fibrillation",
+                    "input_desc": "Whether the patient has atrial fibrillation (Yes or No).",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.atrial_fibrillation"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "atrial_fibrillation_score",
+                    "output_desc": "The score corresponding to the presence of atrial fibrillation.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "DiscreteValueMapping",
+            "reason": "This step maps the presence of atrial fibrillation to a specific score using predefined thresholds.",
+            "detail": "If the patient has atrial fibrillation, score is 10. If not, score is 0."
+        },
+        {
+            "step_id": "4",
+            "step_name": "congestive_heart_failure_score",
+            "step_description": "Calculate the score based on the severity of congestive heart failure.",
+            "step_inputs": [
+                {
+                    "input_name": "congestive_heart_failure_severity",
+                    "input_desc": "The severity of congestive heart failure (None, Mild, Moderate, Severe).",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.congestive_heart_failure_severity"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "congestive_heart_failure_score",
+                    "output_desc": "The score corresponding to the severity of congestive heart failure.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "DiscreteValueMapping",
+            "reason": "This step maps the severity of congestive heart failure to a specific score using predefined thresholds.",
+            "detail": "If no congestive heart failure, score is 0. If mild, score is 5. If moderate, score is 10. If severe, score is 15."
+        },
+        {
+            "step_id": "5",
+            "step_name": "central_nervous_system_symptoms_score",
+            "step_description": "Calculate the score based on the presence and severity of central nervous system symptoms.",
+            "step_inputs": [
+                {
+                    "input_name": "central_nervous_system_symptoms",
+                    "input_desc": "The severity of central nervous system symptoms (None, Mild, Moderate, Severe).",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.central_nervous_system_symptoms"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "central_nervous_system_symptoms_score",
+                    "output_desc": "The score corresponding to the severity of central nervous system symptoms.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "DiscreteValueMapping",
+            "reason": "This step maps the severity of central nervous system symptoms to a specific score using predefined thresholds.",
+            "detail": "If no symptoms, score is 0. If mild, score is 10. If moderate, score is 20. If severe, score is 30."
+        },
+        {
+            "step_id": "6",
+            "step_name": "gastrointestinal_liver_function_impairment_score",
+            "step_description": "Calculate the score based on the presence and severity of gastrointestinal/liver function impairment.",
+            "step_inputs": [
+                {
+                    "input_name": "gastrointestinal_liver_impairment",
+                    "input_desc": "The severity of gastrointestinal/liver function impairment (None, Moderate, Severe).",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.gastrointestinal_liver_impairment"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "gastrointestinal_liver_function_impairment_score",
+                    "output_desc": "The score corresponding to the severity of gastrointestinal/liver function impairment.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "DiscreteValueMapping",
+            "reason": "This step maps the severity of gastrointestinal/liver function impairment to a specific score using predefined thresholds.",
+            "detail": "If no impairment, score is 0. If moderate, score is 10. If severe, score is 20."
+        },
+        {
+            "step_id": "7",
+            "step_name": "trigger_state_score",
+            "step_description": "Calculate the score based on the presence of a clear trigger state.",
+            "step_inputs": [
+                {
+                    "input_name": "trigger_state",
+                    "input_desc": "Whether the patient has a clear trigger state (Yes or No).",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.trigger_state"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "trigger_state_score",
+                    "output_desc": "The score corresponding to the presence of a clear trigger state.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "DiscreteValueMapping",
+            "reason": "This step maps the presence of a clear trigger state to a specific score using predefined thresholds.",
+            "detail": "If no clear trigger state, score is 0. If yes, score is 10."
+        },
+        {
+            "step_id": "8",
+            "step_name": "total_burch_wartofsky_score",
+            "step_description": "Calculate the total Burch-Wartofsky score by summing all individual scores.",
+            "step_inputs": [
+                {
+                    "input_name": "body_temperature_score",
+                    "input_desc": "The score from the body temperature category.",
+                    "input_type": "integer",
+                    "input_source": "$|step1|.body_temperature_score"
+                },
+                {
+                    "input_name": "heart_rate_score",
+                    "input_desc": "The score from the heart rate category.",
+                    "input_type": "integer",
+                    "input_source": "$|step2|.heart_rate_score"
+                },
+                {
+                    "input_name": "atrial_fibrillation_score",
+                    "input_desc": "The score from the atrial fibrillation category.",
+                    "input_type": "integer",
+                    "input_source": "$|step3|.atrial_fibrillation_score"
+                },
+                {
+                    "input_name": "congestive_heart_failure_score",
+                    "input_desc": "The score from the congestive heart failure category.",
+                    "input_type": "integer",
+                    "input_source": "$|step4|.congestive_heart_failure_score"
+                },
+                {
+                    "input_name": "central_nervous_system_symptoms_score",
+                    "input_desc": "The score from the central nervous system symptoms category.",
+                    "input_type": "integer",
+                    "input_source": "$|step5|.central_nervous_system_symptoms_score"
+                },
+                {
+                    "input_name": "gastrointestinal_liver_function_impairment_score",
+                    "input_desc": "The score from the gastrointestinal/liver function impairment category.",
+                    "input_type": "integer",
+                    "input_source": "$|step6|.gastrointestinal_liver_function_impairment_score"
+                },
+                {
+                    "input_name": "trigger_state_score",
+                    "input_desc": "The score from the trigger state category.",
+                    "input_type": "integer",
+                    "input_source": "$|step7|.trigger_state_score"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_burch_wartofsky_score",
+                    "output_desc": "The total Burch-Wartofsky score for thyroid storm.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "This step calculates the final total Burch-Wartofsky score by summing up all the individual component scores.",
+            "detail": "Total Burch-Wartofsky score = body_temperature_score + heart_rate_score + atrial_fibrillation_score + congestive_heart_failure_score + central_nervous_system_symptoms_score + gastrointestinal_liver_function_impairment_score + trigger_state_score."
+        }
+    ],
+    "output": {
+        "output_name": "total_burch_wartofsky_score",
+        "output_desc": "The total Burch-Wartofsky score for thyroid storm.",
+        "output_type": "integer"
+    },
+    "code": "def solve(max_body_temperature, heart_rate, atrial_fibrillation, congestive_heart_failure_severity, central_nervous_system_symptoms, gastrointestinal_liver_impairment, trigger_state):\n    # Step 1: Calculate the score based on the patient's maximum body temperature\n    if max_body_temperature <= 37.1:\n        body_temperature_score = 0\n    elif 37.2 <= max_body_temperature <= 37.7:\n        body_temperature_score = 5\n    elif 37.8 <= max_body_temperature <= 38.2:\n        body_temperature_score = 10\n    elif 38.3 <= max_body_temperature <= 38.8:\n        body_temperature_score = 15\n    elif 38.9 <= max_body_temperature <= 39.4:\n        body_temperature_score = 20\n    elif 39.5 <= max_body_temperature <= 39.9:\n        body_temperature_score = 25\n    else:\n        body_temperature_score = 30\n    yield {\n        \"step_name\": \"body_temperature_score\",\n        \"step_description\": \"Calculate the score based on the patient's maximum body temperature.\",\n        \"step_result\": body_temperature_score,\n        \"unit\": None\n    }\n\n    # Step 2: Calculate the score based on the patient's heart rate\n    if heart_rate < 90:\n        heart_rate_score = 0\n    elif 90 <= heart_rate <= 109:\n        heart_rate_score = 5\n    elif 110 <= heart_rate <= 119:\n        heart_rate_score = 10\n    elif 120 <= heart_rate <= 129:\n        heart_rate_score = 15\n    elif 130 <= heart_rate <= 139:\n        heart_rate_score = 20\n    else:\n        heart_rate_score = 25\n    yield {\n        \"step_name\": \"heart_rate_score\",\n        \"step_description\": \"Calculate the score based on the patient's heart rate.\",\n        \"step_result\": heart_rate_score,\n        \"unit\": None\n    }\n\n    # Step 3: Calculate the score based on the presence of atrial fibrillation\n    if atrial_fibrillation == \"Yes\":\n        atrial_fibrillation_score = 10\n    else:\n        atrial_fibrillation_score = 0\n    yield {\n        \"step_name\": \"atrial_fibrillation_score\",\n        \"step_description\": \"Calculate the score based on the presence of atrial fibrillation.\",\n        \"step_result\": atrial_fibrillation_score,\n        \"unit\": None\n    }\n\n    # Step 4: Calculate the score based on the severity of congestive heart failure\n    if congestive_heart_failure_severity == \"None\":\n        congestive_heart_failure_score = 0\n    elif congestive_heart_failure_severity == \"Mild\":\n        congestive_heart_failure_score = 5\n    elif congestive_heart_failure_severity == \"Moderate\":\n        congestive_heart_failure_score = 10\n    else:\n        congestive_heart_failure_score = 15\n    yield {\n        \"step_name\": \"congestive_heart_failure_score\",\n        \"step_description\": \"Calculate the score based on the severity of congestive heart failure.\",\n        \"step_result\": congestive_heart_failure_score,\n        \"unit\": None\n    }\n\n    # Step 5: Calculate the score based on the severity of central nervous system symptoms\n    if central_nervous_system_symptoms == \"None\":\n        central_nervous_system_symptoms_score = 0\n    elif central_nervous_system_symptoms == \"Mild\":\n        central_nervous_system_symptoms_score = 10\n    elif central_nervous_system_symptoms == \"Moderate\":\n        central_nervous_system_symptoms_score = 20\n    else:\n        central_nervous_system_symptoms_score = 30\n    yield {\n        \"step_name\": \"central_nervous_system_symptoms_score\",\n        \"step_description\": \"Calculate the score based on the presence and severity of central nervous system symptoms.\",\n        \"step_result\": central_nervous_system_symptoms_score,\n        \"unit\": None\n    }\n\n    # Step 6: Calculate the score based on the severity of gastrointestinal/liver function impairment\n    if gastrointestinal_liver_impairment == \"None\":\n        gastrointestinal_liver_function_impairment_score = 0\n    elif gastrointestinal_liver_impairment == \"Moderate\":\n        gastrointestinal_liver_function_impairment_score = 10\n    else:\n        gastrointestinal_liver_function_impairment_score = 20\n    yield {\n        \"step_name\": \"gastrointestinal_liver_function_impairment_score\",\n        \"step_description\": \"Calculate the score based on the presence and severity of gastrointestinal/liver function impairment.\",\n        \"step_result\": gastrointestinal_liver_function_impairment_score,\n        \"unit\": None\n    }\n\n    # Step 7: Calculate the score based on the presence of a clear trigger state\n    if trigger_state == \"No\":\n        trigger_state_score = 0\n    else:\n        trigger_state_score = 10\n    yield {\n        \"step_name\": \"trigger_state_score\",\n        \"step_description\": \"Calculate the score based on the presence of a clear trigger state.\",\n        \"step_result\": trigger_state_score,\n        \"unit\": None\n    }\n\n    # Step 8: Calculate the total Burch-Wartofsky score by summing all individual scores\n    total_burch_wartofsky_score = (\n        body_temperature_score +\n        heart_rate_score +\n        atrial_fibrillation_score +\n        congestive_heart_failure_score +\n        central_nervous_system_symptoms_score +\n        gastrointestinal_liver_function_impairment_score +\n        trigger_state_score\n    )\n    yield {\n        \"step_name\": \"total_burch_wartofsky_score\",\n        \"step_description\": \"Calculate the total Burch-Wartofsky score by summing all individual scores.\",\n        \"step_result\": total_burch_wartofsky_score,\n        \"unit\": None\n    }\n\n    return total_burch_wartofsky_score"
+}

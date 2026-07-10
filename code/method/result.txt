@@ -1,0 +1,97 @@
+<json>
+[
+    {
+        "Category": "None",
+        "Name": "计算体重幂",
+        "Description": "计算体重的0.5378次方",
+        "Inputs": [
+            {
+                "input_name": "weight",
+                "input_desc": "儿童体重（公斤）",
+                "input_type": "number"
+            }
+        ],
+        "Outputs": [
+            {
+                "output_name": "weight_power",
+                "output_desc": "体重^0.5378的结果",
+                "output_type": "number"
+            }
+        ],
+        "Detail": "使用幂运算计算 weight^0.5378",
+        "Reasoning": "Haycock公式需要计算体重的0.5378次方，这是公式中的一个独立计算子步骤，无特定工具模板，直接进行数学运算。"
+    },
+    {
+        "Category": "None",
+        "Name": "计算身高幂",
+        "Description": "计算身高的0.3964次方",
+        "Inputs": [
+            {
+                "input_name": "height",
+                "input_desc": "儿童身高（厘米）",
+                "input_type": "number"
+            }
+        ],
+        "Outputs": [
+            {
+                "output_name": "height_power",
+                "output_desc": "身高^0.3964的结果",
+                "output_type": "number"
+            }
+        ],
+        "Detail": "使用幂运算计算 height^0.3964",
+        "Reasoning": "Haycock公式需要计算身高的0.3964次方，这是公式中的一个独立计算子步骤，无特定工具模板，直接进行数学运算。"
+    },
+    {
+        "Category": "None",
+        "Name": "计算幂乘积",
+        "Description": "将体重幂与身高幂相乘",
+        "Inputs": [
+            {
+                "input_name": "weight_power",
+                "input_desc": "体重^0.5378的结果",
+                "input_type": "number"
+            },
+            {
+                "input_name": "height_power",
+                "input_desc": "身高^0.3964的结果",
+                "input_type": "number"
+            }
+        ],
+        "Outputs": [
+            {
+                "output_name": "power_product",
+                "output_desc": "体重幂与身高幂的乘积",
+                "output_type": "number"
+            }
+        ],
+        "Detail": "计算 weight_power × height_power",
+        "Reasoning": "Haycock公式中需要将体重幂与身高幂相乘，这是公式中的一个独立计算子步骤，无特定工具模板，直接进行数学运算。"
+    },
+    {
+        "Category": "None",
+        "Name": "乘以系数",
+        "Description": "将幂乘积乘以系数0.024265得到体表面积",
+        "Inputs": [
+            {
+                "input_name": "power_product",
+                "input_desc": "体重幂与身高幂的乘积",
+                "input_type": "number"
+            }
+        ],
+        "Outputs": [
+            {
+                "output_name": "body_surface_area",
+                "output_desc": "儿童体表面积（平方米）",
+                "output_type": "number"
+            }
+        ],
+        "Detail": "计算 power_product × 0.024265",
+        "Reasoning": "Haycock公式最后需要乘以常数0.024265，这是公式中的一个独立计算子步骤，无特定工具模板，直接进行数学运算。"
+    }
+]
+</json>
+
+<workflow>
+(inputs(weight, height) -> step1:计算体重幂(weight) -> step2:计算身高幂(height) -> step3:计算幂乘积(weight_power, height_power) -> step4:乘以系数(power_product) -> outputs(body_surface_area)
+</workflow>

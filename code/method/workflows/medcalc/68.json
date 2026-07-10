@@ -1,0 +1,48 @@
+{
+    "name": "conception_date_calculation_workflow",
+    "description": "Calculate the estimated date of conception by adding 14 days to the patient's last menstrual period (LMP) date.",
+    "inputs": [
+        {
+            "input_name": "lmp_date",
+            "input_desc": "Last menstrual period date in MM/DD/YYYY format (e.g., 01/15/2023)",
+            "input_type": "str"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "conception_date_calculation",
+            "step_description": "Calculate estimated date of conception by adding 14 days to the last menstrual period date",
+            "step_inputs": [
+                {
+                    "input_name": "lmp_date",
+                    "input_desc": "Last menstrual period date in MM/DD/YYYY format",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.lmp_date"
+                },
+                {
+                    "input_name": "days_to_add",
+                    "input_desc": "Number of days to add to LMP date (fixed at 14 days)",
+                    "input_type": "int",
+                    "input_source": "14"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "conception_date",
+                    "output_desc": "Estimated date of conception in MM/DD/YYYY format",
+                    "output_type": "str"
+                }
+            ],
+            "category": "time_series_processing",
+            "reason": "This step involves adding a specific number of days (14) to a given date (LMP) to compute a new date (conception date). This fits the TimeSeriesProcessing category which handles date arithmetic operations like adding days.",
+            "detail": "Add 14 days to the last menstrual period (LMP) date. Parse LMP date string in MM/DD/YYYY format, create a date object, add a timedelta of 14 days, and format the result back to MM/DD/YYYY format."
+        }
+    ],
+    "output": {
+        "output_name": "conception_date",
+        "output_desc": "Estimated date of conception in MM/DD/YYYY format",
+        "output_type": "str"
+    },
+    "code": "import datetime\n\ndef solve(lmp_date):\n    # Step 1: conception_date_calculation\n    # Parse the LMP date string in MM/DD/YYYY format\n    lmp_date_obj = datetime.datetime.strptime(lmp_date, \"%m/%d/%Y\")\n    # Add 14 days to the LMP date\n    days_to_add = 14\n    conception_date_obj = lmp_date_obj + datetime.timedelta(days=days_to_add)\n    # Format the result back to MM/DD/YYYY format\n    conception_date = conception_date_obj.strftime(\"%m/%d/%Y\")\n    \n    yield {\n        \"step_name\": \"conception_date_calculation\",\n        \"step_description\": \"Calculate estimated date of conception by adding 14 days to the last menstrual period date\",\n        \"step_result\": conception_date,\n        \"unit\": None\n    }\n    \n    return conception_date"
+}

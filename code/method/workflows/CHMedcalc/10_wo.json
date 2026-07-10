@@ -1,0 +1,244 @@
+{
+    "name": "vte_major_bleeding_risk_score_calculation",
+    "description": "Calculate the total major bleeding risk score for a VTE patient during stable anticoagulation therapy.",
+    "inputs": [
+        {
+            "input_name": "cancer_diagnosis_within_6m",
+            "input_desc": "Whether cancer was diagnosed within 6 months before VTE diagnosis (excluding basal cell or squamous cell skin cancer). Value: true or false",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "cancer_recurrence_or_progression",
+            "input_desc": "Whether there is recent recurrence or progression of cancer. Value: true or false",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "anticancer_therapy_within_6m",
+            "input_desc": "Whether anticancer therapy was required within 6 months before VTE diagnosis. Value: true or false",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "is_male",
+            "input_desc": "Whether the patient is male. Value: true or false",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "systolic_bp_mmhg",
+            "input_desc": "Baseline systolic blood pressure in mmHg",
+            "input_type": "float"
+        },
+        {
+            "input_name": "hemoglobin_g_dl",
+            "input_desc": "Hemoglobin level in g/dL",
+            "input_type": "float"
+        },
+        {
+            "input_name": "has_bleeding_history",
+            "input_desc": "Presence of prior major bleeding, clinically relevant non-major bleeding, rectal bleeding, frequent epistaxis, or hematuria. Value: true or false",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "age_years",
+            "input_desc": "Age of the patient in years",
+            "input_type": "float"
+        },
+        {
+            "input_name": "serum_creatinine_mg_dl",
+            "input_desc": "Serum creatinine level in mg/dL",
+            "input_type": "float"
+        },
+        {
+            "input_name": "weight_kg",
+            "input_desc": "Weight of the patient in kg",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "compute_active_cancer_score",
+            "step_description": "If any of cancer_diagnosis_within_6m, cancer_recurrence_or_progression, or anticancer_therapy_within_6m is true, score = 2; else 0.",
+            "step_inputs": [
+                {
+                    "input_name": "cancer_diagnosis_within_6m",
+                    "input_desc": "Cancer diagnosed within 6 months before VTE diagnosis (excluding basal cell or squamous cell skin cancer). Value: true or false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.cancer_diagnosis_within_6m"
+                },
+                {
+                    "input_name": "cancer_recurrence_or_progression",
+                    "input_desc": "Recent recurrence or progression of cancer. Value: true or false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.cancer_recurrence_or_progression"
+                },
+                {
+                    "input_name": "anticancer_therapy_within_6m",
+                    "input_desc": "Required anticancer therapy within 6 months before VTE diagnosis. Value: true or false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.anticancer_therapy_within_6m"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "active_cancer_score",
+                    "output_desc": "Score for active cancer (2 if any criterion is met, otherwise 0)",
+                    "output_type": "float"
+                }
+            ],
+            "category": "boolean_condition_scoring",
+            "reason": "This step evaluates three boolean criteria and assigns a fixed score if any is true, matching the boolean_condition_scoring template.",
+            "detail": "If cancer_diagnosis_within_6m OR cancer_recurrence_or_progression OR anticancer_therapy_within_6m is true, set active_cancer_score = 2; else set active_cancer_score = 0."
+        },
+        {
+            "step_id": "2",
+            "step_name": "compute_uncontrolled_htn_score",
+            "step_description": "If patient is male and systolic BP >= 140 mmHg, score = 1; else 0.",
+            "step_inputs": [
+                {
+                    "input_name": "is_male",
+                    "input_desc": "Whether the patient is male. Value: true or false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.is_male"
+                },
+                {
+                    "input_name": "systolic_bp_mmhg",
+                    "input_desc": "Baseline systolic blood pressure in mmHg",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.systolic_bp_mmhg"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "uncontrolled_htn_score",
+                    "output_desc": "Score for male with uncontrolled hypertension (1 if male and systolic BP >= 140, otherwise 0)",
+                    "output_type": "float"
+                }
+            ],
+            "category": "boolean_condition_scoring",
+            "reason": "The step combines a boolean input (is_male) and a threshold condition on a numeric input (systolic_bp_mmhg) to assign a score.",
+            "detail": "If is_male is true AND systolic_bp_mmhg >= 140, set uncontrolled_htn_score = 1; else set uncontrolled_htn_score = 0."
+        },
+        {
+            "step_id": "3",
+            "step_name": "compute_anemia_score",
+            "step_description": "If male and hemoglobin < 13 g/dL, or female and hemoglobin < 12 g/dL, score = 1.5; else 0.",
+            "step_inputs": [
+                {
+                    "input_name": "is_male",
+                    "input_desc": "Whether the patient is male. Value: true or false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.is_male"
+                },
+                {
+                    "input_name": "hemoglobin_g_dl",
+                    "input_desc": "Hemoglobin level in g/dL",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.hemoglobin_g_dl"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "anemia_score",
+                    "output_desc": "Score for anemia (1.5 if criteria met, otherwise 0)",
+                    "output_type": "float"
+                }
+            ],
+            "category": "boolean_condition_scoring",
+            "reason": "This step applies a sex-specific threshold on a continuous lab value to assign a score, typical of boolean_condition_scoring.",
+            "detail": "If is_male is true AND hemoglobin_g_dl < 13, set anemia_score = 1.5; else if is_male is false AND hemoglobin_g_dl < 12, set anemia_score = 1.5; else set anemia_score = 0."
+        },
+        {
+            "step_id": "4",
+            "step_name": "compute_bleeding_history_score",
+            "step_description": "If has_bleeding_history is true, score = 1.5; else 0.",
+            "step_inputs": [
+                {
+                    "input_name": "has_bleeding_history",
+                    "input_desc": "Presence of prior major bleeding, clinically relevant non-major bleeding, rectal bleeding, frequent epistaxis, or hematuria. Value: true or false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.has_bleeding_history"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "bleeding_history_score",
+                    "output_desc": "Score for bleeding history (1.5 if present, otherwise 0)",
+                    "output_type": "float"
+                }
+            ],
+            "category": "boolean_condition_scoring",
+            "reason": "A single boolean input directly maps to a fixed score, fitting the boolean_condition_scoring template.",
+            "detail": "If has_bleeding_history is true, set bleeding_history_score = 1.5; else set bleeding_history_score = 0."
+        },
+        {
+            "step_id": "5",
+            "step_name": "compute_age_score",
+            "step_description": "If age >= 60 years, score = 1.5; else 0.",
+            "step_inputs": [
+                {
+                    "input_name": "age_years",
+                    "input_desc": "Age of the patient in years",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.age_years"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "age_score",
+                    "output_desc": "Score for age (1.5 if age >= 60, otherwise 0)",
+                    "output_type": "float"
+                }
+            ],
+            "category": "boolean_condition_scoring",
+            "reason": "An age threshold directly determines a score without complex calculation, matching boolean_condition_scoring.",
+            "detail": "If age_years >= 60, set age_score = 1.5; else set age_score = 0."
+        },
+        {
+            "step_id": "6",
+            "step_name": "compute_renal_impairment_score",
+            "step_description": "Calculate CrCl using Cockcroft-Gault: if male, CrCl = ((140 - age) * weight_kg) / (72 * serum_creatinine_mg_dl); if female, multiply by 0.85. Then if CrCl < 60, score = 1.5; else 0.",
+            "step_inputs": [
+                {
+                    "input_name": "serum_creatinine_mg_dl",
+                    "input_desc": "Serum creatinine level in mg/dL",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.serum_creatinine_mg_dl"
+                },
+                {
+                    "input_name": "age_years",
+                    "input_desc": "Age of the patient in years",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.age_years"
+                },
+                {
+                    "input_name": "weight_kg",
+                    "input_desc": "Weight of the patient in kg",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.weight_kg"
+                },
+                {
+                    "input_name": "is_male",
+                    "input_desc": "Whether the patient is male. Value: true or false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.is_male"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "renal_impairment_score",
+                    "output_desc": "Score for renal impairment (1.5 if estimated CrCl < 60 mL/min, otherwise 0)",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step involves a recognized clinical formula (Cockcroft-Gault) to estimate CrCl, which is then compared to a threshold to assign a score.",
+            "detail": "First, calculate CrCl = ((140 - age_years) * weight_kg) / (72 * serum_creatinine_mg_dl). If is_male is false, multiply this result by 0.85. Then, if the resulting CrCl < 60, set renal_impairment_score = 1.5; else set renal_impairment_score = 0."
+        }
+    ],
+    "output": {
+        "output_name": "total_score",
+        "output_desc": "Sum of active_cancer_score, uncontrolled_htn_score, anemia_score, bleeding_history_score, age_score, and renal_impairment_score.",
+        "output_type": "float"
+    },
+    "code": "def solve(\n    cancer_diagnosis_within_6m,\n    cancer_recurrence_or_progression,\n    anticancer_therapy_within_6m,\n    is_male,\n    systolic_bp_mmhg,\n    hemoglobin_g_dl,\n    has_bleeding_history,\n    age_years,\n    serum_creatinine_mg_dl,\n    weight_kg\n):\n    # Step 1: compute_active_cancer_score\n    # If any of cancer_diagnosis_within_6m, cancer_recurrence_or_progression, or anticancer_therapy_within_6m is true, score = 2; else 0.\n    if cancer_diagnosis_within_6m or cancer_recurrence_or_progression or anticancer_therapy_within_6m:\n        active_cancer_score = 2.0\n    else:\n        active_cancer_score = 0.0\n    yield {\n        \"step_name\": \"compute_active_cancer_score\",\n        \"step_description\": \"If any of cancer_diagnosis_within_6m, cancer_recurrence_or_progression, or anticancer_therapy_within_6m is true, score = 2; else 0.\",\n        \"step_result\": active_cancer_score,\n        \"unit\": None\n    }\n\n    # Step 2: compute_uncontrolled_htn_score\n    # If patient is male and systolic BP >= 140 mmHg, score = 1; else 0.\n    if is_male and systolic_bp_mmhg >= 140:\n        uncontrolled_htn_score = 1.0\n    else:\n        uncontrolled_htn_score = 0.0\n    yield {\n        \"step_name\": \"compute_uncontrolled_htn_score\",\n        \"step_description\": \"If patient is male and systolic BP >= 140 mmHg, score = 1; else 0.\",\n        \"step_result\": uncontrolled_htn_score,\n        \"unit\": None\n    }\n\n    # Step 3: compute_anemia_score\n    # If male and hemoglobin < 13 g/dL, or female and hemoglobin < 12 g/dL, score = 1.5; else 0.\n    if is_male:\n        anemia_score = 1.5 if hemoglobin_g_dl < 13 else 0.0\n    else:\n        anemia_score = 1.5 if hemoglobin_g_dl < 12 else 0.0\n    yield {\n        \"step_name\": \"compute_anemia_score\",\n        \"step_description\": \"If male and hemoglobin < 13 g/dL, or female and hemoglobin < 12 g/dL, score = 1.5; else 0.\",\n        \"step_result\": anemia_score,\n        \"unit\": None\n    }\n\n    # Step 4: compute_bleeding_history_score\n    # If has_bleeding_history is true, score = 1.5; else 0.\n    bleeding_history_score = 1.5 if has_bleeding_history else 0.0\n    yield {\n        \"step_name\": \"compute_bleeding_history_score\",\n        \"step_description\": \"If has_bleeding_history is true, score = 1.5; else 0.\",\n        \"step_result\": bleeding_history_score,\n        \"unit\": None\n    }\n\n    # Step 5: compute_age_score\n    # If age >= 60 years, score = 1.5; else 0.\n    age_score = 1.5 if age_years >= 60 else 0.0\n    yield {\n        \"step_name\": \"compute_age_score\",\n        \"step_description\": \"If age >= 60 years, score = 1.5; else 0.\",\n        \"step_result\": age_score,\n        \"unit\": None\n    }\n\n    # Step 6: compute_renal_impairment_score\n    # Calculate CrCl using Cockcroft-Gault: if male, CrCl = ((140 - age) * weight_kg) / (72 * serum_creatinine_mg_dl); if female, multiply by 0.85.\n    # Then if CrCl < 60, score = 1.5; else 0.\n    crcl = ((140 - age_years) * weight_kg) / (72 * serum_creatinine_mg_dl)\n    if not is_male:\n        crcl *= 0.85\n    renal_impairment_score = 1.5 if crcl < 60 else 0.0\n    yield {\n        \"step_name\": \"compute_renal_impairment_score\",\n        \"step_description\": \"Calculate CrCl using Cockcroft-Gault; if CrCl < 60, score = 1.5; else 0.\",\n        \"step_result\": renal_impairment_score,\n        \"unit\": None\n    }\n\n    # Final output: total_score\n    total_score = active_cancer_score + uncontrolled_htn_score + anemia_score + bleeding_history_score + age_score + renal_impairment_score\n    return total_score"
+}

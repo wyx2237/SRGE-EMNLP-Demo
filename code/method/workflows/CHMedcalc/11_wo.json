@@ -1,0 +1,64 @@
+{
+    "name": "glasgow_coma_scale_calculation_workflow",
+    "description": "Calculate the total Glasgow Coma Scale (GCS) score by summing the scores from eye opening, verbal response, and motor response components, handling special modifiers like 'C' for eye opening or 0 for untestable verbal response.",
+    "inputs": [
+        {
+            "input_name": "eye_opening_score",
+            "input_desc": "Score for eye opening response. Must be an integer (4, 3, 2, 1) or the string 'C' if not testable due to factors like swelling or trauma.",
+            "input_type": "str"
+        },
+        {
+            "input_name": "verbal_response_score",
+            "input_desc": "Score for verbal response. Must be an integer (5, 4, 3, 2, 1) or 0 if untestable and marked as T (tube/tracheostomy), E (endotracheal tube), or A (aphasia).",
+            "input_type": "int"
+        },
+        {
+            "input_name": "motor_response_score",
+            "input_desc": "Score for motor response. Must be an integer (6, 5, 4, 3, 2, 1).",
+            "input_type": "int"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "compute_gcs_score",
+            "step_description": "Sum eye opening, verbal response, and motor response scores to compute total GCS. Handles the 'C' modifier by reporting as a component score, not a total sum.",
+            "step_inputs": [
+                {
+                    "input_name": "eye_opening_score",
+                    "input_desc": "Score for eye opening response, an integer (4, 3, 2, 1) or string 'C'.",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.eye_opening_score"
+                },
+                {
+                    "input_name": "verbal_response_score",
+                    "input_desc": "Score for verbal response, an integer (5, 4, 3, 2, 1, 0).",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.verbal_response_score"
+                },
+                {
+                    "input_name": "motor_response_score",
+                    "input_desc": "Score for motor response, an integer (6, 5, 4, 3, 2, 1).",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.motor_response_score"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_gcs_score",
+                    "output_desc": "Total GCS score or a string representation with modifiers if eye opening is untestable.",
+                    "output_type": "str"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "Calculating the GCS total score involves summing three integer components or handling a special non-numeric modifier, which is a conditional arithmetic operation.",
+            "detail": "If eye_opening_score is the string 'C', the output is a string representation like 'M + V + C' (e.g., '6+5+C'). Otherwise, convert eye_opening_score to an integer and calculate the sum: total_gcs_score = int(eye_opening_score) + verbal_response_score + motor_response_score, and convert the result to a string for consistency."
+        }
+    ],
+    "output": {
+        "output_name": "total_gcs_score",
+        "output_desc": "The final calculated total GCS score, represented as a string. For example, '15' for a full score or '6+5+C' for a patient with an untestable eye component.",
+        "output_type": "str"
+    },
+    "code": "def solve(eye_opening_score, verbal_response_score, motor_response_score):\n    # Step 1: compute_gcs_score - Calculate total GCS score handling special cases\n    if eye_opening_score == 'C':\n        # If eye opening is not testable, return string with modifier\n        total_gcs_score = f\"{motor_response_score}+{verbal_response_score}+C\"\n    else:\n        # Otherwise, sum the three integer components\n        total = int(eye_opening_score) + verbal_response_score + motor_response_score\n        total_gcs_score = str(total)\n    \n    yield {\n        \"step_name\": \"compute_gcs_score\",\n        \"step_description\": \"Sum eye opening, verbal response, and motor response scores to compute total GCS. Handles the 'C' modifier by reporting as a component score, not a total sum.\",\n        \"step_result\": total_gcs_score,\n        \"unit\": None\n    }\n    \n    return total_gcs_score"
+}

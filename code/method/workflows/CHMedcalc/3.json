@@ -1,0 +1,235 @@
+{
+    "name": "ncdrs_diabetes_risk_score_calculation_workflow",
+    "description": "Calculate the total risk score for type 2 diabetes using the Chinese Non-Communicable Disease Risk Score (NCDRS) system.",
+    "inputs": [
+        {
+            "input_name": "age",
+            "input_desc": "The patient's age in years.",
+            "input_type": "integer"
+        },
+        {
+            "input_name": "gender",
+            "input_desc": "The patient's gender (male or female).",
+            "input_type": "string"
+        },
+        {
+            "input_name": "waist_circumference_cm",
+            "input_desc": "The patient's waist circumference in centimeters.",
+            "input_type": "float"
+        },
+        {
+            "input_name": "bmi",
+            "input_desc": "The patient's BMI (body mass index) value.",
+            "input_type": "float"
+        },
+        {
+            "input_name": "systolic_bp_mmHg",
+            "input_desc": "The patient's systolic blood pressure in millimeters of mercury (mmHg).",
+            "input_type": "integer"
+        },
+        {
+            "input_name": "family_history",
+            "input_desc": "Whether the patient has a family history of diabetes (yes/no).",
+            "input_type": "string"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "age_score_calculation",
+            "step_description": "Calculate the age score based on the patient's age range.",
+            "step_inputs": [
+                {
+                    "input_name": "age",
+                    "input_desc": "The patient's age in years.",
+                    "input_type": "integer",
+                    "input_source": "$|inputs|.age"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "age_score",
+                    "output_desc": "The score assigned based on the patient's age range.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step evaluates the age of the patient and assigns a score based on predefined ranges.",
+            "detail": "If 20 ≤ age ≤ 24: 0 points; if 25 ≤ age ≤ 34: 4 points; if 35 ≤ age ≤ 44: 8 points; if 45 ≤ age ≤ 54: 11 points; if 55 ≤ age ≤ 64: 12 points; if 65 ≤ age ≤ 74: 13 points."
+        },
+        {
+            "step_id": "2",
+            "step_name": "gender_score_calculation",
+            "step_description": "Calculate the gender score based on the patient's gender.",
+            "step_inputs": [
+                {
+                    "input_name": "gender",
+                    "input_desc": "The patient's gender (male or female).",
+                    "input_type": "string",
+                    "input_source": "$|inputs|.gender"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "gender_score",
+                    "output_desc": "The score assigned based on the patient's gender.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step evaluates the gender of the patient and assigns a score based on predefined conditions.",
+            "detail": "If gender is female: 0 points; if gender is male: 3 points."
+        },
+        {
+            "step_id": "3",
+            "step_name": "waist_circumference_score_calculation",
+            "step_description": "Calculate the waist circumference score based on the patient's waist circumference range.",
+            "step_inputs": [
+                {
+                    "input_name": "waist_circumference_cm",
+                    "input_desc": "The patient's waist circumference in centimeters.",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.waist_circumference_cm"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "waist_score",
+                    "output_desc": "The score assigned based on the patient's waist circumference range.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step evaluates the waist circumference of the patient and assigns a score based on predefined ranges.",
+            "detail": "If waist circumference ≤ 64.9: 0 points; if 65.0 ≤ waist circumference ≤ 69.9: 3 points; if 70.0 ≤ waist circumference ≤ 74.9: 5 points; if 75.0 ≤ waist circumference ≤ 79.9: 7 points; if 80.0 ≤ waist circumference ≤ 84.9: 8 points; if 85.0 ≤ waist circumference ≤ 89.9: 10 points; if waist circumference ≥ 90.0: 11 points."
+        },
+        {
+            "step_id": "4",
+            "step_name": "bmi_score_calculation",
+            "step_description": "Calculate the BMI score based on the patient's BMI range.",
+            "step_inputs": [
+                {
+                    "input_name": "bmi",
+                    "input_desc": "The patient's BMI (body mass index) value.",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.bmi"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "bmi_score",
+                    "output_desc": "The score assigned based on the patient's BMI range.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step evaluates the BMI of the patient and assigns a score based on predefined ranges.",
+            "detail": "If BMI < 23.0: 0 points; if 23.0 ≤ BMI ≤ 24.9: 3 points; if 25.0 ≤ BMI ≤ 29.9: 5 points; if BMI ≥ 30.0: 6 points."
+        },
+        {
+            "step_id": "5",
+            "step_name": "systolic_blood_pressure_score_calculation",
+            "step_description": "Calculate the systolic blood pressure score based on the patient's systolic blood pressure range.",
+            "step_inputs": [
+                {
+                    "input_name": "systolic_bp_mmHg",
+                    "input_desc": "The patient's systolic blood pressure in millimeters of mercury (mmHg).",
+                    "input_type": "integer",
+                    "input_source": "$|inputs|.systolic_bp_mmHg"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "systolic_score",
+                    "output_desc": "The score assigned based on the patient's systolic blood pressure range.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step evaluates the systolic blood pressure of the patient and assigns a score based on predefined ranges.",
+            "detail": "If systolic BP < 110: 0 points; if 110 ≤ systolic BP ≤ 119: 1 point; if 120 ≤ systolic BP ≤ 129: 2 points; if 130 ≤ systolic BP ≤ 139: 3 points; if 140 ≤ systolic BP ≤ 149: 5 points; if 150 ≤ systolic BP ≤ 159: 6 points; if 160 ≤ systolic BP ≤ 169: 6 points; if systolic BP ≥ 170: 7 points."
+        },
+        {
+            "step_id": "6",
+            "step_name": "family_history_score_calculation",
+            "step_description": "Calculate the family history score based on the patient's family history of diabetes.",
+            "step_inputs": [
+                {
+                    "input_name": "family_history",
+                    "input_desc": "Whether the patient has a family history of diabetes (yes/no).",
+                    "input_type": "string",
+                    "input_source": "$|inputs|.family_history"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "family_score",
+                    "output_desc": "The score assigned based on the patient's family history of diabetes.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step evaluates the family history of diabetes for the patient and assigns a score based on predefined conditions.",
+            "detail": "If no family history: 0 points; if yes: 7 points."
+        },
+        {
+            "step_id": "7",
+            "step_name": "total_risk_score_calculation",
+            "step_description": "Calculate the total risk score by summing all individual scores from the NCDRS diabetes risk assessment.",
+            "step_inputs": [
+                {
+                    "input_name": "age_score",
+                    "input_desc": "The age score calculated based on the patient's age.",
+                    "input_type": "integer",
+                    "input_source": "$|step1|.age_score"
+                },
+                {
+                    "input_name": "gender_score",
+                    "input_desc": "The gender score calculated based on the patient's gender.",
+                    "input_type": "integer",
+                    "input_source": "$|step2|.gender_score"
+                },
+                {
+                    "input_name": "waist_score",
+                    "input_desc": "The waist circumference score calculated based on the patient's waist circumference.",
+                    "input_type": "integer",
+                    "input_source": "$|step3|.waist_score"
+                },
+                {
+                    "input_name": "bmi_score",
+                    "input_desc": "The BMI score calculated based on the patient's BMI.",
+                    "input_type": "integer",
+                    "input_source": "$|step4|.bmi_score"
+                },
+                {
+                    "input_name": "systolic_score",
+                    "input_desc": "The systolic blood pressure score calculated based on the patient's systolic blood pressure.",
+                    "input_type": "integer",
+                    "input_source": "$|step5|.systolic_score"
+                },
+                {
+                    "input_name": "family_score",
+                    "input_desc": "The family history score calculated based on the patient's family history of diabetes.",
+                    "input_type": "integer",
+                    "input_source": "$|step6|.family_score"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_score",
+                    "output_desc": "The total risk score calculated by summing all individual scores.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step sums all individual scores to calculate the total risk score.",
+            "detail": "Total score = Age score + Gender score + Waist score + BMI score + Systolic score + Family score."
+        }
+    ],
+    "output": {
+        "output_name": "total_score",
+        "output_desc": "The total risk score calculated by summing all individual scores.",
+        "output_type": "integer"
+    },
+    "code": "def solve(age, gender, waist_circumference_cm, bmi, systolic_bp_mmHg, family_history):\n    # Step 1: Calculate the age score based on the patient's age range\n    if 20 <= age <= 24:\n        age_score = 0\n    elif 25 <= age <= 34:\n        age_score = 4\n    elif 35 <= age <= 44:\n        age_score = 8\n    elif 45 <= age <= 54:\n        age_score = 11\n    elif 55 <= age <= 64:\n        age_score = 12\n    elif 65 <= age <= 74:\n        age_score = 13\n    else:\n        age_score = 0  # Default value for age outside specified ranges\n\n    yield {\n        \"step_name\": \"age_score_calculation\",\n        \"step_description\": \"Calculate the age score based on the patient's age range.\",\n        \"step_result\": age_score,\n        \"unit\": None\n    }\n\n    # Step 2: Calculate the gender score based on the patient's gender\n    if gender == \"female\":\n        gender_score = 0\n    elif gender == \"male\":\n        gender_score = 3\n    else:\n        gender_score = 0  # Default value for invalid gender input\n\n    yield {\n        \"step_name\": \"gender_score_calculation\",\n        \"step_description\": \"Calculate the gender score based on the patient's gender.\",\n        \"step_result\": gender_score,\n        \"unit\": None\n    }\n\n    # Step 3: Calculate the waist circumference score based on the patient's waist circumference range\n    if waist_circumference_cm <= 64.9:\n        waist_score = 0\n    elif 65.0 <= waist_circumference_cm <= 69.9:\n        waist_score = 3\n    elif 70.0 <= waist_circumference_cm <= 74.9:\n        waist_score = 5\n    elif 75.0 <= waist_circumference_cm <= 79.9:\n        waist_score = 7\n    elif 80.0 <= waist_circumference_cm <= 84.9:\n        waist_score = 8\n    elif 85.0 <= waist_circumference_cm <= 89.9:\n        waist_score = 10\n    elif waist_circumference_cm >= 90.0:\n        waist_score = 11\n    else:\n        waist_score = 0  # Default value for waist circumference outside specified ranges\n\n    yield {\n        \"step_name\": \"waist_circumference_score_calculation\",\n        \"step_description\": \"Calculate the waist circumference score based on the patient's waist circumference range.\",\n        \"step_result\": waist_score,\n        \"unit\": None\n    }\n\n    # Step 4: Calculate the BMI score based on the patient's BMI range\n    if bmi < 23.0:\n        bmi_score = 0\n    elif 23.0 <= bmi <= 24.9:\n        bmi_score = 3\n    elif 25.0 <= bmi <= 29.9:\n        bmi_score = 5\n    elif bmi >= 30.0:\n        bmi_score = 6\n    else:\n        bmi_score = 0  # Default value for BMI outside specified ranges\n\n    yield {\n        \"step_name\": \"bmi_score_calculation\",\n        \"step_description\": \"Calculate the BMI score based on the patient's BMI range.\",\n        \"step_result\": bmi_score,\n        \"unit\": None\n    }\n\n    # Step 5: Calculate the systolic blood pressure score based on the patient's systolic blood pressure range\n    if systolic_bp_mmHg < 110:\n        systolic_score = 0\n    elif 110 <= systolic_bp_mmHg <= 119:\n        systolic_score = 1\n    elif 120 <= systolic_bp_mmHg <= 129:\n        systolic_score = 2\n    elif 130 <= systolic_bp_mmHg <= 139:\n        systolic_score = 3\n    elif 140 <= systolic_bp_mmHg <= 149:\n        systolic_score = 5\n    elif 150 <= systolic_bp_mmHg <= 159:\n        systolic_score = 6\n    elif 160 <= systolic_bp_mmHg <= 169:\n        systolic_score = 6\n    elif systolic_bp_mmHg >= 170:\n        systolic_score = 7\n    else:\n        systolic_score = 0  # Default value for systolic BP outside specified ranges\n\n    yield {\n        \"step_name\": \"systolic_blood_pressure_score_calculation\",\n        \"step_description\": \"Calculate the systolic blood pressure score based on the patient's systolic blood pressure range.\",\n        \"step_result\": systolic_score,\n        \"unit\": None\n    }\n\n    # Step 6: Calculate the family history score based on the patient's family history of diabetes\n    if family_history == \"no\":\n        family_score = 0\n    elif family_history == \"yes\":\n        family_score = 7\n    else:\n        family_score = 0  # Default value for invalid family history input\n\n    yield {\n        \"step_name\": \"family_history_score_calculation\",\n        \"step_description\": \"Calculate the family history score based on the patient's family history of diabetes.\",\n        \"step_result\": family_score,\n        \"unit\": None\n    }\n\n    # Step 7: Calculate the total risk score by summing all individual scores from the NCDRS diabetes risk assessment\n    total_score = age_score + gender_score + waist_score + bmi_score + systolic_score + family_score\n\n    yield {\n        \"step_name\": \"total_risk_score_calculation\",\n        \"step_description\": \"Calculate the total risk score by summing all individual scores from the NCDRS diabetes risk assessment.\",\n        \"step_result\": total_score,\n        \"unit\": None\n    }\n\n    return total_score"
+}

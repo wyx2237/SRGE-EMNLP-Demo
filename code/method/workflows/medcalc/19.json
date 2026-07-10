@@ -1,0 +1,98 @@
+{
+    "name": "fib4_index_calculation_workflow",
+    "description": "Calculate the Fibrosis-4 (FIB-4) index based on age, AST, ALT, and platelet count.",
+    "inputs": [
+        {
+            "input_name": "platelet_count",
+            "input_desc": "Platelet count in K/μL",
+            "input_type": "float"
+        },
+        {
+            "input_name": "age",
+            "input_desc": "Age of the patient in years",
+            "input_type": "int"
+        },
+        {
+            "input_name": "ast",
+            "input_desc": "Aspartate aminotransferase level in U/L",
+            "input_type": "float"
+        },
+        {
+            "input_name": "alt",
+            "input_desc": "Alanine aminotransferase level in U/L",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "unit_conversion_platelet",
+            "step_description": "Convert platelet count from K/μL to billions/L.",
+            "step_inputs": [
+                {
+                    "input_name": "platelet_count",
+                    "input_desc": "Platelet count in K/μL",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.platelet_count"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "platelet_billions_per_l",
+                    "output_desc": "Platelet count in billions per liter",
+                    "output_type": "float"
+                }
+            ],
+            "category": "unit_conversion",
+            "reason": "The FIB-4 formula requires platelet count in billions/L, but the given input is in K/μL. This step performs the necessary unit conversion.",
+            "detail": "Since 1 K/μL = 1 billion/L, the numerical value remains the same. Assign platelet_billions_per_l = platelet_count."
+        },
+        {
+            "step_id": "2",
+            "step_name": "fib4_calculation",
+            "step_description": "Calculate the FIB-4 index using the formula: (Age * AST) / (Platelet * sqrt(ALT)).",
+            "step_inputs": [
+                {
+                    "input_name": "age",
+                    "input_desc": "Age of the patient in years",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.age"
+                },
+                {
+                    "input_name": "ast",
+                    "input_desc": "Aspartate aminotransferase level in U/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.ast"
+                },
+                {
+                    "input_name": "platelet_billions_per_l",
+                    "input_desc": "Platelet count in billions per liter",
+                    "input_type": "float",
+                    "input_source": "$|1|.platelet_billions_per_l"
+                },
+                {
+                    "input_name": "alt",
+                    "input_desc": "Alanine aminotransferase level in U/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.alt"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "fib4_index",
+                    "output_desc": "The calculated FIB-4 index, rounded to 4 decimal places",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step computes the FIB-4 index using a standard medical formula involving multiplication, division, and a square root.",
+            "detail": "Compute fib4_index = (age * ast) / (platelet_billions_per_l * sqrt(alt)). Use a math library for the square root function. Round the final result to 4 decimal places."
+        }
+    ],
+    "output": {
+        "output_name": "fib4_index",
+        "output_desc": "The final calculated Fibrosis-4 (FIB-4) index",
+        "output_type": "float"
+    },
+    "code": "import math\n\ndef solve(platelet_count, age, ast, alt):\n    # Step 1: Unit conversion: platelet count from K/μL to billions/L\n    # Since 1 K/μL = 1 billion/L, the numerical value remains the same.\n    platelet_billions_per_l = platelet_count\n    yield {\n        \"step_name\": \"unit_conversion_platelet\",\n        \"step_description\": \"Convert platelet count from K/μL to billions/L. Since 1 K/μL equals 1 billion/L, the value remains unchanged.\",\n        \"step_result\": platelet_billions_per_l,\n        \"unit\": \"billions/L\"\n    }\n    \n    # Step 2: Calculate the FIB-4 index using the formula: (Age * AST) / (Platelet * sqrt(ALT))\n    fib4_index = (age * ast) / (platelet_billions_per_l * math.sqrt(alt))\n    fib4_index = round(fib4_index, 4)\n    yield {\n        \"step_name\": \"fib4_calculation\",\n        \"step_description\": \"Calculate the FIB-4 index using the formula: (Age * AST) / (Platelet * sqrt(ALT)), and round to 4 decimal places.\",\n        \"step_result\": fib4_index,\n        \"unit\": None\n    }\n    \n    # Final output\n    return fib4_index"
+}

@@ -1,0 +1,235 @@
+{
+    "name": "revised_cardiac_risk_index_calculation",
+    "description": "Calculate the patient's Cardiac Risk Index based on the Revised Cardiac Risk Index (RCRI) for pre-operative risk assessment. The index sums points from six criteria: elevated-risk surgery, history of ischemic heart disease, history of congestive heart failure, history of cerebrovascular disease, pre-operative insulin therapy, and pre-operative creatinine >2 mg/dL.",
+    "inputs": [
+        {
+            "input_name": "is_elevated_risk_surgery",
+            "input_desc": "Whether the surgery is elevated-risk (intraperitoneal, intrathoracic, or suprainguinal vascular). Accepted values: true or false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "has_ischemic_heart_disease",
+            "input_desc": "Whether the patient has a history of ischemic heart disease (history of myocardial infarction, positive exercise test, current chest pain due to myocardial ischemia, use of nitrate therapy, or ECG with pathological Q waves). Accepted values: true or false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "has_congestive_heart_failure",
+            "input_desc": "Whether the patient has a history of congestive heart failure (pulmonary edema, bilateral rales or S3 gallop, paroxysmal nocturnal dyspnea, or chest x-ray showing pulmonary vascular redistribution). Accepted values: true or false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "has_cerebrovascular_disease",
+            "input_desc": "Whether the patient has a history of cerebrovascular disease (prior transient ischemic attack or stroke). Accepted values: true or false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "on_preop_insulin",
+            "input_desc": "Whether the patient is receiving pre-operative treatment with insulin. Accepted values: true or false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "creatinine_mgdl",
+            "input_desc": "Pre-operative serum creatinine level in mg/dL.",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "criterion_1_surgery_type",
+            "step_description": "Determine points for elevated-risk surgery criterion.",
+            "step_inputs": [
+                {
+                    "input_name": "is_elevated_risk_surgery",
+                    "input_desc": "Whether the surgery is elevated-risk. Accepted values: true or false.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.is_elevated_risk_surgery"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "surgery_score",
+                    "output_desc": "Points for elevated-risk surgery criterion (0 or 1).",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step requires evaluating a boolean condition to output a discrete point value (0 or 1), fitting the ConditionEvaluation template.",
+            "detail": "If is_elevated_risk_surgery is true, output 1; otherwise output 0."
+        },
+        {
+            "step_id": "2",
+            "step_name": "criterion_2_ischemic_heart_disease",
+            "step_description": "Determine points for ischemic heart disease history criterion.",
+            "step_inputs": [
+                {
+                    "input_name": "has_ischemic_heart_disease",
+                    "input_desc": "History of ischemic heart disease. Accepted values: true or false.",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.has_ischemic_heart_disease"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "ihd_score",
+                    "output_desc": "Points for ischemic heart disease criterion (0 or 1).",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step requires evaluating a boolean condition to output a discrete point value (0 or 1), fitting the ConditionEvaluation template.",
+            "detail": "If has_ischemic_heart_disease is true, output 1; otherwise output 0."
+        },
+        {
+            "step_id": "3",
+            "step_name": "criterion_3_congestive_heart_failure",
+            "step_description": "Determine points for congestive heart failure history criterion.",
+            "step_inputs": [
+                {
+                    "input_name": "has_congestive_heart_failure",
+                    "input_desc": "History of congestive heart failure. Accepted values: true or false.",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.has_congestive_heart_failure"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "chf_score",
+                    "output_desc": "Points for congestive heart failure criterion (0 or 1).",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step requires evaluating a boolean condition to output a discrete point value (0 or 1), fitting the ConditionEvaluation template.",
+            "detail": "If has_congestive_heart_failure is true, output 1; otherwise output 0."
+        },
+        {
+            "step_id": "4",
+            "step_name": "criterion_4_cerebrovascular_disease",
+            "step_description": "Determine points for cerebrovascular disease history criterion.",
+            "step_inputs": [
+                {
+                    "input_name": "has_cerebrovascular_disease",
+                    "input_desc": "History of cerebrovascular disease. Accepted values: true or false.",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.has_cerebrovascular_disease"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "cvd_score",
+                    "output_desc": "Points for cerebrovascular disease criterion (0 or 1).",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step requires evaluating a boolean condition to output a discrete point value (0 or 1), fitting the ConditionEvaluation template.",
+            "detail": "If has_cerebrovascular_disease is true, output 1; otherwise output 0."
+        },
+        {
+            "step_id": "5",
+            "step_name": "criterion_5_preoperative_insulin",
+            "step_description": "Determine points for pre-operative insulin therapy criterion.",
+            "step_inputs": [
+                {
+                    "input_name": "on_preop_insulin",
+                    "input_desc": "Pre-operative treatment with insulin. Accepted values: true or false.",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.on_preop_insulin"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "insulin_score",
+                    "output_desc": "Points for pre-operative insulin criterion (0 or 1).",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step requires evaluating a boolean condition to output a discrete point value (0 or 1), fitting the ConditionEvaluation template.",
+            "detail": "If on_preop_insulin is true, output 1; otherwise output 0."
+        },
+        {
+            "step_id": "6",
+            "step_name": "criterion_6_preoperative_creatinine",
+            "step_description": "Determine points for elevated pre-operative creatinine criterion.",
+            "step_inputs": [
+                {
+                    "input_name": "creatinine_mgdl",
+                    "input_desc": "Pre-operative creatinine level in mg/dL.",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.creatinine_mgdl"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "creatinine_score",
+                    "output_desc": "Points for elevated creatinine criterion (0 or 1).",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step requires evaluating a numerical threshold condition to output a discrete point value (0 or 1), fitting the ConditionEvaluation template.",
+            "detail": "If creatinine_mgdl > 2.0, output 1; otherwise output 0."
+        },
+        {
+            "step_id": "7",
+            "step_name": "sum_rcri_points",
+            "step_description": "Sum all criterion scores to obtain the total Revised Cardiac Risk Index.",
+            "step_inputs": [
+                {
+                    "input_name": "surgery_score",
+                    "input_desc": "Points from criterion 1.",
+                    "input_type": "int",
+                    "input_source": "$|step1|.surgery_score"
+                },
+                {
+                    "input_name": "ihd_score",
+                    "input_desc": "Points from criterion 2.",
+                    "input_type": "int",
+                    "input_source": "$|step2|.ihd_score"
+                },
+                {
+                    "input_name": "chf_score",
+                    "input_desc": "Points from criterion 3.",
+                    "input_type": "int",
+                    "input_source": "$|step3|.chf_score"
+                },
+                {
+                    "input_name": "cvd_score",
+                    "input_desc": "Points from criterion 4.",
+                    "input_type": "int",
+                    "input_source": "$|step4|.cvd_score"
+                },
+                {
+                    "input_name": "insulin_score",
+                    "input_desc": "Points from criterion 5.",
+                    "input_type": "int",
+                    "input_source": "$|step5|.insulin_score"
+                },
+                {
+                    "input_name": "creatinine_score",
+                    "input_desc": "Points from criterion 6.",
+                    "input_type": "int",
+                    "input_source": "$|step6|.creatinine_score"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_rcri_score",
+                    "output_desc": "Total Revised Cardiac Risk Index score (range 0-6).",
+                    "output_type": "int"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step involves simple arithmetic addition of multiple discrete scores, fitting the FormulaCalculation template.",
+            "detail": "Sum the values: surgery_score + ihd_score + chf_score + cvd_score + insulin_score + creatinine_score."
+        }
+    ],
+    "output": {
+        "output_name": "total_rcri_score",
+        "output_desc": "The final Revised Cardiac Risk Index score, ranging from 0 to 6.",
+        "output_type": "int"
+    },
+    "code": "def solve(is_elevated_risk_surgery, has_ischemic_heart_disease, has_congestive_heart_failure, has_cerebrovascular_disease, on_preop_insulin, creatinine_mgdl):\n    # Step 1: criterion_1_surgery_type - Determine points for elevated-risk surgery criterion.\n    surgery_score = 1 if is_elevated_risk_surgery else 0\n    yield {\n        \"step_name\": \"criterion_1_surgery_type\",\n        \"step_description\": \"Determine points for elevated-risk surgery criterion. If is_elevated_risk_surgery is true, output 1; otherwise 0.\",\n        \"step_result\": surgery_score,\n        \"unit\": None\n    }\n\n    # Step 2: criterion_2_ischemic_heart_disease - Determine points for ischemic heart disease history criterion.\n    ihd_score = 1 if has_ischemic_heart_disease else 0\n    yield {\n        \"step_name\": \"criterion_2_ischemic_heart_disease\",\n        \"step_description\": \"Determine points for ischemic heart disease history criterion. If has_ischemic_heart_disease is true, output 1; otherwise 0.\",\n        \"step_result\": ihd_score,\n        \"unit\": None\n    }\n\n    # Step 3: criterion_3_congestive_heart_failure - Determine points for congestive heart failure history criterion.\n    chf_score = 1 if has_congestive_heart_failure else 0\n    yield {\n        \"step_name\": \"criterion_3_congestive_heart_failure\",\n        \"step_description\": \"Determine points for congestive heart failure history criterion. If has_congestive_heart_failure is true, output 1; otherwise 0.\",\n        \"step_result\": chf_score,\n        \"unit\": None\n    }\n\n    # Step 4: criterion_4_cerebrovascular_disease - Determine points for cerebrovascular disease history criterion.\n    cvd_score = 1 if has_cerebrovascular_disease else 0\n    yield {\n        \"step_name\": \"criterion_4_cerebrovascular_disease\",\n        \"step_description\": \"Determine points for cerebrovascular disease history criterion. If has_cerebrovascular_disease is true, output 1; otherwise 0.\",\n        \"step_result\": cvd_score,\n        \"unit\": None\n    }\n\n    # Step 5: criterion_5_preoperative_insulin - Determine points for pre-operative insulin therapy criterion.\n    insulin_score = 1 if on_preop_insulin else 0\n    yield {\n        \"step_name\": \"criterion_5_preoperative_insulin\",\n        \"step_description\": \"Determine points for pre-operative insulin therapy criterion. If on_preop_insulin is true, output 1; otherwise 0.\",\n        \"step_result\": insulin_score,\n        \"unit\": None\n    }\n\n    # Step 6: criterion_6_preoperative_creatinine - Determine points for elevated pre-operative creatinine criterion.\n    creatinine_score = 1 if creatinine_mgdl > 2.0 else 0\n    yield {\n        \"step_name\": \"criterion_6_preoperative_creatinine\",\n        \"step_description\": \"Determine points for elevated pre-operative creatinine criterion. If creatinine_mgdl > 2.0, output 1; otherwise 0.\",\n        \"step_result\": creatinine_score,\n        \"unit\": None\n    }\n\n    # Step 7: sum_rcri_points - Sum all criterion scores to obtain the total Revised Cardiac Risk Index.\n    total_rcri_score = surgery_score + ihd_score + chf_score + cvd_score + insulin_score + creatinine_score\n    yield {\n        \"step_name\": \"sum_rcri_points\",\n        \"step_description\": \"Sum all criterion scores to obtain the total Revised Cardiac Risk Index.\",\n        \"step_result\": total_rcri_score,\n        \"unit\": None\n    }\n\n    return total_rcri_score"
+}

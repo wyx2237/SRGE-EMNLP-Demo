@@ -1,0 +1,222 @@
+{
+    "name": "has_bled_score_calculation",
+    "description": "Calculate the total HAS-BLED score by evaluating nine clinical criteria: hypertension, renal disease, liver disease, stroke history, prior bleeding, labile INR, age >65, medication usage, and alcohol use.",
+    "inputs": [
+        {
+            "input_name": "has_uncontrolled_hypertension",
+            "input_desc": "Whether the patient has uncontrolled hypertension (>160 mmHg systolic). Allowed values: true, false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "has_renal_disease",
+            "input_desc": "Whether the patient has renal disease (Dialysis, transplant, Cr >2.26 mg/dL or >200 µmol/L). Allowed values: true, false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "has_liver_disease",
+            "input_desc": "Whether the patient has liver disease (Cirrhosis or bilirubin >2x normal with AST/ALT/AP >3x normal). Allowed values: true, false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "has_stroke_history",
+            "input_desc": "Whether the patient has a history of stroke. Allowed values: true, false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "has_prior_bleeding",
+            "input_desc": "Whether the patient has prior major bleeding or predisposition to bleeding. Allowed values: true, false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "has_labile_inr",
+            "input_desc": "Whether the patient has labile INR (Unstable/high INRs, time in therapeutic range <60%). Allowed values: true, false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "is_age_above_65",
+            "input_desc": "Whether the patient's age is >65. Allowed values: true, false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "has_bleeding_medication",
+            "input_desc": "Whether the patient uses medication predisposing to bleeding (Aspirin, clopidogrel, NSAIDs). Allowed values: true, false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "has_alcohol_use",
+            "input_desc": "Whether the patient has alcohol use (≥8 drinks/week). Allowed values: true, false.",
+            "input_type": "bool"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "hypertension_score",
+            "step_description": "Check if the patient has uncontrolled hypertension and assign the corresponding score.",
+            "step_inputs": [
+                {
+                    "input_name": "has_uncontrolled_hypertension",
+                    "input_desc": "Whether the patient has uncontrolled hypertension (>160 mmHg systolic). Allowed values: true, false.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.has_uncontrolled_hypertension"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "hypertension_score",
+                    "output_desc": "Score for the hypertension criterion (0 or 1 points)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step evaluates a boolean condition to assign a fixed score, matching the condition evaluation template.",
+            "detail": "If has_uncontrolled_hypertension is True, score = 1; otherwise, score = 0."
+        },
+        {
+            "step_id": "2",
+            "step_name": "renal_disease_score",
+            "step_description": "Check if the patient has renal disease and assign the corresponding score.",
+            "step_inputs": [
+                {
+                    "input_name": "has_renal_disease",
+                    "input_desc": "Whether the patient has renal disease (Dialysis, transplant, Cr >2.26 mg/dL or >200 µmol/L). Allowed values: true, false.",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.has_renal_disease"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "renal_disease_score",
+                    "output_desc": "Score for the renal disease criterion (0 or 1 points)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step evaluates a boolean condition to assign a fixed score, matching the condition evaluation template.",
+            "detail": "If has_renal_disease is True, score = 1; otherwise, score = 0."
+        },
+        {
+            "step_id": "3",
+            "step_name": "liver_disease_score",
+            "step_description": "Check if the patient has liver disease and assign the corresponding score.",
+            "step_inputs": [
+                {
+                    "input_name": "has_liver_disease",
+                    "input_desc": "Whether the patient has liver disease (Cirrhosis or bilirubin >2x normal with AST/ALT/AP >3x normal). Allowed values: true, false.",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.has_liver_disease"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "liver_disease_score",
+                    "output_desc": "Score for the liver disease criterion (0 or 1 points)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step evaluates a boolean condition to assign a fixed score, matching the condition evaluation template.",
+            "detail": "If has_liver_disease is True, score = 1; otherwise, score = 0."
+        },
+        {
+            "step_id": "4",
+            "step_name": "combined_risk_factor_score",
+            "step_description": "Check for stroke history, prior major bleeding, labile INR, age >65, medication usage, and alcohol use, then sum their scores.",
+            "step_inputs": [
+                {
+                    "input_name": "has_stroke_history",
+                    "input_desc": "Whether the patient has a history of stroke. Allowed values: true, false.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.has_stroke_history"
+                },
+                {
+                    "input_name": "has_prior_bleeding",
+                    "input_desc": "Whether the patient has prior major bleeding or predisposition. Allowed values: true, false.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.has_prior_bleeding"
+                },
+                {
+                    "input_name": "has_labile_inr",
+                    "input_desc": "Whether the patient has labile INR (Unstable/high INRs, time in therapeutic range <60%). Allowed values: true, false.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.has_labile_inr"
+                },
+                {
+                    "input_name": "is_age_above_65",
+                    "input_desc": "Whether the patient's age is >65. Allowed values: true, false.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.is_age_above_65"
+                },
+                {
+                    "input_name": "has_bleeding_medication",
+                    "input_desc": "Whether the patient uses medication predisposing to bleeding (Aspirin, clopidogrel, NSAIDs). Allowed values: true, false.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.has_bleeding_medication"
+                },
+                {
+                    "input_name": "has_alcohol_use",
+                    "input_desc": "Whether the patient has alcohol use (≥8 drinks/week). Allowed values: true, false.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.has_alcohol_use"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "combined_risk_factor_score",
+                    "output_desc": "Sum of scores for stroke history, prior bleeding, labile INR, age >65, medication usage, and alcohol use criteria",
+                    "output_type": "int"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step performs a summation of multiple binary values derived from boolean conditions, fitting the formula calculation template.",
+            "detail": "For each of the six criteria, assign 1 point if True, 0 if False. Then sum all six values: combined_risk_factor_score = (1 if has_stroke_history else 0) + (1 if has_prior_bleeding else 0) + (1 if has_labile_inr else 0) + (1 if is_age_above_65 else 0) + (1 if has_bleeding_medication else 0) + (1 if has_alcohol_use else 0)."
+        },
+        {
+            "step_id": "5",
+            "step_name": "total_has_bled_score",
+            "step_description": "Calculate the total HAS-BLED score by summing the scores from all nine criteria.",
+            "step_inputs": [
+                {
+                    "input_name": "hypertension_score",
+                    "input_desc": "Score for hypertension criterion (from step 1)",
+                    "input_type": "int",
+                    "input_source": "$|step1|.hypertension_score"
+                },
+                {
+                    "input_name": "renal_disease_score",
+                    "input_desc": "Score for renal disease criterion (from step 2)",
+                    "input_type": "int",
+                    "input_source": "$|step2|.renal_disease_score"
+                },
+                {
+                    "input_name": "liver_disease_score",
+                    "input_desc": "Score for liver disease criterion (from step 3)",
+                    "input_type": "int",
+                    "input_source": "$|step3|.liver_disease_score"
+                },
+                {
+                    "input_name": "combined_risk_factor_score",
+                    "input_desc": "Sum of scores for the remaining six criteria (from step 4)",
+                    "input_type": "int",
+                    "input_source": "$|step4|.combined_risk_factor_score"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_has_bled_score",
+                    "output_desc": "Total HAS-BLED score (range 0-9 points)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This is a simple summation of all individual criterion scores, fitting the formula calculation template.",
+            "detail": "Total HAS-BLED score = hypertension_score + renal_disease_score + liver_disease_score + combined_risk_factor_score."
+        }
+    ],
+    "output": {
+        "output_name": "total_has_bled_score",
+        "output_desc": "Total HAS-BLED score calculated from all nine criteria",
+        "output_type": "int"
+    },
+    "code": "def solve(has_uncontrolled_hypertension, has_renal_disease, has_liver_disease, has_stroke_history, has_prior_bleeding, has_labile_inr, is_age_above_65, has_bleeding_medication, has_alcohol_use):\n    # Step 1: Check if the patient has uncontrolled hypertension and assign the corresponding score.\n    hypertension_score = 1 if has_uncontrolled_hypertension else 0\n    yield {\n        \"step_name\": \"hypertension_score\",\n        \"step_description\": \"Check if the patient has uncontrolled hypertension and assign the corresponding score.\",\n        \"step_result\": hypertension_score,\n        \"unit\": None\n    }\n\n    # Step 2: Check if the patient has renal disease and assign the corresponding score.\n    renal_disease_score = 1 if has_renal_disease else 0\n    yield {\n        \"step_name\": \"renal_disease_score\",\n        \"step_description\": \"Check if the patient has renal disease and assign the corresponding score.\",\n        \"step_result\": renal_disease_score,\n        \"unit\": None\n    }\n\n    # Step 3: Check if the patient has liver disease and assign the corresponding score.\n    liver_disease_score = 1 if has_liver_disease else 0\n    yield {\n        \"step_name\": \"liver_disease_score\",\n        \"step_description\": \"Check if the patient has liver disease and assign the corresponding score.\",\n        \"step_result\": liver_disease_score,\n        \"unit\": None\n    }\n\n    # Step 4: Check for stroke history, prior major bleeding, labile INR, age >65, medication usage, and alcohol use, then sum their scores.\n    combined_risk_factor_score = (\n        (1 if has_stroke_history else 0) +\n        (1 if has_prior_bleeding else 0) +\n        (1 if has_labile_inr else 0) +\n        (1 if is_age_above_65 else 0) +\n        (1 if has_bleeding_medication else 0) +\n        (1 if has_alcohol_use else 0)\n    )\n    yield {\n        \"step_name\": \"combined_risk_factor_score\",\n        \"step_description\": \"Check for stroke history, prior major bleeding, labile INR, age >65, medication usage, and alcohol use, then sum their scores.\",\n        \"step_result\": combined_risk_factor_score,\n        \"unit\": None\n    }\n\n    # Step 5: Calculate the total HAS-BLED score by summing the scores from all nine criteria.\n    total_has_bled_score = hypertension_score + renal_disease_score + liver_disease_score + combined_risk_factor_score\n    yield {\n        \"step_name\": \"total_has_bled_score\",\n        \"step_description\": \"Calculate the total HAS-BLED score by summing the scores from all nine criteria.\",\n        \"step_result\": total_has_bled_score,\n        \"unit\": None\n    }\n\n    return total_has_bled_score"
+}

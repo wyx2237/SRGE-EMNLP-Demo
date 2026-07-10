@@ -1,0 +1,121 @@
+{
+    "name": "albumin_corrected_delta_gap_calculation_workflow",
+    "description": "Calculate the patient's albumin corrected delta gap in mEq/L using sodium, chloride, bicarbonate, and albumin values.",
+    "inputs": [
+        {
+            "input_name": "sodium",
+            "input_desc": "Serum sodium level in mEq/L",
+            "input_type": "float"
+        },
+        {
+            "input_name": "chloride",
+            "input_desc": "Serum chloride level in mEq/L",
+            "input_type": "float"
+        },
+        {
+            "input_name": "bicarbonate",
+            "input_desc": "Serum bicarbonate level in mEq/L",
+            "input_type": "float"
+        },
+        {
+            "input_name": "albumin",
+            "input_desc": "Serum albumin level in g/dL",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "anion_gap_calculation",
+            "step_description": "Calculate the patient's anion gap using sodium, chloride, and bicarbonate values.",
+            "step_inputs": [
+                {
+                    "input_name": "sodium",
+                    "input_desc": "Serum sodium level in mEq/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.sodium"
+                },
+                {
+                    "input_name": "chloride",
+                    "input_desc": "Serum chloride level in mEq/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.chloride"
+                },
+                {
+                    "input_name": "bicarbonate",
+                    "input_desc": "Serum bicarbonate level in mEq/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.bicarbonate"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "anion_gap",
+                    "output_desc": "Calculated anion gap in mEq/L",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step directly computes the anion gap using a simple mathematical formula: sodium minus the sum of chloride and bicarbonate.",
+            "detail": "anion_gap = sodium - (chloride + bicarbonate)"
+        },
+        {
+            "step_id": "2",
+            "step_name": "albumin_corrected_anion_gap_calculation",
+            "step_description": "Calculate the albumin corrected anion gap using the anion gap and albumin values.",
+            "step_inputs": [
+                {
+                    "input_name": "anion_gap",
+                    "input_desc": "Anion gap in mEq/L from previous step",
+                    "input_type": "float",
+                    "input_source": "$|step1|.anion_gap"
+                },
+                {
+                    "input_name": "albumin",
+                    "input_desc": "Serum albumin level in g/dL",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.albumin"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "albumin_corrected_anion_gap",
+                    "output_desc": "Albumin corrected anion gap in mEq/L",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step computes the albumin corrected anion gap using a precise mathematical formula with multiplication and addition.",
+            "detail": "albumin_corrected_anion_gap = anion_gap + 2.5 * (4 - albumin)"
+        },
+        {
+            "step_id": "3",
+            "step_name": "delta_gap_calculation",
+            "step_description": "Calculate the albumin corrected delta gap by subtracting 12 from the albumin corrected anion gap.",
+            "step_inputs": [
+                {
+                    "input_name": "albumin_corrected_anion_gap",
+                    "input_desc": "Albumin corrected anion gap in mEq/L from previous step",
+                    "input_type": "float",
+                    "input_source": "$|step2|.albumin_corrected_anion_gap"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "albumin_corrected_delta_gap",
+                    "output_desc": "Albumin corrected delta gap in mEq/L",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step is a simple subtraction to derive the final delta gap value from the albumin corrected anion gap.",
+            "detail": "albumin_corrected_delta_gap = albumin_corrected_anion_gap - 12"
+        }
+    ],
+    "output": {
+        "output_name": "albumin_corrected_delta_gap",
+        "output_desc": "Final albumin corrected delta gap in mEq/L",
+        "output_type": "float"
+    },
+    "code": "def solve(sodium, chloride, bicarbonate, albumin):\n    # Step 1: Calculate the patient's anion gap using sodium, chloride, and bicarbonate values.\n    anion_gap = sodium - (chloride + bicarbonate)\n    yield {\n        \"step_name\": \"anion_gap_calculation\",\n        \"step_description\": \"Calculate the patient's anion gap using sodium, chloride, and bicarbonate values.\",\n        \"step_result\": anion_gap,\n        \"unit\": \"mEq/L\"\n    }\n    \n    # Step 2: Calculate the albumin corrected anion gap using the anion gap and albumin values.\n    albumin_corrected_anion_gap = anion_gap + 2.5 * (4 - albumin)\n    yield {\n        \"step_name\": \"albumin_corrected_anion_gap_calculation\",\n        \"step_description\": \"Calculate the albumin corrected anion gap using the anion gap and albumin values.\",\n        \"step_result\": albumin_corrected_anion_gap,\n        \"unit\": \"mEq/L\"\n    }\n    \n    # Step 3: Calculate the albumin corrected delta gap by subtracting 12 from the albumin corrected anion gap.\n    albumin_corrected_delta_gap = albumin_corrected_anion_gap - 12\n    yield {\n        \"step_name\": \"delta_gap_calculation\",\n        \"step_description\": \"Calculate the albumin corrected delta gap by subtracting 12 from the albumin corrected anion gap.\",\n        \"step_result\": albumin_corrected_delta_gap,\n        \"unit\": \"mEq/L\"\n    }\n    \n    # Return the final albumin corrected delta gap\n    return albumin_corrected_delta_gap"
+}

@@ -1,0 +1,201 @@
+{
+    "name": "child_pugh_score_calculation",
+    "description": "Calculates the Child-Pugh Score by summing points assigned to five clinical criteria: total bilirubin, serum albumin, INR, ascites severity, and encephalopathy grade.",
+    "inputs": [
+        {
+            "input_name": "bilirubin_total",
+            "input_desc": "Total bilirubin level in mg/dL",
+            "input_type": "float"
+        },
+        {
+            "input_name": "albumin",
+            "input_desc": "Serum albumin level in g/dL",
+            "input_type": "float"
+        },
+        {
+            "input_name": "inr",
+            "input_desc": "International Normalized Ratio (INR) value",
+            "input_type": "float"
+        },
+        {
+            "input_name": "ascites_grade",
+            "input_desc": "Ascites severity. Must be one of: 'Absent', 'Slight', 'Moderate'",
+            "input_type": "str"
+        },
+        {
+            "input_name": "encephalopathy_grade",
+            "input_desc": "Encephalopathy grade. Must be one of: 'None', 'Grade1-2', 'Grade3-4'",
+            "input_type": "str"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "bilirubin_scoring",
+            "step_description": "Assign points based on total bilirubin level (mg/dL) using the Child-Pugh criteria.",
+            "step_inputs": [
+                {
+                    "input_name": "bilirubin_total",
+                    "input_desc": "Total bilirubin level in mg/dL",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.bilirubin_total"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "bilirubin_points",
+                    "output_desc": "Points for bilirubin criterion (1, 2, or 3)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "threshold_mapping",
+            "reason": "This step maps a continuous bilirubin value to discrete point categories using predefined thresholds (1, 2, 3), fitting the ThresholdMapping tool perfectly.",
+            "detail": "If bilirubin_total < 2 mg/dL, assign 1 point. If 2 ≤ bilirubin_total ≤ 3 mg/dL, assign 2 points. If bilirubin_total > 3 mg/dL, assign 3 points."
+        },
+        {
+            "step_id": "2",
+            "step_name": "albumin_scoring",
+            "step_description": "Assign points based on serum albumin level (g/dL) using the Child-Pugh criteria.",
+            "step_inputs": [
+                {
+                    "input_name": "albumin",
+                    "input_desc": "Serum albumin level in g/dL",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.albumin"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "albumin_points",
+                    "output_desc": "Points for albumin criterion (1, 2, or 3)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "threshold_mapping",
+            "reason": "This step maps a continuous albumin value to discrete point categories using predefined thresholds, which is exactly the use case for ThresholdMapping.",
+            "detail": "If albumin > 3.5 g/dL, assign 1 point. If 2.8 ≤ albumin ≤ 3.5 g/dL, assign 2 points. If albumin < 2.8 g/dL, assign 3 points."
+        },
+        {
+            "step_id": "3",
+            "step_name": "inr_scoring",
+            "step_description": "Assign points based on INR value using the Child-Pugh criteria.",
+            "step_inputs": [
+                {
+                    "input_name": "inr",
+                    "input_desc": "International Normalized Ratio (INR) value",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.inr"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "inr_points",
+                    "output_desc": "Points for INR criterion (1, 2, or 3)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "threshold_mapping",
+            "reason": "This step maps a continuous INR value to discrete point categories using predefined thresholds, making ThresholdMapping the appropriate tool.",
+            "detail": "If INR < 1.7, assign 1 point. If 1.7 ≤ INR ≤ 2.3, assign 2 points. If INR > 2.3, assign 3 points."
+        },
+        {
+            "step_id": "4",
+            "step_name": "ascites_scoring",
+            "step_description": "Assign points based on ascites severity using the Child-Pugh criteria.",
+            "step_inputs": [
+                {
+                    "input_name": "ascites_grade",
+                    "input_desc": "Ascites severity: 'Absent', 'Slight', or 'Moderate'",
+                    "input_type": "str",
+                    "input_source": "$|raw input|.ascites_grade"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "ascites_points",
+                    "output_desc": "Points for ascites criterion (1, 2, or 3)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "discrete_value_mapping",
+            "reason": "This step maps a discrete string value (Absent/Slight/Moderate) to predefined integer points, which is a direct discrete value mapping operation.",
+            "detail": "If ascites_grade is 'Absent', assign 1 point. If 'Slight', assign 2 points. If 'Moderate', assign 3 points."
+        },
+        {
+            "step_id": "5",
+            "step_name": "encephalopathy_scoring",
+            "step_description": "Assign points based on encephalopathy grade using the Child-Pugh criteria.",
+            "step_inputs": [
+                {
+                    "input_name": "encephalopathy_grade",
+                    "input_desc": "Encephalopathy grade: 'None', 'Grade1-2', or 'Grade3-4'",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.encephalopathy_grade"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "encephalopathy_points",
+                    "output_desc": "Points for encephalopathy criterion (1, 2, or 3)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "discrete_value_mapping",
+            "reason": "This step maps a discrete string value (None/Grade1-2/Grade3-4) to predefined integer points, fitting the DiscreteValueMapping tool.",
+            "detail": "If encephalopathy_grade is 'None', assign 1 point. If 'Grade1-2', assign 2 points. If 'Grade3-4', assign 3 points."
+        },
+        {
+            "step_id": "6",
+            "step_name": "child_pugh_sum",
+            "step_description": "Calculate the total Child-Pugh Score by summing points from all five criteria.",
+            "step_inputs": [
+                {
+                    "input_name": "bilirubin_points",
+                    "input_desc": "Points from bilirubin criterion",
+                    "input_type": "int",
+                    "input_source": "$|step1|.bilirubin_points"
+                },
+                {
+                    "input_name": "albumin_points",
+                    "input_desc": "Points from albumin criterion",
+                    "input_type": "int",
+                    "input_source": "$|step2|.albumin_points"
+                },
+                {
+                    "input_name": "inr_points",
+                    "input_desc": "Points from INR criterion",
+                    "input_type": "int",
+                    "input_source": "$|step3|.inr_points"
+                },
+                {
+                    "input_name": "ascites_points",
+                    "input_desc": "Points from ascites criterion",
+                    "input_type": "int",
+                    "input_source": "$|step4|.ascites_points"
+                },
+                {
+                    "input_name": "encephalopathy_points",
+                    "input_desc": "Points from encephalopathy criterion",
+                    "input_type": "int",
+                    "input_source": "$|step5|.encephalopathy_points"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "child_pugh_score",
+                    "output_desc": "Total Child-Pugh Score (sum of all criterion points)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This is a simple arithmetic sum of five integer values using a formula, requiring precise numerical computation as per the FormulaCalculation tool.",
+            "detail": "child_pugh_score = bilirubin_points + albumin_points + inr_points + ascites_points + encephalopathy_points"
+        }
+    ],
+    "output": {
+        "output_name": "child_pugh_score",
+        "output_desc": "Final Child-Pugh Score calculated by summing the points for all five criteria.",
+        "output_type": "int"
+    },
+    "code": "def solve(bilirubin_total, albumin, inr, ascites_grade, encephalopathy_grade):\n    # Step 1: bilirubin_scoring - Assign points based on total bilirubin level (mg/dL) using the Child-Pugh criteria\n    if bilirubin_total < 2:\n        bilirubin_points = 1\n    elif 2 <= bilirubin_total <= 3:\n        bilirubin_points = 2\n    else:  # bilirubin_total > 3\n        bilirubin_points = 3\n    yield {\n        \"step_name\": \"bilirubin_scoring\",\n        \"step_description\": \"Assign points based on total bilirubin level (mg/dL) using the Child-Pugh criteria: <2 mg/dL -> 1, 2-3 mg/dL -> 2, >3 mg/dL -> 3\",\n        \"step_result\": bilirubin_points,\n        \"unit\": None\n    }\n\n    # Step 2: albumin_scoring - Assign points based on serum albumin level (g/dL) using the Child-Pugh criteria\n    if albumin > 3.5:\n        albumin_points = 1\n    elif 2.8 <= albumin <= 3.5:\n        albumin_points = 2\n    else:  # albumin < 2.8\n        albumin_points = 3\n    yield {\n        \"step_name\": \"albumin_scoring\",\n        \"step_description\": \"Assign points based on serum albumin level (g/dL) using the Child-Pugh criteria: >3.5 g/dL -> 1, 2.8-3.5 g/dL -> 2, <2.8 g/dL -> 3\",\n        \"step_result\": albumin_points,\n        \"unit\": None\n    }\n\n    # Step 3: inr_scoring - Assign points based on INR value using the Child-Pugh criteria\n    if inr < 1.7:\n        inr_points = 1\n    elif 1.7 <= inr <= 2.3:\n        inr_points = 2\n    else:  # inr > 2.3\n        inr_points = 3\n    yield {\n        \"step_name\": \"inr_scoring\",\n        \"step_description\": \"Assign points based on INR value using the Child-Pugh criteria: <1.7 -> 1, 1.7-2.3 -> 2, >2.3 -> 3\",\n        \"step_result\": inr_points,\n        \"unit\": None\n    }\n\n    # Step 4: ascites_scoring - Assign points based on ascites severity using the Child-Pugh criteria\n    if ascites_grade == 'Absent':\n        ascites_points = 1\n    elif ascites_grade == 'Slight':\n        ascites_points = 2\n    elif ascites_grade == 'Moderate':\n        ascites_points = 3\n    else:\n        raise ValueError(\"Invalid ascites_grade: must be 'Absent', 'Slight', or 'Moderate'\")\n    yield {\n        \"step_name\": \"ascites_scoring\",\n        \"step_description\": \"Assign points based on ascites severity using the Child-Pugh criteria: 'Absent' -> 1, 'Slight' -> 2, 'Moderate' -> 3\",\n        \"step_result\": ascites_points,\n        \"unit\": None\n    }\n\n    # Step 5: encephalopathy_scoring - Assign points based on encephalopathy grade using the Child-Pugh criteria\n    if encephalopathy_grade == 'None':\n        encephalopathy_points = 1\n    elif encephalopathy_grade == 'Grade1-2':\n        encephalopathy_points = 2\n    elif encephalopathy_grade == 'Grade3-4':\n        encephalopathy_points = 3\n    else:\n        raise ValueError(\"Invalid encephalopathy_grade: must be 'None', 'Grade1-2', or 'Grade3-4'\")\n    yield {\n        \"step_name\": \"encephalopathy_scoring\",\n        \"step_description\": \"Assign points based on encephalopathy grade using the Child-Pugh criteria: 'None' -> 1, 'Grade1-2' -> 2, 'Grade3-4' -> 3\",\n        \"step_result\": encephalopathy_points,\n        \"unit\": None\n    }\n\n    # Step 6: child_pugh_sum - Calculate the total Child-Pugh Score by summing points from all five criteria\n    child_pugh_score = bilirubin_points + albumin_points + inr_points + ascites_points + encephalopathy_points\n    yield {\n        \"step_name\": \"child_pugh_sum\",\n        \"step_description\": \"Calculate the total Child-Pugh Score by summing points from all five criteria: bilirubin, albumin, INR, ascites, encephalopathy\",\n        \"step_result\": child_pugh_score,\n        \"unit\": None\n    }\n\n    return child_pugh_score"
+}

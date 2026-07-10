@@ -1,0 +1,210 @@
+{
+    "name": "opt_cad_score_calculation_workflow",
+    "description": "Calculate the OPT-CAD score for a coronary heart disease patient based on age, heart rate, and eight binary risk factors.",
+    "inputs": [
+        {
+            "input_name": "age",
+            "input_desc": "Patient's age in years",
+            "input_type": "int"
+        },
+        {
+            "input_name": "heart_rate",
+            "input_desc": "Patient's heart rate in beats per minute",
+            "input_type": "int"
+        },
+        {
+            "input_name": "hypertension",
+            "input_desc": "Presence of hypertension history. Allowed values: true, false",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "prior_mi",
+            "input_desc": "Prior myocardial infarction. Allowed values: true, false",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "prior_stroke",
+            "input_desc": "Prior stroke. Allowed values: true, false",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "renal_insufficiency",
+            "input_desc": "Renal insufficiency defined as eGFR < 60 ml/(min·1.73m²). Allowed values: true, false",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "anemia",
+            "input_desc": "Anemia (Male Hb < 13 g/dL, Female Hb < 12 g/dL). Allowed values: true, false",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "lvef_below_50",
+            "input_desc": "Left ventricular ejection fraction < 50%. Allowed values: true, false",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "elevated_ctn",
+            "input_desc": "Cardiac troponin above upper limit of normal. Allowed values: true, false",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "st_changes",
+            "input_desc": "ECG ST-segment depression or elevation. Allowed values: true, false",
+            "input_type": "bool"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "age_score_calculation",
+            "step_description": "Calculate the score based on the patient's age group.",
+            "step_inputs": [
+                {
+                    "input_name": "age",
+                    "input_desc": "Patient's age in years",
+                    "input_type": "int",
+                    "input_source": "$|raw input|.age"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "age_score",
+                    "output_desc": "Score for age component",
+                    "output_type": "int"
+                }
+            ],
+            "category": "clinical_scoring",
+            "reason": "This step maps a patient's age to a predefined score based on clinical risk stratification tiers.",
+            "detail": "Age < 40: 0 points; 40-49: 9 points; 50-59: 29 points; 60-64: 41 points; 65-69: 50 points; 70-74: 58 points; 75-79: 65 points; >=80: 71 points."
+        },
+        {
+            "step_id": "2",
+            "step_name": "heart_rate_score_calculation",
+            "step_description": "Calculate the score based on the patient's heart rate.",
+            "step_inputs": [
+                {
+                    "input_name": "heart_rate",
+                    "input_desc": "Patient's heart rate in beats per minute",
+                    "input_type": "int",
+                    "input_source": "$|raw_input|.heart_rate"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "heart_rate_score",
+                    "output_desc": "Score for heart rate component",
+                    "output_type": "int"
+                }
+            ],
+            "category": "clinical_scoring",
+            "reason": "This step maps a patient's heart rate to a predefined score based on clinical risk stratification tiers.",
+            "detail": "Heart rate < 60 bpm: 0 points; 60-69 bpm: 14 points; 70-79 bpm: 18 points; 80-89 bpm: 21 points; 90-99 bpm: 24 points; 100-110 bpm: 30 points; > 110 bpm: 36 points."
+        },
+        {
+            "step_id": "3",
+            "step_name": "binary_risk_factor_scores_calculation",
+            "step_description": "Calculate scores for the eight binary risk factors and sum them up.",
+            "step_inputs": [
+                {
+                    "input_name": "hypertension",
+                    "input_desc": "Presence of hypertension history. Allowed values: true, false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.hypertension"
+                },
+                {
+                    "input_name": "prior_mi",
+                    "input_desc": "Prior myocardial infarction. Allowed values: true, false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.prior_mi"
+                },
+                {
+                    "input_name": "prior_stroke",
+                    "input_desc": "Prior stroke. Allowed values: true, false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.prior_stroke"
+                },
+                {
+                    "input_name": "renal_insufficiency",
+                    "input_desc": "Renal insufficiency defined as eGFR < 60 ml/(min·1.73m²). Allowed values: true, false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.renal_insufficiency"
+                },
+                {
+                    "input_name": "anemia",
+                    "input_desc": "Anemia (Male Hb < 13 g/dL, Female Hb < 12 g/dL). Allowed values: true, false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.anemia"
+                },
+                {
+                    "input_name": "lvef_below_50",
+                    "input_desc": "Left ventricular ejection fraction < 50%. Allowed values: true, false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.lvef_below_50"
+                },
+                {
+                    "input_name": "elevated_ctn",
+                    "input_desc": "Cardiac troponin above upper limit of normal. Allowed values: true, false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.elevated_ctn"
+                },
+                {
+                    "input_name": "st_changes",
+                    "input_desc": "ECG ST-segment depression or elevation. Allowed values: true, false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.st_changes"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "binary_scores_sum",
+                    "output_desc": "Sum of scores from all binary risk factors",
+                    "output_type": "int"
+                }
+            ],
+            "category": "clinical_scoring",
+            "reason": "This step evaluates eight independent clinical risk factors, assigning a fixed score to each if present, and sums them.",
+            "detail": "Sum points for each factor if true: Hypertension: 20 points; Prior MI: 16 points; Prior Stroke: 16 points; Renal insufficiency: 21 points; Anemia: 19 points; LVEF < 50%: 22 points; Elevated cTn: 23 points; ST-segment changes: 13 points. False yields 0 points for each."
+        },
+        {
+            "step_id": "4",
+            "step_name": "total_opt_cad_score_calculation",
+            "step_description": "Sum all component scores to compute the final OPT-CAD score.",
+            "step_inputs": [
+                {
+                    "input_name": "age_score",
+                    "input_desc": "Score from age component",
+                    "input_type": "int",
+                    "input_source": "$|step1|.age_score"
+                },
+                {
+                    "input_name": "heart_rate_score",
+                    "input_desc": "Score from heart rate component",
+                    "input_type": "int",
+                    "input_source": "$|step2|.heart_rate_score"
+                },
+                {
+                    "input_name": "binary_scores_sum",
+                    "input_desc": "Sum of scores from all binary risk factors",
+                    "input_type": "int",
+                    "input_source": "$|step3|.binary_scores_sum"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_opt_cad_score",
+                    "output_desc": "Total OPT-CAD score",
+                    "output_type": "int"
+                }
+            ],
+            "category": "arithmetic_calculation",
+            "reason": "This step performs a simple summation of three integer scores to derive the final composite clinical score.",
+            "detail": "Total score = age_score + heart_rate_score + binary_scores_sum."
+        }
+    ],
+    "output": {
+        "output_name": "total_opt_cad_score",
+        "output_desc": "The final calculated OPT-CAD score",
+        "output_type": "int"
+    },
+    "code": "def solve(age, heart_rate, hypertension, prior_mi, prior_stroke, renal_insufficiency, anemia, lvef_below_50, elevated_ctn, st_changes):\n    # Step 1: age_score_calculation\n    # Map patient's age to a predefined score based on clinical risk stratification tiers.\n    if age < 40:\n        age_score = 0\n    elif age < 50:\n        age_score = 9\n    elif age < 60:\n        age_score = 29\n    elif age < 65:\n        age_score = 41\n    elif age < 70:\n        age_score = 50\n    elif age < 75:\n        age_score = 58\n    elif age < 80:\n        age_score = 65\n    else:\n        age_score = 71\n    yield {\n        \"step_name\": \"age_score_calculation\",\n        \"step_description\": \"Calculate the score based on the patient's age group.\",\n        \"step_result\": age_score,\n        \"unit\": None\n    }\n\n    # Step 2: heart_rate_score_calculation\n    # Map patient's heart rate to a predefined score based on clinical risk stratification tiers.\n    if heart_rate < 60:\n        heart_rate_score = 0\n    elif heart_rate < 70:\n        heart_rate_score = 14\n    elif heart_rate < 80:\n        heart_rate_score = 18\n    elif heart_rate < 90:\n        heart_rate_score = 21\n    elif heart_rate < 100:\n        heart_rate_score = 24\n    elif heart_rate <= 110:\n        heart_rate_score = 30\n    else:\n        heart_rate_score = 36\n    yield {\n        \"step_name\": \"heart_rate_score_calculation\",\n        \"step_description\": \"Calculate the score based on the patient's heart rate.\",\n        \"step_result\": heart_rate_score,\n        \"unit\": None\n    }\n\n    # Step 3: binary_risk_factor_scores_calculation\n    # Evaluate eight independent clinical risk factors, assign a fixed score to each if present, and sum them.\n    binary_scores_sum = 0\n    if hypertension:\n        binary_scores_sum += 20\n    if prior_mi:\n        binary_scores_sum += 16\n    if prior_stroke:\n        binary_scores_sum += 16\n    if renal_insufficiency:\n        binary_scores_sum += 21\n    if anemia:\n        binary_scores_sum += 19\n    if lvef_below_50:\n        binary_scores_sum += 22\n    if elevated_ctn:\n        binary_scores_sum += 23\n    if st_changes:\n        binary_scores_sum += 13\n    yield {\n        \"step_name\": \"binary_risk_factor_scores_calculation\",\n        \"step_description\": \"Calculate scores for the eight binary risk factors and sum them up.\",\n        \"step_result\": binary_scores_sum,\n        \"unit\": None\n    }\n\n    # Step 4: total_opt_cad_score_calculation\n    # Sum all component scores to compute the final OPT-CAD score.\n    total_opt_cad_score = age_score + heart_rate_score + binary_scores_sum\n    return total_opt_cad_score"
+}

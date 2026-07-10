@@ -1,0 +1,99 @@
+{
+    "name": "charlson_comorbidity_index_calculation",
+    "description": "Calculate the Charlson Comorbidity Index (CCI) score based on disease weight and age adjustment scores.",
+    "inputs": [
+        {
+            "input_name": "diseases_present",
+            "input_desc": "List of diseases present in the patient, each represented as a string. Valid values include: '心肌梗死', '充血性心力衰竭', '外周血管疾病', '脑血管疾病', '痴呆', '慢性阻塞性肺疾病', '结缔组织病', '消化性溃疡病', '轻度肝脏疾病', '无器官损伤的糖尿病', '伴有靶器官损害的糖尿病', '偏瘫', '中重度慢性肾脏病', '白血病', '淋巴瘤', '实体瘤', '中重度肝脏疾病', '转移性实体瘤', '艾滋病'.",
+            "input_type": "array"
+        },
+        {
+            "input_name": "patient_age",
+            "input_desc": "Patient's age as an integer.",
+            "input_type": "integer"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "disease_weight_calculation",
+            "step_description": "Calculate the disease weight score by summing the weights of the diseases present.",
+            "step_inputs": [
+                {
+                    "input_name": "diseases_present",
+                    "input_desc": "List of diseases present in the patient, each represented as a string. Valid values include: '心肌梗死', '充血性心力衰竭', '外周血管疾病', '脑血管疾病', '痴呆', '慢性阻塞性肺疾病', '结缔组织病', '消化性溃疡病', '轻度肝脏疾病', '无器官损伤的糖尿病', '伴有靶器官损害的糖尿病', '偏瘫', '中重度慢性肾脏病', '白血病', '淋巴瘤', '实体瘤', '中重度肝脏疾病', '转移性实体瘤', '艾滋病'.",
+                    "input_type": "array",
+                    "input_source": "$|inputs|.diseases_present"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "disease_weight_score",
+                    "output_desc": "Total disease weight score calculated by summing the weights of the diseases present.",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step involves calculating the disease weight score using a formula that sums the weights of the diseases present.",
+            "detail": "For each disease present, assign the corresponding weight: 1 for 1-point diseases, 2 for 2-point diseases, 3 for 3-point diseases, and 6 for 6-point diseases. Sum all these weights to get the total disease weight score."
+        },
+        {
+            "step_id": "2",
+            "step_name": "age_adjustment_score_calculation",
+            "step_description": "Calculate the age adjustment score based on the patient's age.",
+            "step_inputs": [
+                {
+                    "input_name": "patient_age",
+                    "input_desc": "Patient's age as an integer.",
+                    "input_type": "integer",
+                    "input_source": "$|inputs|.patient_age"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "age_adjustment_score",
+                    "output_desc": "Age adjustment score based on predefined ranges.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step evaluates the patient's age against predefined conditions to determine the age adjustment score.",
+            "detail": "Based on the patient's age, apply the following rules: <50 years → 0 points; 50-59 years → 1 point; 60-69 years → 2 points; 70-79 years → 3 points; ≥80 years → 4 points."
+        },
+        {
+            "step_id": "3",
+            "step_name": "charlson_comorbidity_index_calculation",
+            "step_description": "Calculate the final Charlson Comorbidity Index (CCI) score by adding the disease weight score and the age adjustment score.",
+            "step_inputs": [
+                {
+                    "input_name": "disease_weight_score",
+                    "input_desc": "Total disease weight score calculated from the list of diseases present.",
+                    "input_type": "float",
+                    "input_source": "$|1|.disease_weight_score"
+                },
+                {
+                    "input_name": "age_adjustment_score",
+                    "input_desc": "Age adjustment score based on the patient's age.",
+                    "input_type": "integer",
+                    "input_source": "$|2|.age_adjustment_score"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "charlson_comorbidity_index",
+                    "output_desc": "Final Charlson Comorbidity Index (CCI) score.",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step combines the two previously calculated scores to determine the final CCI score.",
+            "detail": "The final CCI score is calculated by adding the disease weight score and the age adjustment score."
+        }
+    ],
+    "output": {
+        "output_name": "charlson_comorbidity_index",
+        "output_desc": "Final Charlson Comorbidity Index (CCI) score.",
+        "output_type": "float"
+    },
+    "code": "def solve(diseases_present, patient_age):\n    # Step 1: Calculate the disease weight score by summing the weights of the diseases present.\n    disease_weight_score = 0.0\n    disease_weights = {\n        '心肌梗死': 1,\n        '充血性心力衰竭': 1,\n        '外周血管疾病': 1,\n        '脑血管疾病': 1,\n        '痴呆': 1,\n        '慢性阻塞性肺疾病': 1,\n        '结缔组织病': 2,\n        '消化性溃疡病': 1,\n        '轻度肝脏疾病': 1,\n        '无器官损伤的糖尿病': 1,\n        '伴有靶器官损害的糖尿病': 2,\n        '偏瘫': 1,\n        '中重度慢性肾脏病': 2,\n        '白血病': 3,\n        '淋巴瘤': 3,\n        '实体瘤': 3,\n        '中重度肝脏疾病': 6,\n        '转移性实体瘤': 6,\n        '艾滋病': 6\n    }\n    \n    for disease in diseases_present:\n        if disease in disease_weights:\n            disease_weight_score += disease_weights[disease]\n    \n    yield {\n        \"step_name\": \"disease_weight_calculation\",\n        \"step_description\": \"Calculate the disease weight score by summing the weights of the diseases present.\",\n        \"step_result\": disease_weight_score,\n        \"unit\": None\n    }\n\n    # Step 2: Calculate the age adjustment score based on the patient's age.\n    if patient_age < 50:\n        age_adjustment_score = 0\n    elif 50 <= patient_age <= 59:\n        age_adjustment_score = 1\n    elif 60 <= patient_age <= 69:\n        age_adjustment_score = 2\n    elif 70 <= patient_age <= 79:\n        age_adjustment_score = 3\n    else:  # patient_age >= 80\n        age_adjustment_score = 4\n    \n    yield {\n        \"step_name\": \"age_adjustment_score_calculation\",\n        \"step_description\": \"Calculate the age adjustment score based on the patient's age.\",\n        \"step_result\": age_adjustment_score,\n        \"unit\": None\n    }\n\n    # Step 3: Calculate the final Charlson Comorbidity Index (CCI) score.\n    charlson_comorbidity_index = disease_weight_score + age_adjustment_score\n\n    yield {\n        \"step_name\": \"charlson_comorbidity_index_calculation\",\n        \"step_description\": \"Calculate the final Charlson Comorbidity Index (CCI) score by adding the disease weight score and the age adjustment score.\",\n        \"step_result\": charlson_comorbidity_index,\n        \"unit\": None\n    }\n\n    return charlson_comorbidity_index"
+}

@@ -1,0 +1,42 @@
+{
+    "name": "maintenance_fluid_calculation_workflow",
+    "description": "Calculate the patient's maintenance fluid rate in mL/hr based on their weight using the standard segmented formula.",
+    "inputs": [
+        {
+            "input_name": "weight_kg",
+            "input_desc": "Patient's weight in kilograms",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "compute_maintenance_fluid_rate",
+            "step_description": "Calculate maintenance fluid rate in mL/hr using weight-based segmented formulas.",
+            "step_inputs": [
+                {
+                    "input_name": "weight_kg",
+                    "input_desc": "Patient's weight in kilograms",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.weight_kg"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "maintenance_fluid_rate",
+                    "output_desc": "Maintenance fluid rate in mL/hr",
+                    "output_type": "float"
+                }
+            ],
+            "category": "ConditionEvaluation",
+            "reason": "The calculation requires evaluating different formulas based on the patient's weight range, which is a conditional branching logic.",
+            "detail": "If weight_kg <= 10: maintenance_fluid_rate = 4 * weight_kg. If 11 <= weight_kg <= 20: maintenance_fluid_rate = 40 + 2 * (weight_kg - 10). If weight_kg > 20: maintenance_fluid_rate = 60 + 1 * (weight_kg - 20)."
+        }
+    ],
+    "output": {
+        "output_name": "maintenance_fluid_rate",
+        "output_desc": "Maintenance fluid rate in mL/hr",
+        "output_type": "float"
+    },
+    "code": "import math  # included in case math operations are needed, though not strictly required here\n\ndef solve(weight_kg):\n    # Step 1: compute_maintenance_fluid_rate\n    # Calculate maintenance fluid rate in mL/hr using weight-based segmented formulas\n    if weight_kg <= 10:\n        maintenance_fluid_rate = 4.0 * weight_kg\n    elif weight_kg <= 20:\n        maintenance_fluid_rate = 40.0 + 2.0 * (weight_kg - 10)\n    else:\n        maintenance_fluid_rate = 60.0 + 1.0 * (weight_kg - 20)\n\n    yield {\n        \"step_name\": \"compute_maintenance_fluid_rate\",\n        \"step_description\": \"Calculate maintenance fluid rate in mL/hr using weight-based segmented formulas.\",\n        \"step_result\": maintenance_fluid_rate,\n        \"unit\": \"mL/hr\"\n    }\n\n    # final result\n    return maintenance_fluid_rate"
+}

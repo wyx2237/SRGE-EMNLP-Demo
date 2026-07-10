@@ -1,0 +1,75 @@
+{
+    "name": "mdrd_gfr_calculation_workflow",
+    "description": "Calculate the Glomerular Filtration Rate (GFR) using the MDRD equation.",
+    "inputs": [
+        {
+            "input_name": "creatinine",
+            "input_desc": "Serum creatinine concentration in mg/dL",
+            "input_type": "float"
+        },
+        {
+            "input_name": "age",
+            "input_desc": "Patient age in years",
+            "input_type": "int"
+        },
+        {
+            "input_name": "is_female",
+            "input_desc": "Whether the patient is female",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "is_african_american",
+            "input_desc": "Whether the patient is African American",
+            "input_type": "bool"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "compute_gfr",
+            "step_description": "GFR = 175 * creatinine^(-1.154) * age^(-0.203) * race_coefficient * gender_coefficient. race_coefficient = 1.212 if is_african_american is true, else 1.0. gender_coefficient = 0.742 if is_female is true, else 1.0. The result is rounded to 4 decimal places.",
+            "step_inputs": [
+                {
+                    "input_name": "creatinine",
+                    "input_desc": "Serum creatinine concentration (mg/dL)",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.creatinine"
+                },
+                {
+                    "input_name": "age",
+                    "input_desc": "Patient age (years)",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.age"
+                },
+                {
+                    "input_name": "is_female",
+                    "input_desc": "Whether the patient is female",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.is_female"
+                },
+                {
+                    "input_name": "is_african_american",
+                    "input_desc": "Whether the patient is African American",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.is_african_american"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "gfr",
+                    "output_desc": "Estimated Glomerular Filtration Rate in mL/min/1.73 m²",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "The MDRD equation is a precise mathematical formula requiring exponentiation and multiplication of multiple numeric variables. The coefficients are determined before calculation but the overall operation is a single formula evaluation. Using FormulaCalculation allows direct computation of the complex formula with rounding to 4 decimal places.",
+            "detail": "Compute race_coefficient as 1.212 if is_african_american is true, else 1.0. Compute gender_coefficient as 0.742 if is_female is true, else 1.0. Calculate GFR = 175 * (creatinine ^ (-1.154)) * (age ^ (-0.203)) * race_coefficient * gender_coefficient. Round the result to 4 decimal places."
+        }
+    ],
+    "output": {
+        "output_name": "gfr",
+        "output_desc": "Estimated Glomerular Filtration Rate in mL/min/1.73 m²",
+        "output_type": "float"
+    },
+    "code": "import math\n\ndef solve(creatinine, age, is_female, is_african_american):\n    \"\"\"\n    Calculate the Glomerular Filtration Rate (GFR) using the MDRD equation.\n    \"\"\"\n    # Step 1: compute_gfr\n    # Determine race coefficient: 1.212 if African American, else 1.0\n    race_coefficient = 1.212 if is_african_american else 1.0\n    # Determine gender coefficient: 0.742 if female, else 1.0\n    gender_coefficient = 0.742 if is_female else 1.0\n    # Calculate GFR using the MDRD formula: GFR = 175 * creatinine^(-1.154) * age^(-0.203) * race_coefficient * gender_coefficient\n    gfr = 175 * (creatinine ** (-1.154)) * (age ** (-0.203)) * race_coefficient * gender_coefficient\n    # Round the result to 4 decimal places\n    gfr = round(gfr, 4)\n    \n    yield {\n        \"step_name\": \"compute_gfr\",\n        \"step_description\": \"GFR = 175 * creatinine^(-1.154) * age^(-0.203) * race_coefficient * gender_coefficient. race_coefficient = 1.212 if is_african_american is true, else 1.0. gender_coefficient = 0.742 if is_female is true, else 1.0. The result is rounded to 4 decimal places.\",\n        \"step_result\": gfr,\n        \"unit\": \"mL/min/1.73 m²\"\n    }\n    \n    return gfr"
+}

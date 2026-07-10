@@ -1,0 +1,53 @@
+{
+    "name": "corrected_sodium_calculation_workflow",
+    "description": "Calculate the corrected sodium concentration using the Hiller 1999 formula for hyperglycemia.",
+    "inputs": [
+        {
+            "input_name": "measured_sodium",
+            "input_desc": "Measured sodium concentration in mEq/L",
+            "input_type": "float"
+        },
+        {
+            "input_name": "serum_glucose",
+            "input_desc": "Serum glucose concentration in mg/dL",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "compute_corrected_sodium",
+            "step_description": "Calculate the corrected sodium concentration using the Hiller 1999 formula: Corrected Sodium = measured_sodium + 0.024 * (serum_glucose - 100).",
+            "step_inputs": [
+                {
+                    "input_name": "measured_sodium",
+                    "input_desc": "Measured sodium concentration in mEq/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.measured_sodium"
+                },
+                {
+                    "input_name": "serum_glucose",
+                    "input_desc": "Serum glucose concentration in mg/dL",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.serum_glucose"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "corrected_sodium",
+                    "output_desc": "Corrected sodium concentration in mEq/L",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "The task requires evaluating a precise mathematical formula (Hiller 1999) with two numeric inputs to produce a single numeric output, which fits the FormulaCalculation template.",
+            "detail": "The corrected sodium concentration is calculated using the Hiller 1999 formula: Corrected Sodium = measured_sodium + 0.024 * (serum_glucose - 100). The result is rounded to 4 decimal places."
+        }
+    ],
+    "output": {
+        "output_name": "corrected_sodium",
+        "output_desc": "Corrected sodium concentration in mEq/L",
+        "output_type": "float"
+    },
+    "code": "def solve(measured_sodium, serum_glucose):\n    \"\"\"\n    Calculate the corrected sodium concentration using the Hiller 1999 formula for hyperglycemia.\n    \n    Args:\n        measured_sodium: Measured sodium concentration in mEq/L\n        serum_glucose: Serum glucose concentration in mg/dL\n    \n    Returns:\n        corrected_sodium: Corrected sodium concentration in mEq/L\n    \"\"\"\n    # Step 1: compute_corrected_sodium\n    # Calculate the corrected sodium concentration using the Hiller 1999 formula:\n    # Corrected Sodium = measured_sodium + 0.024 * (serum_glucose - 100)\n    corrected_sodium = measured_sodium + 0.024 * (serum_glucose - 100)\n    corrected_sodium = round(corrected_sodium, 4)\n    \n    yield {\n        \"step_name\": \"compute_corrected_sodium\",\n        \"step_description\": \"Calculate the corrected sodium concentration using the Hiller 1999 formula: Corrected Sodium = measured_sodium + 0.024 * (serum_glucose - 100), and round to 4 decimal places.\",\n        \"step_result\": corrected_sodium,\n        \"unit\": \"mEq/L\"\n    }\n    \n    return corrected_sodium"
+}

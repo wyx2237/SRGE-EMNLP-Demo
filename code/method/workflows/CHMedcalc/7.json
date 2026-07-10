@@ -1,0 +1,64 @@
+{
+    "name": "calculate_creatinine_clearance_workflow",
+    "description": "Calculate the endogenous creatinine clearance (CCr) using the 24-hour urine collection method.",
+    "inputs": [
+        {
+            "input_name": "urine_creatinine_concentration",
+            "input_desc": "Urine creatinine concentration measured in a 24-hour urine sample, unit: μmol/L or mg/dL.",
+            "input_type": "float"
+        },
+        {
+            "input_name": "blood_creatinine_concentration",
+            "input_desc": "Blood creatinine concentration measured from a fasting venous blood sample, unit: μmol/L or mg/dL.",
+            "input_type": "float"
+        },
+        {
+            "input_name": "total_urine_volume",
+            "input_desc": "Total urine volume collected over 24 hours, unit: ml.",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "calculate_creatinine_clearance",
+            "step_description": "Calculate the endogenous creatinine clearance (CCr) using the formula provided.",
+            "step_inputs": [
+                {
+                    "input_name": "urine_creatinine_concentration",
+                    "input_desc": "Urine creatinine concentration measured in a 24-hour urine sample, unit: μmol/L or mg/dL.",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.urine_creatinine_concentration"
+                },
+                {
+                    "input_name": "blood_creatinine_concentration",
+                    "input_desc": "Blood creatinine concentration measured from a fasting venous blood sample, unit: μmol/L or mg/dL.",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.blood_creatinine_concentration"
+                },
+                {
+                    "input_name": "total_urine_volume",
+                    "input_desc": "Total urine volume collected over 24 hours, unit: ml.",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.total_urine_volume"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "creatinine_clearance",
+                    "output_desc": "Endogenous creatinine clearance (CCr) calculated in ml/min.",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "This step involves performing a mathematical calculation based on a specific formula, which fits the 'FormulaCalculation' tool template.",
+            "detail": "The formula for calculating endogenous creatinine clearance is: CCr (ml/min) = (urineCreatinineConcentration × totalUrineVolume) / (bloodCreatinineConcentration × 1440). The result is rounded to four decimal places."
+        }
+    ],
+    "output": {
+        "output_name": "creatinine_clearance",
+        "output_desc": "Endogenous creatinine clearance (CCr) calculated in ml/min.",
+        "output_type": "float"
+    },
+    "code": "def solve(urine_creatinine_concentration, blood_creatinine_concentration, total_urine_volume):\n    # Step 1: Calculate the endogenous creatinine clearance (CCr)\n    # Description: Calculate the endogenous creatinine clearance (CCr) using the formula provided.\n    # Formula: CCr (ml/min) = (urineCreatinineConcentration × totalUrineVolume) / (bloodCreatinineConcentration × 1440)\n    # The result is rounded to four decimal places.\n    creatinine_clearance = (urine_creatinine_concentration * total_urine_volume) / (blood_creatinine_concentration * 1440)\n    creatinine_clearance_rounded = round(creatinine_clearance, 4)\n    \n    # Yield the result of step 1\n    yield {\n        \"step_name\": \"calculate_creatinine_clearance\",\n        \"step_description\": \"Calculate the endogenous creatinine clearance (CCr) using the formula provided.\",\n        \"step_result\": creatinine_clearance_rounded,\n        \"unit\": \"ml/min\"\n    }\n    \n    # Return the final result\n    return creatinine_clearance_rounded"
+}

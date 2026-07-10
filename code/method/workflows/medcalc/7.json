@@ -1,0 +1,59 @@
+{
+    "name": "calcium_correction_hypoalbuminemia_workflow",
+    "description": "Calculate the corrected calcium level in mg/dL using the Calcium Correction for Hypoalbuminemia formula, given the patient's serum calcium and albumin levels.",
+    "inputs": [
+        {
+            "input_name": "serum_calcium",
+            "input_desc": "Patient's measured serum calcium level, in mg/dL",
+            "input_type": "float"
+        },
+        {
+            "input_name": "patient_albumin",
+            "input_desc": "Patient's measured albumin level, in g/dL",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "calculate_corrected_calcium",
+            "step_description": "Compute the corrected calcium using the formula: (0.8 * (4.0 - Patient's Albumin)) + Serum Calcium.",
+            "step_inputs": [
+                {
+                    "input_name": "serum_calcium",
+                    "input_desc": "Patient's measured serum calcium level in mg/dL",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.serum_calcium"
+                },
+                {
+                    "input_name": "patient_albumin",
+                    "input_desc": "Patient's measured albumin level in g/dL",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.patient_albumin"
+                },
+                {
+                    "input_name": "normal_albumin",
+                    "input_desc": "Standard normal albumin concentration, default is 4.0 g/dL",
+                    "input_type": "float",
+                    "input_source": "4.0"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "corrected_calcium",
+                    "output_desc": "Corrected calcium level in mg/dL, rounded to 4 decimal places",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "The task requires computing a specific mathematical formula with given variables and a constant, which aligns with the FormulaCalculation template.",
+            "detail": "Corrected Calcium (mg/dL) = (0.8 * (Normal Albumin - Patient's Albumin)) + Serum Calcium, where Normal Albumin is set to 4.0 g/dL. The result is rounded to 4 decimal places."
+        }
+    ],
+    "output": {
+        "output_name": "corrected_calcium",
+        "output_desc": "The final corrected calcium level in mg/dL",
+        "output_type": "float"
+    },
+    "code": "def solve(serum_calcium, patient_albumin):\n    # Step 1: calculate_corrected_calcium\n    # Compute corrected calcium using formula: (0.8 * (4.0 - patient_albumin)) + serum_calcium\n    # Result rounded to 4 decimal places\n    normal_albumin = 4.0\n    corrected_calcium = round((0.8 * (normal_albumin - patient_albumin)) + serum_calcium, 4)\n    \n    yield {\n        \"step_name\": \"calculate_corrected_calcium\",\n        \"step_description\": \"Compute corrected calcium using formula: (0.8 * (4.0 - patient_albumin)) + serum_calcium, rounded to 4 decimal places\",\n        \"step_result\": corrected_calcium,\n        \"unit\": \"mg/dL\"\n    }\n    \n    return corrected_calcium"
+}

@@ -1,0 +1,75 @@
+{
+    "name": "lipid_unit_conversion_workflow",
+    "description": "Convert a lipid indicator value between mmol/L and mg/dL based on the indicator type (TC, HDL-C, LDL-C, TG).",
+    "inputs": [
+        {
+            "input_name": "indicator_type",
+            "input_desc": "Type of lipid indicator. Must be one of: 'TC', 'HDL-C', 'LDL-C', 'TG'.",
+            "input_type": "str"
+        },
+        {
+            "input_name": "original_value",
+            "input_desc": "Numerical value of the lipid indicator in the original unit.",
+            "input_type": "float"
+        },
+        {
+            "input_name": "original_unit",
+            "input_desc": "Original unit of the value. Must be one of: 'mmol/L', 'mg/dL'.",
+            "input_type": "str"
+        },
+        {
+            "input_name": "target_unit",
+            "input_desc": "Target unit for conversion. Must be one of: 'mmol/L', 'mg/dL'.",
+            "input_type": "str"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "convert_lipid_unit",
+            "step_description": "Convert lipid indicator value between mmol/L and mg/dL according to indicator type.",
+            "step_inputs": [
+                {
+                    "input_name": "indicator_type",
+                    "input_desc": "Type of lipid indicator (TC, HDL-C, LDL-C, TG)",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.indicator_type"
+                },
+                {
+                    "input_name": "original_value",
+                    "input_desc": "Numerical value in original unit",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.original_value"
+                },
+                {
+                    "input_name": "original_unit",
+                    "input_desc": "Original unit (mmol/L or mg/dL)",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.original_unit"
+                },
+                {
+                    "input_name": "target_unit",
+                    "input_desc": "Target unit (mmol/L or mg/dL)",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.target_unit"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "converted_value",
+                    "output_desc": "Converted numerical value in target unit",
+                    "output_type": "float"
+                }
+            ],
+            "category": "unit_conversion",
+            "reason": "This step performs unit conversion for lipid indicators using predefined conversion factors based on the indicator type and unit pair.",
+            "detail": "If indicator_type is TC, HDL-C, or LDL-C: if original_unit is 'mmol/L' and target_unit is 'mg/dL', converted_value = original_value * 38.67; if original_unit is 'mg/dL' and target_unit is 'mmol/L', converted_value = original_value * 0.02586; if original_unit equals target_unit, converted_value = original_value. If indicator_type is 'TG': if original_unit is 'mmol/L' and target_unit is 'mg/dL', converted_value = original_value * 88.57; if original_unit is 'mg/dL' and target_unit is 'mmol/L', converted_value = original_value * 0.01129; if original_unit equals target_unit, converted_value = original_value."
+        }
+    ],
+    "output": {
+        "output_name": "converted_value",
+        "output_desc": "Final converted lipid indicator value in the target unit.",
+        "output_type": "float"
+    },
+    "code": "def solve(indicator_type, original_value, original_unit, target_unit):\n    # Step 1: Convert lipid indicator value between mmol/L and mg/dL according to indicator type.\n    if indicator_type in (\"TC\", \"HDL-C\", \"LDL-C\"):\n        if original_unit == \"mmol/L\" and target_unit == \"mg/dL\":\n            converted_value = original_value * 38.67\n        elif original_unit == \"mg/dL\" and target_unit == \"mmol/L\":\n            converted_value = original_value * 0.02586\n        else:\n            converted_value = original_value\n    elif indicator_type == \"TG\":\n        if original_unit == \"mmol/L\" and target_unit == \"mg/dL\":\n            converted_value = original_value * 88.57\n        elif original_unit == \"mg/dL\" and target_unit == \"mmol/L\":\n            converted_value = original_value * 0.01129\n        else:\n            converted_value = original_value\n    else:\n        raise ValueError(\"indicator_type must be one of: 'TC', 'HDL-C', 'LDL-C', 'TG'\")\n    \n    yield {\n        \"step_name\": \"convert_lipid_unit\",\n        \"step_description\": \"Convert lipid indicator value between mmol/L and mg/dL according to indicator type.\",\n        \"step_result\": converted_value,\n        \"unit\": target_unit\n    }\n    \n    return converted_value"
+}

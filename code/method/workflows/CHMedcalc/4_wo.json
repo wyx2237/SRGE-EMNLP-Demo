@@ -1,0 +1,223 @@
+{
+    "name": "diabetes_diagnosis_workflow",
+    "description": "Determine whether an individual has diabetes based on the WHO 2024 diagnostic criteria, using a combination of symptom checks, single test results with symptoms, and asymptomatic confirmation via same-sample or different-day test results.",
+    "inputs": [
+        {
+            "input_name": "typical_symptoms",
+            "input_desc": "Presence of typical diabetes symptoms (polyuria, polydipsia, unexplained weight loss, etc.)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "random_glucose",
+            "input_desc": "Random plasma glucose level in mmol/L",
+            "input_type": "float"
+        },
+        {
+            "input_name": "fpg",
+            "input_desc": "Fasting plasma glucose level in mmol/L (requires at least 8 hours of fasting)",
+            "input_type": "float"
+        },
+        {
+            "input_name": "ogtt_2h",
+            "input_desc": "2-hour plasma glucose during OGTT in mmol/L",
+            "input_type": "float"
+        },
+        {
+            "input_name": "hba1c",
+            "input_desc": "Glycated hemoglobin (HbA1c) percentage",
+            "input_type": "float"
+        },
+        {
+            "input_name": "fpg_second",
+            "input_desc": "Fasting plasma glucose level in mmol/L from a second test (may be from the same sample or a different day)",
+            "input_type": "float"
+        },
+        {
+            "input_name": "ogtt_2h_second",
+            "input_desc": "2-hour plasma glucose during OGTT in mmol/L from a second test (may be from the same sample or a different day)",
+            "input_type": "float"
+        },
+        {
+            "input_name": "hba1c_second",
+            "input_desc": "Glycated hemoglobin (HbA1c) percentage from a second test (may be from the same sample or a different day)",
+            "input_type": "float"
+        },
+        {
+            "input_name": "same_sample",
+            "input_desc": "Whether the two abnormal results are from the same sample (true) or different days (false)",
+            "input_type": "bool"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "symptom_check",
+            "step_description": "Determine if the individual has typical diabetes symptoms.",
+            "step_inputs": [
+                {
+                    "input_name": "typical_symptoms",
+                    "input_desc": "Presence of typical diabetes symptoms (polyuria, polydipsia, unexplained weight loss, etc.)",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.typical_symptoms"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "has_symptoms",
+                    "output_desc": "Indicator of typical diabetes symptoms (true if present, false otherwise)",
+                    "output_type": "bool"
+                }
+            ],
+            "category": "symptom_check",
+            "reason": "This is a basic boolean evaluation to capture the presence or absence of typical diabetes symptoms, which is a prerequisite for the diagnostic pathway.",
+            "detail": "If typical_symptoms is true, then has_symptoms = true; otherwise, has_symptoms = false."
+        },
+        {
+            "step_id": "2",
+            "step_name": "single_test_diagnosis_with_symptoms",
+            "step_description": "Check if any single test meets the diagnostic threshold in the presence of typical symptoms.",
+            "step_inputs": [
+                {
+                    "input_name": "has_symptoms",
+                    "input_desc": "Indicator of typical diabetes symptoms (step 1 output)",
+                    "input_type": "bool",
+                    "input_source": "$|1|.has_symptoms"
+                },
+                {
+                    "input_name": "random_glucose",
+                    "input_desc": "Random plasma glucose level in mmol/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.random_glucose"
+                },
+                {
+                    "input_name": "fpg",
+                    "input_desc": "Fasting plasma glucose level in mmol/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.fpg"
+                },
+                {
+                    "input_name": "ogtt_2h",
+                    "input_desc": "2-hour plasma glucose during OGTT in mmol/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.ogtt_2h"
+                },
+                {
+                    "input_name": "hba1c",
+                    "input_desc": "Glycated hemoglobin (HbA1c) percentage",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.hba1c"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "single_test_diagnosis",
+                    "output_desc": "Diagnosis based on a single test with symptoms (true if criteria met, false otherwise)",
+                    "output_type": "bool"
+                }
+            ],
+            "category": "single_test_diagnosis_with_symptoms",
+            "reason": "This step combines symptom presence with any of the four single-test thresholds to immediately diagnose diabetes when symptoms exist.",
+            "detail": "If has_symptoms is true and (random_glucose >= 11.1 or fpg >= 7.0 or ogtt_2h >= 11.1 or hba1c >= 6.5), then single_test_diagnosis = true; otherwise, single_test_diagnosis = false."
+        },
+        {
+            "step_id": "3",
+            "step_name": "asymptomatic_confirmation",
+            "step_description": "For asymptomatic individuals, confirm diagnosis using two abnormal results from either the same sample or different days.",
+            "step_inputs": [
+                {
+                    "input_name": "has_symptoms",
+                    "input_desc": "Indicator of typical diabetes symptoms (step 1 output)",
+                    "input_type": "bool",
+                    "input_source": "$|step1|.has_symptoms"
+                },
+                {
+                    "input_name": "fpg",
+                    "input_desc": "Fasting plasma glucose level in mmol/L (first test)",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.fpg"
+                },
+                {
+                    "input_name": "ogtt_2h",
+                    "input_desc": "2-hour plasma glucose during OGTT in mmol/L (first test)",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.ogtt_2h"
+                },
+                {
+                    "input_name": "hba1c",
+                    "input_desc": "Glycated hemoglobin (HbA1c) percentage (first test)",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.hba1c"
+                },
+                {
+                    "input_name": "fpg_second",
+                    "input_desc": "Fasting plasma glucose level in mmol/L (second test)",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.fpg_second"
+                },
+                {
+                    "input_name": "ogtt_2h_second",
+                    "input_desc": "2-hour plasma glucose during OGTT in mmol/L (second test)",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.ogtt_2h_second"
+                },
+                {
+                    "input_name": "hba1c_second",
+                    "input_desc": "Glycated hemoglobin (HbA1c) percentage (second test)",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.hba1c_second"
+                },
+                {
+                    "input_name": "same_sample",
+                    "input_desc": "Whether the two results are from the same sample (true) or different days (false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.same_sample"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "asymptomatic_diagnosis",
+                    "output_desc": "Diagnosis for asymptomatic individuals (true if confirmed by two abnormal results, false otherwise)",
+                    "output_type": "bool"
+                }
+            ],
+            "category": "asymptomatic_confirmation",
+            "reason": "This step implements the rule for asymptomatic individuals, where diabetes must be confirmed by two abnormal test results from either the same sample or different days.",
+            "detail": "If has_symptoms is false: Determine first_test_positive = (fpg >= 7.0 or ogtt_2h >= 11.1 or hba1c >= 6.5). Determine second_test_positive = (fpg_second >= 7.0 or ogtt_2h_second >= 11.1 or hba1c_second >= 6.5). If same_sample is true, asymptomatic_diagnosis = (first_test_positive and second_test_positive). If same_sample is false, asymptomatic_diagnosis = (first_test_positive and second_test_positive). If has_symptoms is true, asymptomatic_diagnosis = false."
+        },
+        {
+            "step_id": "4",
+            "step_name": "final_diabetes_diagnosis",
+            "step_description": "Combine symptomatic and asymptomatic results to produce the final diagnosis.",
+            "step_inputs": [
+                {
+                    "input_name": "single_test_diagnosis",
+                    "input_desc": "Diagnosis from single test with symptoms (step 2 output)",
+                    "input_type": "bool",
+                    "input_source": "$|2|.single_test_diagnosis"
+                },
+                {
+                    "input_name": "asymptomatic_diagnosis",
+                    "input_desc": "Diagnosis from asymptomatic confirmation (step 3 output)",
+                    "input_type": "bool",
+                    "input_source": "$|3|.asymptomatic_diagnosis"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "diabetes",
+                    "output_desc": "Final diabetes diagnosis (1 for yes, 0 for no)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "final_diabetes_diagnosis",
+            "reason": "This step aggregates the outcomes from the symptomatic and asymptomatic pathways to render a definitive diagnosis per the WHO criteria.",
+            "detail": "If single_test_diagnosis is true or asymptomatic_diagnosis is true, then diabetes = 1; otherwise, diabetes = 0."
+        }
+    ],
+    "output": {
+        "output_name": "diabetes",
+        "output_desc": "Final diabetes diagnosis (1 indicates diabetes, 0 indicates no diabetes)",
+        "output_type": "int"
+    },
+    "code": "def solve(typical_symptoms, random_glucose, fpg, ogtt_2h, hba1c, fpg_second, ogtt_2h_second, hba1c_second, same_sample):\n    \"\"\"\n    Determines whether an individual has diabetes based on the WHO 2024 diagnostic criteria.\n    \"\"\"\n    \n    # Step 1: Symptom check\n    # Determine if the individual has typical diabetes symptoms.\n    has_symptoms = typical_symptoms\n    yield {\n        \"step_name\": \"symptom_check\",\n        \"step_description\": \"Determine if the individual has typical diabetes symptoms (polyuria, polydipsia, unexplained weight loss).\",\n        \"step_result\": has_symptoms,\n        \"unit\": None\n    }\n\n    # Step 2: Single test diagnosis with symptoms\n    # Check if any single test meets the diagnostic threshold in the presence of typical symptoms.\n    single_test_diagnosis = False\n    if has_symptoms and (random_glucose >= 11.1 or fpg >= 7.0 or ogtt_2h >= 11.1 or hba1c >= 6.5):\n        single_test_diagnosis = True\n    yield {\n        \"step_name\": \"single_test_diagnosis_with_symptoms\",\n        \"step_description\": \"Check if any single test meets the diagnostic threshold in the presence of typical symptoms.\",\n        \"step_result\": single_test_diagnosis,\n        \"unit\": None\n    }\n\n    # Step 3: Asymptomatic confirmation\n    # For asymptomatic individuals, confirm diagnosis using two abnormal results from either the same sample or different days.\n    asymptomatic_diagnosis = False\n    if not has_symptoms:\n        first_test_positive = (fpg >= 7.0 or ogtt_2h >= 11.1 or hba1c >= 6.5)\n        second_test_positive = (fpg_second >= 7.0 or ogtt_2h_second >= 11.1 or hba1c_second >= 6.5)\n        if same_sample:\n            asymptomatic_diagnosis = (first_test_positive and second_test_positive)\n        else:\n            asymptomatic_diagnosis = (first_test_positive and second_test_positive)\n    yield {\n        \"step_name\": \"asymptomatic_confirmation\",\n        \"step_description\": \"For asymptomatic individuals, confirm diagnosis using two abnormal results from either the same sample or different days.\",\n        \"step_result\": asymptomatic_diagnosis,\n        \"unit\": None\n    }\n\n    # Step 4: Final diabetes diagnosis\n    # Combine symptomatic and asymptomatic results to produce the final diagnosis.\n    diabetes = 1 if (single_test_diagnosis or asymptomatic_diagnosis) else 0\n    yield {\n        \"step_name\": \"final_diabetes_diagnosis\",\n        \"step_description\": \"Combine symptomatic and asymptomatic results to produce the final diagnosis (1 for yes, 0 for no).\",\n        \"step_result\": diabetes,\n        \"unit\": None\n    }\n\n    return diabetes"
+}

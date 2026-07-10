@@ -1,0 +1,133 @@
+{
+    "name": "ckd_epi_2021_gfr_calculation_workflow",
+    "description": "Calculate the estimated Glomerular Filtration Rate (GFR) using the 2021 CKD-EPI Creatinine equation based on patient's serum creatinine, age, and gender.",
+    "inputs": [
+        {
+            "input_name": "gender",
+            "input_desc": "Patient's gender. Allowed values: 'male', 'female'.",
+            "input_type": "str"
+        },
+        {
+            "input_name": "scr",
+            "input_desc": "Serum creatinine concentration in mg/dL.",
+            "input_type": "float"
+        },
+        {
+            "input_name": "age",
+            "input_desc": "Patient's age in years.",
+            "input_type": "int"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "determine_coefficients_a_and_b",
+            "step_description": "Determine the coefficients A and B based on patient's gender and serum creatinine level.",
+            "step_inputs": [
+                {
+                    "input_name": "gender",
+                    "input_desc": "Patient's gender. Allowed values: 'male', 'female'.",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.gender"
+                },
+                {
+                    "input_name": "scr",
+                    "input_desc": "Serum creatinine concentration in mg/dL.",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.scr"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "coefficient_a",
+                    "output_desc": "Coefficient A for the 2021 CKD-EPI equation.",
+                    "output_type": "float"
+                },
+                {
+                    "output_name": "coefficient_b",
+                    "output_desc": "Coefficient B for the 2021 CKD-EPI equation.",
+                    "output_type": "float"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "The coefficients A and B depend on conditional branching based on gender and serum creatinine thresholds, making ConditionEvaluation the appropriate tool.",
+            "detail": "For females: if Scr <= 0.7, A=0.7, B=-0.241; if Scr > 0.7, A=0.7, B=-1.2. For males: if Scr <= 0.9, A=0.9, B=-0.302; if Scr > 0.9, A=0.9, B=-1.2."
+        },
+        {
+            "step_id": "2",
+            "step_name": "select_gender_coefficient",
+            "step_description": "Select the gender coefficient based on patient's gender.",
+            "step_inputs": [
+                {
+                    "input_name": "gender",
+                    "input_desc": "Patient's gender. Allowed values: 'male', 'female'.",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.gender"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "gender_coefficient",
+                    "output_desc": "Gender coefficient for the 2021 CKD-EPI equation (1.012 for female, 1 for male).",
+                    "output_type": "float"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "The gender coefficient is assigned based on a simple conditional (if-else) check on gender.",
+            "detail": "If female, gender_coefficient = 1.012; else gender_coefficient = 1."
+        },
+        {
+            "step_id": "3",
+            "step_name": "calculate_gfr",
+            "step_description": "Calculate the Glomerular Filtration Rate using the 2021 CKD-EPI Creatinine equation.",
+            "step_inputs": [
+                {
+                    "input_name": "scr",
+                    "input_desc": "Serum creatinine concentration in mg/dL.",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.scr"
+                },
+                {
+                    "input_name": "age",
+                    "input_desc": "Patient's age in years.",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.age"
+                },
+                {
+                    "input_name": "coefficient_a",
+                    "input_desc": "Coefficient A determined from gender and Scr.",
+                    "input_type": "float",
+                    "input_source": "$|1|.coefficient_a"
+                },
+                {
+                    "input_name": "coefficient_b",
+                    "input_desc": "Coefficient B determined from gender and Scr.",
+                    "input_type": "float",
+                    "input_source": "$|1|.coefficient_b"
+                },
+                {
+                    "input_name": "gender_coefficient",
+                    "input_desc": "Gender coefficient (1.012 for female, 1 for male).",
+                    "input_type": "float",
+                    "input_source": "$|2|.gender_coefficient"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "gfr",
+                    "output_desc": "Estimated Glomerular Filtration Rate in mL/min/1.73 m².",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "The GFR computation involves a well-defined mathematical formula with exponentiation and multiplication, suitable for FormulaCalculation.",
+            "detail": "GFR = 142 * (scr / coefficient_a)^coefficient_b * 0.9938^age * gender_coefficient. Round the final result to 4 decimal places."
+        }
+    ],
+    "output": {
+        "output_name": "gfr",
+        "output_desc": "Final estimated Glomerular Filtration Rate in mL/min/1.73 m², rounded to 4 decimal places.",
+        "output_type": "float"
+    },
+    "code": "import math\n\ndef solve(gender, scr, age):\n    # Step 1: determine_coefficients_a_and_b\n    # Determine the coefficients A and B based on patient's gender and serum creatinine level.\n    if gender == 'female':\n        if scr <= 0.7:\n            coefficient_a = 0.7\n            coefficient_b = -0.241\n        else:\n            coefficient_a = 0.7\n            coefficient_b = -1.2\n    elif gender == 'male':\n        if scr <= 0.9:\n            coefficient_a = 0.9\n            coefficient_b = -0.302\n        else:\n            coefficient_a = 0.9\n            coefficient_b = -1.2\n    yield {\n        \"step_name\": \"determine_coefficients_a_and_b\",\n        \"step_description\": \"Determine the coefficients A and B based on patient's gender and serum creatinine level.\",\n        \"step_result\": {\"coefficient_a\": coefficient_a, \"coefficient_b\": coefficient_b},\n        \"unit\": None\n    }\n\n    # Step 2: select_gender_coefficient\n    # Select the gender coefficient based on patient's gender.\n    if gender == 'female':\n        gender_coefficient = 1.012\n    else:\n        gender_coefficient = 1.0\n    yield {\n        \"step_name\": \"select_gender_coefficient\",\n        \"step_description\": \"Select the gender coefficient based on patient's gender.\",\n        \"step_result\": gender_coefficient,\n        \"unit\": None\n    }\n\n    # Step 3: calculate_gfr\n    # Calculate the Glomerular Filtration Rate using the 2021 CKD-EPI Creatinine equation.\n    gfr = 142 * (scr / coefficient_a) ** coefficient_b * (0.9938 ** age) * gender_coefficient\n    gfr = round(gfr, 4)\n    yield {\n        \"step_name\": \"calculate_gfr\",\n        \"step_description\": \"Calculate the Glomerular Filtration Rate using the 2021 CKD-EPI Creatinine equation.\",\n        \"step_result\": gfr,\n        \"unit\": \"mL/min/1.73 m²\"\n    }\n\n    return gfr"
+}

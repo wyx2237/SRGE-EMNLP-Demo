@@ -1,0 +1,87 @@
+{
+    "name": "delta_gap_calculation_workflow",
+    "description": "Calculate the patient's delta gap in mEq/L by first computing the anion gap and then subtracting 12 from it.",
+    "inputs": [
+        {
+            "input_name": "sodium",
+            "input_desc": "Serum sodium concentration in mEq/L",
+            "input_type": "float"
+        },
+        {
+            "input_name": "chloride",
+            "input_desc": "Serum chloride concentration in mEq/L",
+            "input_type": "float"
+        },
+        {
+            "input_name": "bicarbonate",
+            "input_desc": "Serum bicarbonate concentration in mEq/L",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "anion_gap_calculation",
+            "step_description": "Calculate the patient's anion gap using the formula: sodium - (chloride + bicarbonate).",
+            "step_inputs": [
+                {
+                    "input_name": "sodium",
+                    "input_desc": "Serum sodium concentration in mEq/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.sodium"
+                },
+                {
+                    "input_name": "chloride",
+                    "input_desc": "Serum chloride concentration in mEq/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.chloride"
+                },
+                {
+                    "input_name": "bicarbonate",
+                    "input_desc": "Serum bicarbonate concentration in mEq/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.bicarbonate"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "anion_gap",
+                    "output_desc": "Calculated anion gap in mEq/L",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "The anion gap calculation is a straightforward mathematical formula with no conditional branches or thresholds, requiring precise numerical computation.",
+            "detail": "Calculate anion gap using the formula: anion_gap = sodium - (chloride + bicarbonate). All units are in mEq/L."
+        },
+        {
+            "step_id": "2",
+            "step_name": "delta_gap_calculation",
+            "step_description": "Calculate the delta gap by subtracting 12 from the anion gap.",
+            "step_inputs": [
+                {
+                    "input_name": "anion_gap",
+                    "input_desc": "Anion gap value in mEq/L",
+                    "input_type": "float",
+                    "input_source": "$|step1|.anion_gap"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "delta_gap",
+                    "output_desc": "Calculated delta gap in mEq/L",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "The delta gap calculation is a simple subtraction formula requiring precise numerical computation, fitting the FormulaCalculation category.",
+            "detail": "Calculate delta gap using the formula: delta_gap = anion_gap - 12."
+        }
+    ],
+    "output": {
+        "output_name": "delta_gap",
+        "output_desc": "Final calculated delta gap in mEq/L",
+        "output_type": "float"
+    },
+    "code": "def solve(sodium, chloride, bicarbonate):\n    # Step 1: anion_gap_calculation\n    # Calculate the patient's anion gap using the formula: sodium - (chloride + bicarbonate)\n    anion_gap = sodium - (chloride + bicarbonate)\n    yield {\n        \"step_name\": \"anion_gap_calculation\",\n        \"step_description\": \"Calculate anion gap using the formula: sodium - (chloride + bicarbonate)\",\n        \"step_result\": anion_gap,\n        \"unit\": \"mEq/L\"\n    }\n    \n    # Step 2: delta_gap_calculation\n    # Calculate the delta gap by subtracting 12 from the anion gap\n    delta_gap = anion_gap - 12\n    yield {\n        \"step_name\": \"delta_gap_calculation\",\n        \"step_description\": \"Calculate delta gap by subtracting 12 from the anion gap\",\n        \"step_result\": delta_gap,\n        \"unit\": \"mEq/L\"\n    }\n    \n    return delta_gap"
+}

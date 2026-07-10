@@ -1,0 +1,100 @@
+{
+  "builder_name": "csv",
+  "citation": "",
+  "config_name": "default",
+  "dataset_name": "med_calc-bench-v1.2",
+  "dataset_size": 56871542,
+  "description": "",
+  "download_checksums": {
+    "hf://datasets/ncbi/MedCalc-Bench-v1.2@acb17912657c084f5bf08b8fd029812f84630497/train_data_11_18_final.csv": {
+      "num_bytes": 51109647,
+      "checksum": null
+    },
+    "hf://datasets/ncbi/MedCalc-Bench-v1.2@acb17912657c084f5bf08b8fd029812f84630497/test_data_11_18_final.csv": {
+      "num_bytes": 5350557,
+      "checksum": null
+    }
+  },
+  "download_size": 56460204,
+  "features": {
+    "Row Number": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "Calculator ID": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "Calculator Name": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "Category": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "Output Type": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "Note ID": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "Note Type": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "Patient Note": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "Question": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "Relevant Entities": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "Ground Truth Answer": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "Lower Limit": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "Upper Limit": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "Ground Truth Explanation": {
+      "dtype": "string",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "size_in_bytes": 113331746,
+  "splits": {
+    "train": {
+      "name": "train",
+      "num_bytes": 51482038,
+      "num_examples": 10543,
+      "dataset_name": "med_calc-bench-v1.2"
+    },
+    "test": {
+      "name": "test",
+      "num_bytes": 5389504,
+      "num_examples": 1100,
+      "dataset_name": "med_calc-bench-v1.2"
+    }
+  },
+  "version": {
+    "version_str": "0.0.0",
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  }
+}

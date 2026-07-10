@@ -1,0 +1,327 @@
+{
+    "name": "ascvd_10_year_risk_calculation_workflow",
+    "description": "Calculate the 10-year predicted risk of atherosclerotic cardiovascular disease (ASCVD) based on patient characteristics, using a Cox proportional hazards model-derived survival function.",
+    "inputs": [
+        {
+            "input_name": "gender",
+            "input_desc": "Gender of the patient. Allowed values: 'male', 'female'",
+            "input_type": "str"
+        },
+        {
+            "input_name": "age",
+            "input_desc": "Age of the patient in years",
+            "input_type": "float"
+        },
+        {
+            "input_name": "sbp",
+            "input_desc": "Systolic blood pressure in mmHg",
+            "input_type": "float"
+        },
+        {
+            "input_name": "on_antihypertensive",
+            "input_desc": "Whether the patient is on antihypertensive medication. Allowed values: true, false",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "tc",
+            "input_desc": "Total cholesterol value",
+            "input_type": "float"
+        },
+        {
+            "input_name": "hdl_c",
+            "input_desc": "HDL cholesterol value",
+            "input_type": "float"
+        },
+        {
+            "input_name": "tc_unit",
+            "input_desc": "Unit of total cholesterol and HDL-C. Allowed values: 'mmol/L', 'mg/dL'",
+            "input_type": "str"
+        },
+        {
+            "input_name": "waist",
+            "input_desc": "Waist circumference in cm",
+            "input_type": "float"
+        },
+        {
+            "input_name": "smoking",
+            "input_desc": "Current smoking status. 1 if yes, 0 if no",
+            "input_type": "int"
+        },
+        {
+            "input_name": "diabetes",
+            "input_desc": "Diabetes mellitus status. 1 if yes, 0 if no",
+            "input_type": "int"
+        },
+        {
+            "input_name": "region",
+            "input_desc": "Region of residence. 1 if north, 0 if south",
+            "input_type": "int"
+        },
+        {
+            "input_name": "urban",
+            "input_desc": "Urban or rural residence. 1 if urban, 0 if rural. Only used for male patients",
+            "input_type": "int"
+        },
+        {
+            "input_name": "family_history",
+            "input_desc": "Family history of cardiovascular disease. 1 if yes, 0 if no. Only used for male patients",
+            "input_type": "int"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "coefficient_selection_and_unit_conversion",
+            "step_description": "Select the appropriate coefficient set and baseline values based on gender and treatment status, and convert cholesterol units if necessary.",
+            "step_inputs": [
+                {
+                    "input_name": "gender",
+                    "input_desc": "Gender of the patient. Allowed values: 'male', 'female'",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.gender"
+                },
+                {
+                    "input_name": "on_antihypertensive",
+                    "input_desc": "Whether the patient is on antihypertensive medication. Allowed values: true, false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.on_antihypertensive"
+                },
+                {
+                    "input_name": "tc_unit",
+                    "input_desc": "Unit of total cholesterol and HDL-C. Allowed values: 'mmol/L', 'mg/dL'",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.tc_unit"
+                },
+                {
+                    "input_name": "tc",
+                    "input_desc": "Total cholesterol value",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.tc"
+                },
+                {
+                    "input_name": "hdl_c",
+                    "input_desc": "HDL cholesterol value",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.hdl_c"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "coefficients",
+                    "output_desc": "Selected coefficient set, baseline risk index, and baseline survival rate",
+                    "output_type": "dict"
+                },
+                {
+                    "output_name": "tc_mg_dl",
+                    "output_desc": "Total cholesterol converted to mg/dL",
+                    "output_type": "float"
+                },
+                {
+                    "output_name": "hdl_c_mg_dl",
+                    "output_desc": "HDL cholesterol converted to mg/dL",
+                    "output_type": "float"
+                }
+            ],
+            "category": "data_selection_and_conversion",
+            "reason": "This step selects gender-specific coefficients and baseline values, determines the SBP coefficient based on treatment status, and performs necessary unit conversions for cholesterol, which is a prerequisite for subsequent calculations.",
+            "detail": "If gender is 'male', use male coefficients: age_coeff=31.967, sbp_treated_coeff=27.388, sbp_untreated_coeff=26.148, tc_coeff=0.621, hdl_coeff=-0.695, waist_coeff=-0.712, smoking_coeff=3.955, diabetes_coeff=0.357, region_coeff=0.475, urban_coeff=-0.164, family_history_coeff=6.221, baseline_risk_index=140.68, baseline_survival=0.9707. Interaction terms: age_sbp_treated_inter=-6.018, age_sbp_untreated_inter=-5.731, age_smoking_inter=-0.939, age_family_history_inter=-1.534. If gender is 'female', use female coefficients: age_coeff=24.874, sbp_treated_coeff=20.709, sbp_untreated_coeff=19.982, tc_coeff=0.058, hdl_coeff=-0.217, waist_coeff=1.475, smoking_coeff=0.495, diabetes_coeff=0.567, region_coeff=0.544, baseline_risk_index=117.26, baseline_survival=0.9851. Interaction terms: age_sbp_treated_inter=-4.528, age_sbp_untreated_inter=-4.360. Determine treated status: if on_antihypertensive is true, select treated coefficients; otherwise untreated. If tc_unit is 'mmol/L', convert tc and hdl_c to mg/dL by multiplying by 38.6; else keep as is. Output the assembled coefficients dictionary along with baseline values and converted cholesterol values."
+        },
+        {
+            "step_id": "2",
+            "step_name": "logarithmic_transformation",
+            "step_description": "Compute natural logarithms of age, SBP, waist circumference, and converted TC and HDL-C.",
+            "step_inputs": [
+                {
+                    "input_name": "age",
+                    "input_desc": "Age of the patient in years",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.age"
+                },
+                {
+                    "input_name": "sbp",
+                    "input_desc": "Systolic blood pressure in mmHg",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.sbp"
+                },
+                {
+                    "input_name": "waist",
+                    "input_desc": "Waist circumference in cm",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.waist"
+                },
+                {
+                    "input_name": "tc_mg_dl",
+                    "input_desc": "Total cholesterol in mg/dL",
+                    "input_type": "float",
+                    "input_source": "$|step1|.tc_mg_dl"
+                },
+                {
+                    "input_name": "hdl_c_mg_dl",
+                    "input_desc": "HDL cholesterol in mg/dL",
+                    "input_type": "float",
+                    "input_source": "$|step1|.hdl_c_mg_dl"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "ln_age",
+                    "output_desc": "Natural log of age",
+                    "output_type": "float"
+                },
+                {
+                    "output_name": "ln_sbp",
+                    "output_desc": "Natural log of SBP",
+                    "output_type": "float"
+                },
+                {
+                    "output_name": "ln_tc",
+                    "output_desc": "Natural log of total cholesterol",
+                    "output_type": "float"
+                },
+                {
+                    "output_name": "ln_hdl",
+                    "output_desc": "Natural log of HDL cholesterol",
+                    "output_type": "float"
+                },
+                {
+                    "output_name": "ln_waist",
+                    "output_desc": "Natural log of waist circumference",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "The risk model requires log-transformed continuous variables. This step performs a simple mathematical transformation.",
+            "detail": "Calculate ln_age = ln(age), ln_sbp = ln(sbp), ln_tc = ln(tc_mg_dl), ln_hdl = ln(hdl_c_mg_dl), ln_waist = ln(waist)."
+        },
+        {
+            "step_id": "3",
+            "step_name": "linear_predictor_calculation",
+            "step_description": "Compute the linear combination X using the selected coefficients, log-transformed variables, and patient characteristics.",
+            "step_inputs": [
+                {
+                    "input_name": "coefficients",
+                    "input_desc": "Selected coefficient set and baseline values",
+                    "input_type": "dict",
+                    "input_source": "$|step1|.coefficients"
+                },
+                {
+                    "input_name": "ln_age",
+                    "input_desc": "Natural log of age",
+                    "input_type": "float",
+                    "input_source": "$|step2|.ln_age"
+                },
+                {
+                    "input_name": "ln_sbp",
+                    "input_desc": "Natural log of SBP",
+                    "input_type": "float",
+                    "input_source": "$|step2|.ln_sbp"
+                },
+                {
+                    "input_name": "ln_tc",
+                    "input_desc": "Natural log of total cholesterol",
+                    "input_type": "float",
+                    "input_source": "$|step2|.ln_tc"
+                },
+                {
+                    "input_name": "ln_hdl",
+                    "input_desc": "Natural log of HDL cholesterol",
+                    "input_type": "float",
+                    "input_source": "$|step2|.ln_hdl"
+                },
+                {
+                    "input_name": "ln_waist",
+                    "input_desc": "Natural log of waist circumference",
+                    "input_type": "float",
+                    "input_source": "$|step2|.ln_waist"
+                },
+                {
+                    "input_name": "smoking",
+                    "input_desc": "Current smoking status. 1 if yes, 0 if no",
+                    "input_type": "int",
+                    "input_source": "$|raw input|.smoking"
+                },
+                {
+                    "input_name": "diabetes",
+                    "input_desc": "Diabetes mellitus status. 1 if yes, 0 if no",
+                    "input_type": "int",
+                    "input_source": "$|raw input|.diabetes"
+                },
+                {
+                    "input_name": "region",
+                    "input_desc": "Region of residence. 1 if north, 0 if south",
+                    "input_type": "int",
+                    "input_source": "$|raw input|.region"
+                },
+                {
+                    "input_name": "urban",
+                    "input_desc": "Urban or rural residence. 1 if urban, 0 if rural",
+                    "input_type": "int",
+                    "input_source": "$|raw input|.urban"
+                },
+                {
+                    "input_name": "family_history",
+                    "input_desc": "Family history of cardiovascular disease. 1 if yes, 0 if no",
+                    "input_type": "int",
+                    "input_source": "$|raw input|.family_history"
+                },
+                {
+                    "input_name": "gender",
+                    "input_desc": "Gender of the patient. Allowed values: 'male', 'female'",
+                    "input_type": "str",
+                    "input_source": "$|raw input|.gender"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "x",
+                    "output_desc": "Linear predictor value",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step constructs the linear predictor X by summing the products of coefficients and variables, including interaction terms. It is a direct application of the Cox model formula.",
+            "detail": "Using selected coefficients, compute X = (age_coeff * ln_age) + (sbp_coeff * ln_sbp) + (tc_coeff * ln_tc) + (hdl_coeff * ln_hdl) + (waist_coeff * ln_waist) + (smoking_coeff * smoking) + (diabetes_coeff * diabetes) + (region_coeff * region). If gender is 'male', add (urban_coeff * urban) + (family_history_coeff * family_history). Then add interaction terms: for 'male', add (age_sbp_inter * ln_age * ln_sbp) + (age_smoking_inter * ln_age * smoking) + (age_family_history_inter * ln_age * family_history); for 'female', add (age_sbp_inter * ln_age * ln_sbp)."
+        },
+        {
+            "step_id": "4",
+            "step_name": "risk_transformation_and_10_year_ascvd_risk",
+            "step_description": "Calculate the 10-year ASCVD risk percentage using the survival function.",
+            "step_inputs": [
+                {
+                    "input_name": "x",
+                    "input_desc": "Linear predictor value",
+                    "input_type": "float",
+                    "input_source": "$|step3|.x"
+                },
+                {
+                    "input_name": "baseline_risk_index",
+                    "input_desc": "Baseline risk index from the selected coefficient set",
+                    "input_type": "float",
+                    "input_source": "$|step1|.coefficients"
+                },
+                {
+                    "input_name": "baseline_survival",
+                    "input_desc": "Baseline survival rate from the selected coefficient set",
+                    "input_type": "float",
+                    "input_source": "$|step1|.coefficients"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "risk_10yr_percent",
+                    "output_desc": "10-year ASCVD risk percentage",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step applies the survival function to convert the linear predictor into a 10-year risk probability, which is the final clinical output.",
+            "detail": "Compute Y = exp(X - baseline_risk_index). Then 10-year risk = 1 - (baseline_survival)^Y. Express as percentage by multiplying by 100."
+        }
+    ],
+    "output": {
+        "output_name": "risk_10yr_percent",
+        "output_desc": "Final 10-year ASCVD risk percentage",
+        "output_type": "float"
+    },
+    "code": "import math\n\ndef solve(gender, age, sbp, on_antihypertensive, tc, hdl_c, tc_unit, waist, smoking, diabetes, region, urban, family_history):\n    # Step 1: coefficient_selection_and_unit_conversion\n    # Select the appropriate coefficient set and baseline values based on gender and treatment status,\n    # and convert cholesterol units if necessary.\n    if gender == 'male':\n        coefficients = {\n            'age_coeff': 31.967,\n            'sbp_treated_coeff': 27.388,\n            'sbp_untreated_coeff': 26.148,\n            'tc_coeff': 0.621,\n            'hdl_coeff': -0.695,\n            'waist_coeff': -0.712,\n            'smoking_coeff': 3.955,\n            'diabetes_coeff': 0.357,\n            'region_coeff': 0.475,\n            'urban_coeff': -0.164,\n            'family_history_coeff': 6.221,\n            'baseline_risk_index': 140.68,\n            'baseline_survival': 0.9707,\n            'age_sbp_treated_inter': -6.018,\n            'age_sbp_untreated_inter': -5.731,\n            'age_smoking_inter': -0.939,\n            'age_family_history_inter': -1.534\n        }\n    elif gender == 'female':\n        coefficients = {\n            'age_coeff': 24.874,\n            'sbp_treated_coeff': 20.709,\n            'sbp_untreated_coeff': 19.982,\n            'tc_coeff': 0.058,\n            'hdl_coeff': -0.217,\n            'waist_coeff': 1.475,\n            'smoking_coeff': 0.495,\n            'diabetes_coeff': 0.567,\n            'region_coeff': 0.544,\n            'baseline_risk_index': 117.26,\n            'baseline_survival': 0.9851,\n            'age_sbp_treated_inter': -4.528,\n            'age_sbp_untreated_inter': -4.360\n        }\n    else:\n        raise ValueError(\"Invalid gender. Allowed values: 'male', 'female'\")\n\n    # Determine SBP coefficient based on treatment status\n    if on_antihypertensive:\n        coefficients['sbp_coeff'] = coefficients['sbp_treated_coeff']\n        coefficients['age_sbp_inter'] = coefficients['age_sbp_treated_inter']\n    else:\n        coefficients['sbp_coeff'] = coefficients['sbp_untreated_coeff']\n        coefficients['age_sbp_inter'] = coefficients['age_sbp_untreated_inter']\n\n    # Convert cholesterol units if necessary\n    if tc_unit == 'mmol/L':\n        tc_mg_dl = tc * 38.6\n        hdl_c_mg_dl = hdl_c * 38.6\n    elif tc_unit == 'mg/dL':\n        tc_mg_dl = tc\n        hdl_c_mg_dl = hdl_c\n    else:\n        raise ValueError(\"Invalid tc_unit. Allowed values: 'mmol/L', 'mg/dL'\")\n\n    yield {\n        \"step_name\": \"coefficient_selection_and_unit_conversion\",\n        \"step_description\": \"Select appropriate coefficient set and baseline values based on gender and treatment status, and convert cholesterol units if necessary.\",\n        \"step_result\": {\n            \"coefficients\": coefficients,\n            \"tc_mg_dl\": tc_mg_dl,\n            \"hdl_c_mg_dl\": hdl_c_mg_dl\n        },\n        \"unit\": None\n    }\n\n    # Step 2: logarithmic_transformation\n    # Compute natural logarithms of age, SBP, waist circumference, and converted TC and HDL-C.\n    ln_age = math.log(age)\n    ln_sbp = math.log(sbp)\n    ln_tc = math.log(tc_mg_dl)\n    ln_hdl = math.log(hdl_c_mg_dl)\n    ln_waist = math.log(waist)\n\n    yield {\n        \"step_name\": \"logarithmic_transformation\",\n        \"step_description\": \"Compute natural logarithms of age, SBP, waist circumference, and converted TC and HDL-C.\",\n        \"step_result\": {\n            \"ln_age\": ln_age,\n            \"ln_sbp\": ln_sbp,\n            \"ln_tc\": ln_tc,\n            \"ln_hdl\": ln_hdl,\n            \"ln_waist\": ln_waist\n        },\n        \"unit\": None\n    }\n\n    # Step 3: linear_predictor_calculation\n    # Compute the linear combination X using the selected coefficients, log-transformed variables, and patient characteristics.\n    x = (coefficients['age_coeff'] * ln_age +\n         coefficients['sbp_coeff'] * ln_sbp +\n         coefficients['tc_coeff'] * ln_tc +\n         coefficients['hdl_coeff'] * ln_hdl +\n         coefficients['waist_coeff'] * ln_waist +\n         coefficients['smoking_coeff'] * smoking +\n         coefficients['diabetes_coeff'] * diabetes +\n         coefficients['region_coeff'] * region)\n\n    if gender == 'male':\n        x += (coefficients['urban_coeff'] * urban +\n              coefficients['family_history_coeff'] * family_history)\n        # Interaction terms for male\n        x += (coefficients['age_sbp_inter'] * ln_age * ln_sbp +\n              coefficients['age_smoking_inter'] * ln_age * smoking +\n              coefficients['age_family_history_inter'] * ln_age * family_history)\n    else:\n        # Interaction terms for female\n        x += coefficients['age_sbp_inter'] * ln_age * ln_sbp\n\n    yield {\n        \"step_name\": \"linear_predictor_calculation\",\n        \"step_description\": \"Compute the linear combination X using the selected coefficients, log-transformed variables, and patient characteristics.\",\n        \"step_result\": x,\n        \"unit\": None\n    }\n\n    # Step 4: risk_transformation_and_10_year_ascvd_risk\n    # Calculate the 10-year ASCVD risk percentage using the survival function.\n    baseline_risk_index = coefficients['baseline_risk_index']\n    baseline_survival = coefficients['baseline_survival']\n    y = math.exp(x - baseline_risk_index)\n    risk_10yr_percent = (1 - math.pow(baseline_survival, y)) * 100\n\n    yield {\n        \"step_name\": \"risk_transformation_and_10_year_ascvd_risk\",\n        \"step_description\": \"Calculate the 10-year ASCVD risk percentage using the survival function.\",\n        \"step_result\": risk_10yr_percent,\n        \"unit\": \"%\"\n    }\n\n    return risk_10yr_percent"
+}

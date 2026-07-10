@@ -1,0 +1,87 @@
+{
+    "name": "adjusted_body_weight_calculation",
+    "description": "Calculate adjusted body weight (ABW) using patient height, sex, and actual weight. First computes ideal body weight (IBW) based on sex-specific formula, then applies ABW formula.",
+    "inputs": [
+        {
+            "input_name": "height_in_inches",
+            "input_desc": "Patient's height in inches",
+            "input_type": "float"
+        },
+        {
+            "input_name": "sex",
+            "input_desc": "Patient's sex, allowed values: 'male', 'female'",
+            "input_type": "str"
+        },
+        {
+            "input_name": "actual_weight_kg",
+            "input_desc": "Patient's actual weight in kg",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "calculate_ibw",
+            "step_description": "Calculate ideal body weight (IBW) based on sex and height",
+            "step_inputs": [
+                {
+                    "input_name": "height_in_inches",
+                    "input_desc": "Patient's height in inches",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.height_in_inches"
+                },
+                {
+                    "input_name": "sex",
+                    "input_desc": "Patient's sex, allowed values: 'male', 'female'",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.sex"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "ibw",
+                    "output_desc": "Ideal body weight in kg",
+                    "output_type": "float"
+                }
+            ],
+            "category": "ConditionEvaluation",
+            "reason": "The IBW formula depends on the patient's sex, requiring a conditional branch to select the correct formula (male vs female).",
+            "detail": "For males: IBW = 50 + 2.3 * (height_in_inches - 60). For females: IBW = 45.5 + 2.3 * (height_in_inches - 60)."
+        },
+        {
+            "step_id": "2",
+            "step_name": "calculate_abw",
+            "step_description": "Calculate adjusted body weight using ABW = IBW + 0.4 * (actual_weight_kg - IBW)",
+            "step_inputs": [
+                {
+                    "input_name": "ibw",
+                    "input_desc": "Ideal body weight in kg",
+                    "input_type": "float",
+                    "input_source": "$|1|.ibw"
+                },
+                {
+                    "input_name": "actual_weight_kg",
+                    "input_desc": "Patient's actual weight in kg",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.actual_weight_kg"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "adjusted_body_weight",
+                    "output_desc": "Adjusted body weight in kg, rounded to 4 decimal places",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "ABW is computed by a straightforward mathematical formula with no conditional logic.",
+            "detail": "ABW = IBW + 0.4 * (actual_weight_kg - IBW). Round the result to 4 decimal places."
+        }
+    ],
+    "output": {
+        "output_name": "adjusted_body_weight",
+        "output_desc": "Final adjusted body weight in kg",
+        "output_type": "float"
+    },
+    "code": "def solve(height_in_inches, sex, actual_weight_kg):\n    # Step 1: Calculate ideal body weight (IBW) based on sex and height\n    if sex.lower() == 'male':\n        ibw = 50 + 2.3 * (height_in_inches - 60)\n    elif sex.lower() == 'female':\n        ibw = 45.5 + 2.3 * (height_in_inches - 60)\n    else:\n        raise ValueError(\"Sex must be 'male' or 'female'\")\n    \n    yield {\n        \"step_name\": \"calculate_ibw\",\n        \"step_description\": \"Calculate ideal body weight (IBW) based on sex and height. For males: IBW = 50 + 2.3 * (height_in_inches - 60). For females: IBW = 45.5 + 2.3 * (height_in_inches - 60).\",\n        \"step_result\": ibw,\n        \"unit\": \"kg\"\n    }\n    \n    # Step 2: Calculate adjusted body weight (ABW) using ABW = IBW + 0.4 * (actual_weight_kg - IBW)\n    adjusted_body_weight = round(ibw + 0.4 * (actual_weight_kg - ibw), 4)\n    \n    yield {\n        \"step_name\": \"calculate_abw\",\n        \"step_description\": \"Calculate adjusted body weight using ABW = IBW + 0.4 * (actual_weight_kg - IBW), rounded to 4 decimal places.\",\n        \"step_result\": adjusted_body_weight,\n        \"unit\": \"kg\"\n    }\n    \n    # Final output\n    return adjusted_body_weight"
+}

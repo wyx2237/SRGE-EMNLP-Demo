@@ -1,0 +1,139 @@
+{
+    "name": "ree_calculation_based_on_harris_benedict_formula",
+    "description": "Calculate the Resting Energy Expenditure (REE) for a patient using the Harris-Benedict formula based on gender.",
+    "inputs": [
+        {
+            "input_name": "weight_kg",
+            "input_desc": "The patient's weight in kilograms (kg).",
+            "input_type": "float"
+        },
+        {
+            "input_name": "height_cm",
+            "input_desc": "The patient's height in centimeters (cm).",
+            "input_type": "float"
+        },
+        {
+            "input_name": "age_years",
+            "input_desc": "The patient's age in years.",
+            "input_type": "integer"
+        },
+        {
+            "input_name": "gender",
+            "input_desc": "The patient's gender (Male or Female).",
+            "input_type": "str"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "calculate_ree_for_male",
+            "step_description": "Calculate the Resting Energy Expenditure (REE) for a male patient using the Harris-Benedict formula.",
+            "step_inputs": [
+                {
+                    "input_name": "weight_kg",
+                    "input_desc": "The patient's weight in kilograms (kg).",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.weight_kg"
+                },
+                {
+                    "input_name": "height_cm",
+                    "input_desc": "The patient's height in centimeters (cm).",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.height_cm"
+                },
+                {
+                    "input_name": "age_years",
+                    "input_desc": "The patient's age in years.",
+                    "input_type": "integer",
+                    "input_source": "$|inputs|.age_years"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "ree_male",
+                    "output_desc": "The calculated REE for a male patient in kilocalories per day (kcal/day).",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "This step calculates the REE for a male patient using the Harris-Benedict formula.",
+            "detail": "REE = [66 + (13.7 × weight_kg) + (5 × height_cm) - (6.8 × age_years)] × 1.1"
+        },
+        {
+            "step_id": "2",
+            "step_name": "calculate_ree_for_female",
+            "step_description": "Calculate the Resting Energy Expenditure (REE) for a female patient using the Harris-Benedict formula.",
+            "step_inputs": [
+                {
+                    "input_name": "weight_kg",
+                    "input_desc": "The patient's weight in kilograms (kg).",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.weight_kg"
+                },
+                {
+                    "input_name": "height_cm",
+                    "input_desc": "The patient's height in centimeters (cm).",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.height_cm"
+                },
+                {
+                    "input_name": "age_years",
+                    "input_desc": "The patient's age in years.",
+                    "input_type": "integer",
+                    "input_source": "$|inputs|.age_years"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "ree_female",
+                    "output_desc": "The calculated REE for a female patient in kilocalories per day (kcal/day).",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "This step calculates the REE for a female patient using the Harris-Benedict formula.",
+            "detail": "REE = [655 + (9.6 × weight_kg) + (1.7 × height_cm) - (4.7 × age_years)] × 1.1"
+        },
+        {
+            "step_id": "3",
+            "step_name": "select_ree_based_on_gender",
+            "step_description": "Select the appropriate REE value based on the patient's gender.",
+            "step_inputs": [
+                {
+                    "input_name": "gender",
+                    "input_desc": "The patient's gender (Male or Female).",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.gender"
+                },
+                {
+                    "input_name": "ree_male",
+                    "input_desc": "The calculated REE for a male patient in kilocalories per day (kcal/day).",
+                    "input_type": "float",
+                    "input_source": "$|step1|.ree_male"
+                },
+                {
+                    "input_name": "ree_female",
+                    "input_desc": "The calculated REE for a female patient in kilocalories per day (kcal/day).",
+                    "input_type": "float",
+                    "input_source": "$|step2|.ree_female"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "ree_value",
+                    "output_desc": "The calculated REE for the patient in kilocalories per day (kcal/day).",
+                    "output_type": "float"
+                }
+            ],
+            "category": "ConditionalSelection",
+            "reason": "This step selects the correct REE calculation based on the patient's gender.",
+            "detail": "If the patient is male, use the REE value from the male calculation. If the patient is female, use the REE value from the female calculation."
+        }
+    ],
+    "output": {
+        "output_name": "ree_value",
+        "output_desc": "The calculated REE for the patient in kilocalories per day (kcal/day).",
+        "output_type": "float"
+    },
+    "code": "def solve(weight_kg, height_cm, age_years, gender):\n    # Step 1: Calculate the REE for a male patient using the Harris-Benedict formula\n    ree_male = (66 + (13.7 * weight_kg) + (5 * height_cm) - (6.8 * age_years)) * 1.1\n    yield {\n        \"step_name\": \"calculate_ree_for_male\",\n        \"step_description\": \"Calculate the Resting Energy Expenditure (REE) for a male patient using the Harris-Benedict formula.\",\n        \"step_result\": ree_male,\n        \"unit\": \"kcal/day\"\n    }\n\n    # Step 2: Calculate the REE for a female patient using the Harris-Benedict formula\n    ree_female = (655 + (9.6 * weight_kg) + (1.7 * height_cm) - (4.7 * age_years)) * 1.1\n    yield {\n        \"step_name\": \"calculate_ree_for_female\",\n        \"step_description\": \"Calculate the Resting Energy Expenditure (REE) for a female patient using the Harris-Benedict formula.\",\n        \"step_result\": ree_female,\n        \"unit\": \"kcal/day\"\n    }\n\n    # Step 3: Select the appropriate REE value based on the patient's gender\n    if gender == \"Male\":\n        ree_value = ree_male\n    else:\n        ree_value = ree_female\n    yield {\n        \"step_name\": \"select_ree_based_on_gender\",\n        \"step_description\": \"Select the appropriate REE value based on the patient's gender.\",\n        \"step_result\": ree_value,\n        \"unit\": \"kcal/day\"\n    }\n\n    return ree_value"
+}

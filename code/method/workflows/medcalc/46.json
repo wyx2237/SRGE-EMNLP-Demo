@@ -1,0 +1,172 @@
+{
+    "name": "framingham_risk_score_calculation_workflow",
+    "description": "Calculate the 10-year hard coronary heart disease risk percentage using the Framingham Risk Score, based on patient demographics, cholesterol, blood pressure, and smoking status.",
+    "inputs": [
+        {
+            "input_name": "age",
+            "input_desc": "Patient's age in years (integer)",
+            "input_type": "int"
+        },
+        {
+            "input_name": "gender",
+            "input_desc": "Patient's gender, must be 'male' or 'female'",
+            "input_type": "str"
+        },
+        {
+            "input_name": "total_cholesterol",
+            "input_desc": "Total cholesterol level in mg/dL",
+            "input_type": "float"
+        },
+        {
+            "input_name": "hdl_cholesterol",
+            "input_desc": "HDL cholesterol level in mg/dL",
+            "input_type": "float"
+        },
+        {
+            "input_name": "sys_bp",
+            "input_desc": "Systolic blood pressure in mmHg",
+            "input_type": "int"
+        },
+        {
+            "input_name": "bp_medicine",
+            "input_desc": "Whether the patient is on blood pressure medication (1 for yes, 0 for no)",
+            "input_type": "int"
+        },
+        {
+            "input_name": "smoker",
+            "input_desc": "Whether the patient is a smoker (1 for yes, 0 for no)",
+            "input_type": "int"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "age_capping_for_smoker_term",
+            "step_description": "Apply age capping for the ln(age_smoke) * smoker term based on gender. For males, cap age at 70; for females, cap age at 78.",
+            "step_inputs": [
+                {
+                    "input_name": "age",
+                    "input_desc": "Patient's age in years",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.age"
+                },
+                {
+                    "input_name": "gender",
+                    "input_desc": "Patient's gender, must be 'male' or 'female'",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.gender"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "age_smoke",
+                    "output_desc": "Age value used in the ln(age_smoke) * smoker term, capped at 70 for males and 78 for females",
+                    "output_type": "int"
+                }
+            ],
+            "category": "ConditionEvaluation",
+            "reason": "This step involves conditional branching based on gender and age thresholds to cap the age value, which fits the ConditionEvaluation tool template.",
+            "detail": "If gender is 'male' and age > 70, age_smoke = 70; if gender is 'female' and age > 78, age_smoke = 78; otherwise, age_smoke = age."
+        },
+        {
+            "step_id": "2",
+            "step_name": "framingham_risk_score_calculation",
+            "step_description": "Compute the raw Framingham Risk Score using the gender-specific formula with the capped age for the smoker term.",
+            "step_inputs": [
+                {
+                    "input_name": "age",
+                    "input_desc": "Patient's age in years (uncapped)",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.age"
+                },
+                {
+                    "input_name": "total_cholesterol",
+                    "input_desc": "Total cholesterol level in mg/dL",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.total_cholesterol"
+                },
+                {
+                    "input_name": "hdl_cholesterol",
+                    "input_desc": "HDL cholesterol level in mg/dL",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.hdl_cholesterol"
+                },
+                {
+                    "input_name": "sys_bp",
+                    "input_desc": "Systolic blood pressure in mmHg",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.sys_bp"
+                },
+                {
+                    "input_name": "bp_medicine",
+                    "input_desc": "Whether the patient is on blood pressure medication (1 for yes, 0 for no)",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.bp_medicine"
+                },
+                {
+                    "input_name": "smoker",
+                    "input_desc": "Whether the patient is a smoker (1 for yes, 0 for no)",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.smoker"
+                },
+                {
+                    "input_name": "age_smoke",
+                    "input_desc": "Capped age for the smoker interaction term",
+                    "input_type": "int",
+                    "input_source": "$|1|.age_smoke"
+                },
+                {
+                    "input_name": "gender",
+                    "input_desc": "Patient's gender, must be 'male' or 'female'",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.gender"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "risk_score",
+                    "output_desc": "The computed raw Framingham Risk Score",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "This step involves computing a complex mathematical formula with natural logarithms, which fits the FormulaCalculation tool template.",
+            "detail": "For males: risk_score = 52.00961 * ln(age) + 20.014077 * ln(total_cholesterol) - 0.905964 * ln(hdl_cholesterol) + 1.305784 * ln(sys_bp) + 0.241549 * bp_medicine + 12.096316 * smoker - 4.605038 * ln(age) * ln(total_cholesterol) - 2.84367 * ln(age_smoke) * smoker - 2.93323 * ln(age) * ln(age) - 172.300168. For females: risk_score = 31.764001 * ln(age) + 22.465206 * ln(total_cholesterol) - 1.187731 * ln(hdl_cholesterol) + 2.552905 * ln(sys_bp) + 0.420251 * bp_medicine + 13.07543 * smoker - 5.060998 * ln(age) * ln(total_cholesterol) - 2.996945 * ln(age_smoke) * smoker - 146.5933061."
+        },
+        {
+            "step_id": "3",
+            "step_name": "ten_year_risk_percentage",
+            "step_description": "Convert the raw risk score to a 10-year risk percentage using the gender-specific survival probability.",
+            "step_inputs": [
+                {
+                    "input_name": "risk_score",
+                    "input_desc": "The raw Framingham Risk Score",
+                    "input_type": "float",
+                    "input_source": "$|2|.risk_score"
+                },
+                {
+                    "input_name": "gender",
+                    "input_desc": "Patient's gender, must be 'male' or 'female'",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.gender"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "risk_percentage",
+                    "output_desc": "The 10-year risk percentage for hard coronary heart disease",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "This step involves computing an exponential formula with a gender-specific constant to derive a percentage, which fits the FormulaCalculation tool template.",
+            "detail": "For males: risk_percentage = [1 - 0.9402^exp(risk_score)] * 100. For females: risk_percentage = [1 - 0.98767^exp(risk_score)] * 100."
+        }
+    ],
+    "output": {
+        "output_name": "risk_percentage",
+        "output_desc": "The final 10-year risk percentage for hard coronary heart disease",
+        "output_type": "float"
+    },
+    "code": "import math\n\ndef solve(age, gender, total_cholesterol, hdl_cholesterol, sys_bp, bp_medicine, smoker):\n    \"\"\"\n    Calculate the 10-year hard coronary heart disease risk percentage using the Framingham Risk Score.\n    \n    Parameters:\n    age (int): Patient's age in years\n    gender (str): Patient's gender, must be 'male' or 'female'\n    total_cholesterol (float): Total cholesterol level in mg/dL\n    hdl_cholesterol (float): HDL cholesterol level in mg/dL\n    sys_bp (int): Systolic blood pressure in mmHg\n    bp_medicine (int): Whether the patient is on blood pressure medication (1 for yes, 0 for no)\n    smoker (int): Whether the patient is a smoker (1 for yes, 0 for no)\n    \n    Yields:\n    dict: A dictionary containing step_name, step_description, step_result, and unit for each step.\n    \n    Returns:\n    float: The final 10-year risk percentage for hard coronary heart disease.\n    \"\"\"\n    \n    # Step 1: Age capping for smoker term\n    # Apply age capping for the ln(age_smoke) * smoker term based on gender.\n    # For males: cap age at 70; for females: cap age at 78.\n    if gender == 'male':\n        if age > 70:\n            age_smoke = 70\n        else:\n            age_smoke = age\n    elif gender == 'female':\n        if age > 78:\n            age_smoke = 78\n        else:\n            age_smoke = age\n    else:\n        # Default to uncapped age if gender is unrecognized (should not happen with valid input)\n        age_smoke = age\n    \n    yield {\n        \"step_name\": \"age_capping_for_smoker_term\",\n        \"step_description\": \"Apply age capping for the ln(age_smoke) * smoker term based on gender. For males, cap age at 70; for females, cap age at 78.\",\n        \"step_result\": age_smoke,\n        \"unit\": None\n    }\n    \n    # Step 2: Framingham Risk Score Calculation\n    # Compute the raw Framingham Risk Score using the gender-specific formula with the capped age for the smoker term.\n    # For males:\n    # risk_score = 52.00961 * ln(age) + 20.014077 * ln(total_cholesterol) - 0.905964 * ln(hdl_cholesterol) \n    #              + 1.305784 * ln(sys_bp) + 0.241549 * bp_medicine + 12.096316 * smoker \n    #              - 4.605038 * ln(age) * ln(total_cholesterol) - 2.84367 * ln(age_smoke) * smoker \n    #              - 2.93323 * ln(age) * ln(age) - 172.300168\n    # For females:\n    # risk_score = 31.764001 * ln(age) + 22.465206 * ln(total_cholesterol) - 1.187731 * ln(hdl_cholesterol) \n    #              + 2.552905 * ln(sys_bp) + 0.420251 * bp_medicine + 13.07543 * smoker \n    #              - 5.060998 * ln(age) * ln(total_cholesterol) - 2.996945 * ln(age_smoke) * smoker - 146.5933061\n    if gender == 'male':\n        risk_score = (52.00961 * math.log(age) + \n                      20.014077 * math.log(total_cholesterol) - \n                      0.905964 * math.log(hdl_cholesterol) + \n                      1.305784 * math.log(sys_bp) + \n                      0.241549 * bp_medicine + \n                      12.096316 * smoker - \n                      4.605038 * math.log(age) * math.log(total_cholesterol) - \n                      2.84367 * math.log(age_smoke) * smoker - \n                      2.93323 * math.log(age) * math.log(age) - \n                      172.300168)\n    else:  # female\n        risk_score = (31.764001 * math.log(age) + \n                      22.465206 * math.log(total_cholesterol) - \n                      1.187731 * math.log(hdl_cholesterol) + \n                      2.552905 * math.log(sys_bp) + \n                      0.420251 * bp_medicine + \n                      13.07543 * smoker - \n                      5.060998 * math.log(age) * math.log(total_cholesterol) - \n                      2.996945 * math.log(age_smoke) * smoker - \n                      146.5933061)\n    \n    yield {\n        \"step_name\": \"framingham_risk_score_calculation\",\n        \"step_description\": \"Compute the raw Framingham Risk Score using the gender-specific formula with the capped age for the smoker term.\",\n        \"step_result\": risk_score,\n        \"unit\": None\n    }\n    \n    # Step 3: Ten-year risk percentage\n    # Convert the raw risk score to a 10-year risk percentage using the gender-specific survival probability.\n    # For males: risk_percentage = [1 - 0.9402^exp(risk_score)] * 100\n    # For females: risk_percentage = [1 - 0.98767^exp(risk_score)] * 100\n    if gender == 'male':\n        risk_percentage = (1 - 0.9402 ** math.exp(risk_score)) * 100\n    else:  # female\n        risk_percentage = (1 - 0.98767 ** math.exp(risk_score)) * 100\n    \n    yield {\n        \"step_name\": \"ten_year_risk_percentage\",\n        \"step_description\": \"Convert the raw risk score to a 10-year risk percentage using the gender-specific survival probability.\",\n        \"step_result\": risk_percentage,\n        \"unit\": \"%\"\n    }\n    \n    # Return final output\n    return risk_percentage"
+}

@@ -1,0 +1,266 @@
+{
+    "name": "glasgow_blatchford_score_calculation_workflow",
+    "description": "Calculate the Glasgow-Blatchford Bleeding Score based on patient clinical data including BUN, hemoglobin, systolic blood pressure, and boolean indicators for pulse, melena, syncope, liver disease, and cardiac failure.",
+    "inputs": [
+        {
+            "input_name": "bun_value",
+            "input_desc": "Blood Urea Nitrogen level in mg/dL",
+            "input_type": "float"
+        },
+        {
+            "input_name": "hemoglobin_value",
+            "input_desc": "Hemoglobin level in g/dL",
+            "input_type": "float"
+        },
+        {
+            "input_name": "sex",
+            "input_desc": "Biological sex of the patient, allowed values: 'male' or 'female'",
+            "input_type": "str"
+        },
+        {
+            "input_name": "sbp_value",
+            "input_desc": "Systolic blood pressure in mm Hg",
+            "input_type": "int"
+        },
+        {
+            "input_name": "pulse_above_100",
+            "input_desc": "Is pulse rate >=100 per minute?",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "melena_present",
+            "input_desc": "Is melena present?",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "syncope_present",
+            "input_desc": "Did patient present with syncope?",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "liver_disease_history",
+            "input_desc": "Does patient have a history of liver disease?",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "cardiac_failure_present",
+            "input_desc": "Is cardiac failure present?",
+            "input_type": "bool"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "compute_bun_score",
+            "step_description": "Calculate the BUN score based on the patient's Blood Urea Nitrogen value.",
+            "step_inputs": [
+                {
+                    "input_name": "bun_value",
+                    "input_desc": "Blood Urea Nitrogen level in mg/dL",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.bun_value"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "bun_score",
+                    "output_desc": "Points assigned for the BUN criterion",
+                    "output_type": "int"
+                }
+            ],
+            "category": "threshold_mapping",
+            "reason": "The BUN criterion requires mapping a continuous numerical value (BUN) into discrete score categories based on predefined numerical thresholds.",
+            "detail": "Threshold mapping for BUN (mg/dL): <18.2 -> 0; >=18.2 and <=22.3 -> 2; >=22.4 and <=28 -> 3; >28 and <=70 -> 4; >70 -> 6. The boundaries are inclusive of the lower bound and inclusive of the upper bound where ranges are consecutive (e.g., 18.2-22.3 means 18.2 <= value <= 22.3)."
+        },
+        {
+            "step_id": "2",
+            "step_name": "compute_hemoglobin_score",
+            "step_description": "Calculate the Hemoglobin score based on the patient's hemoglobin value and sex.",
+            "step_inputs": [
+                {
+                    "input_name": "hemoglobin_value",
+                    "input_desc": "Hemoglobin level in g/dL",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.hemoglobin_value"
+                },
+                {
+                    "input_name": "sex",
+                    "input_desc": "Biological sex of the patient, allowed values: 'male' or 'female'",
+                    "input_type": "str",
+                    "input_source": "$|raw input|.sex"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "hemoglobin_score",
+                    "output_desc": "Points assigned for the Hemoglobin criterion",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "The Hemoglobin scoring is a conditional evaluation that depends on both the hemoglobin value and the patient's sex, with different threshold sets for males and females.",
+            "detail": "If sex is 'male': >=13 -> 0; >12 and <=13 -> 1; >=10 and <=12 -> 3; <10 -> 6. If sex is 'female': >=12 -> 0; >=10 and <12 -> 1; <10 -> 6. Boundaries are inclusive of the lower bound and exclusive of the upper bound unless otherwise specified by standard clinical practice (e.g., >12 and <=13 matches '12-13' convention)."
+        },
+        {
+            "step_id": "3",
+            "step_name": "compute_sbp_score",
+            "step_description": "Calculate the Systolic Blood Pressure score.",
+            "step_inputs": [
+                {
+                    "input_name": "sbp_value",
+                    "input_desc": "Systolic blood pressure in mm Hg",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.sbp_value"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "sbp_score",
+                    "output_desc": "Points assigned for the Systolic Blood Pressure criterion",
+                    "output_type": "int"
+                }
+            ],
+            "category": "threshold_mapping",
+            "reason": "The Systolic Blood Pressure criterion maps a continuous value to discrete score categories based on thresholds.",
+            "detail": "Threshold mapping for Systolic Blood Pressure (mm Hg): >=110 -> 0; >=100 and <=109 -> 1; >=90 and <=99 -> 2; <90 -> 3."
+        },
+        {
+            "step_id": "4",
+            "step_name": "compute_boolean_scores",
+            "step_description": "Calculate the scores for all boolean-type criteria: Pulse >=100, Melena, Syncope, Liver disease history, and Cardiac failure.",
+            "step_inputs": [
+                {
+                    "input_name": "pulse_above_100",
+                    "input_desc": "Is pulse rate >=100 per minute?",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.pulse_above_100"
+                },
+                {
+                    "input_name": "melena_present",
+                    "input_desc": "Is melena present?",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.melena_present"
+                },
+                {
+                    "input_name": "syncope_present",
+                    "input_desc": "Did patient present with syncope?",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.syncope_present"
+                },
+                {
+                    "input_name": "liver_disease_history",
+                    "input_desc": "Does patient have a history of liver disease?",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.liver_disease_history"
+                },
+                {
+                    "input_name": "cardiac_failure_present",
+                    "input_desc": "Is cardiac failure present?",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.cardiac_failure_present"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "pulse_score",
+                    "output_desc": "Points for pulse criterion (0 or 1)",
+                    "output_type": "int"
+                },
+                {
+                    "output_name": "melena_score",
+                    "output_desc": "Points for melena criterion (0 or 1)",
+                    "output_type": "int"
+                },
+                {
+                    "output_name": "syncope_score",
+                    "output_desc": "Points for syncope criterion (0 or 2)",
+                    "output_type": "int"
+                },
+                {
+                    "output_name": "liver_disease_score",
+                    "output_desc": "Points for liver disease criterion (0 or 2)",
+                    "output_type": "int"
+                },
+                {
+                    "output_name": "cardiac_failure_score",
+                    "output_desc": "Points for cardiac failure criterion (0 or 2)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "These five criteria are all simple boolean-to-score evaluations. They can be grouped into a single step for efficiency, as each maps a true/false condition to a predefined integer score (0 or a positive constant).",
+            "detail": "For each boolean input: if true, assign the specified positive score; if false, assign 0. Pulse >=100: 1 point. Melena: 1 point. Syncope: 2 points. Liver disease history: 2 points. Cardiac failure: 2 points."
+        },
+        {
+            "step_id": "5",
+            "step_name": "compute_total_gbs",
+            "step_description": "Sum all individual criterion scores to produce the total Glasgow-Blatchford Score.",
+            "step_inputs": [
+                {
+                    "input_name": "bun_score",
+                    "input_desc": "BUN score",
+                    "input_type": "int",
+                    "input_source": "$|step1|.bun_score"
+                },
+                {
+                    "input_name": "hemoglobin_score",
+                    "input_desc": "Hemoglobin score",
+                    "input_type": "int",
+                    "input_source": "$|step2|.hemoglobin_score"
+                },
+                {
+                    "input_name": "sbp_score",
+                    "input_desc": "Systolic BP score",
+                    "input_type": "int",
+                    "input_source": "$|step3|.sbp_score"
+                },
+                {
+                    "input_name": "pulse_score",
+                    "input_desc": "Pulse score",
+                    "input_type": "int",
+                    "input_source": "$|step4|.pulse_score"
+                },
+                {
+                    "input_name": "melena_score",
+                    "input_desc": "Melena score",
+                    "input_type": "int",
+                    "input_source": "$|step4|.melena_score"
+                },
+                {
+                    "input_name": "syncope_score",
+                    "input_desc": "Syncope score",
+                    "input_type": "int",
+                    "input_source": "$|step4|.syncope_score"
+                },
+                {
+                    "input_name": "liver_disease_score",
+                    "input_desc": "Liver disease score",
+                    "input_type": "int",
+                    "input_source": "$|step4|.liver_disease_score"
+                },
+                {
+                    "input_name": "cardiac_failure_score",
+                    "input_desc": "Cardiac failure score",
+                    "input_type": "int",
+                    "input_source": "$|step4|.cardiac_failure_score"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_score",
+                    "output_desc": "Total Glasgow-Blatchford Bleeding Score",
+                    "output_type": "int"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "The final step is a simple sum of all individual criterion scores, which is a direct mathematical formula calculation.",
+            "detail": "Total Score = BUN_score + Hemoglobin_score + SBP_score + pulse_score + melena_score + syncope_score + liver_disease_score + cardiac_failure_score."
+        }
+    ],
+    "output": {
+        "output_name": "total_score",
+        "output_desc": "Total Glasgow-Blatchford Bleeding Score",
+        "output_type": "int"
+    },
+    "code": "def solve(bun_value, hemoglobin_value, sex, sbp_value, pulse_above_100, melena_present, syncope_present, liver_disease_history, cardiac_failure_present):\n    # Step 1: compute_bun_score - Calculate the BUN score based on the patient's Blood Urea Nitrogen value.\n    if bun_value < 18.2:\n        bun_score = 0\n    elif 18.2 <= bun_value <= 22.3:\n        bun_score = 2\n    elif 22.4 <= bun_value <= 28:\n        bun_score = 3\n    elif 28 < bun_value <= 70:\n        bun_score = 4\n    else:  # bun_value > 70\n        bun_score = 6\n    yield {\n        \"step_name\": \"compute_bun_score\",\n        \"step_description\": \"Calculate the BUN score based on the patient's Blood Urea Nitrogen value.\",\n        \"step_result\": bun_score,\n        \"unit\": None\n    }\n\n    # Step 2: compute_hemoglobin_score - Calculate the Hemoglobin score based on the patient's hemoglobin value and sex.\n    if sex == 'male':\n        if hemoglobin_value >= 13:\n            hemoglobin_score = 0\n        elif 12 < hemoglobin_value <= 13:\n            hemoglobin_score = 1\n        elif 10 <= hemoglobin_value <= 12:\n            hemoglobin_score = 3\n        else:  # hemoglobin_value < 10\n            hemoglobin_score = 6\n    else:  # sex == 'female'\n        if hemoglobin_value >= 12:\n            hemoglobin_score = 0\n        elif 10 <= hemoglobin_value < 12:\n            hemoglobin_score = 1\n        else:  # hemoglobin_value < 10\n            hemoglobin_score = 6\n    yield {\n        \"step_name\": \"compute_hemoglobin_score\",\n        \"step_description\": \"Calculate the Hemoglobin score based on the patient's hemoglobin value and sex.\",\n        \"step_result\": hemoglobin_score,\n        \"unit\": None\n    }\n\n    # Step 3: compute_sbp_score - Calculate the Systolic Blood Pressure score.\n    if sbp_value >= 110:\n        sbp_score = 0\n    elif 100 <= sbp_value <= 109:\n        sbp_score = 1\n    elif 90 <= sbp_value <= 99:\n        sbp_score = 2\n    else:  # sbp_value < 90\n        sbp_score = 3\n    yield {\n        \"step_name\": \"compute_sbp_score\",\n        \"step_description\": \"Calculate the Systolic Blood Pressure score.\",\n        \"step_result\": sbp_score,\n        \"unit\": None\n    }\n\n    # Step 4: compute_boolean_scores - Calculate the scores for all boolean-type criteria.\n    pulse_score = 1 if pulse_above_100 else 0\n    melena_score = 1 if melena_present else 0\n    syncope_score = 2 if syncope_present else 0\n    liver_disease_score = 2 if liver_disease_history else 0\n    cardiac_failure_score = 2 if cardiac_failure_present else 0\n    yield {\n        \"step_name\": \"compute_boolean_scores\",\n        \"step_description\": \"Calculate the scores for all boolean-type criteria: Pulse >=100, Melena, Syncope, Liver disease history, and Cardiac failure.\",\n        \"step_result\": {\n            \"pulse_score\": pulse_score,\n            \"melena_score\": melena_score,\n            \"syncope_score\": syncope_score,\n            \"liver_disease_score\": liver_disease_score,\n            \"cardiac_failure_score\": cardiac_failure_score\n        },\n        \"unit\": None\n    }\n\n    # Step 5: compute_total_gbs - Sum all individual criterion scores to produce the total Glasgow-Blatchford Score.\n    total_score = bun_score + hemoglobin_score + sbp_score + pulse_score + melena_score + syncope_score + liver_disease_score + cardiac_failure_score\n    yield {\n        \"step_name\": \"compute_total_gbs\",\n        \"step_description\": \"Sum all individual criterion scores to produce the total Glasgow-Blatchford Score.\",\n        \"step_result\": total_score,\n        \"unit\": None\n    }\n\n    return total_score"
+}

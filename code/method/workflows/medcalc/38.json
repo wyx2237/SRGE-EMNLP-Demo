@@ -1,0 +1,98 @@
+{
+    "name": "free_water_deficit_calculation_workflow",
+    "description": "Calculate the free water deficit in liters based on patient's age, gender, body weight, and measured sodium concentration.",
+    "inputs": [
+        {
+            "input_name": "age",
+            "input_desc": "Patient's age in years",
+            "input_type": "int"
+        },
+        {
+            "input_name": "gender",
+            "input_desc": "Patient's gender, allowed values: 'male', 'female'",
+            "input_type": "str"
+        },
+        {
+            "input_name": "body_weight_kg",
+            "input_desc": "Body weight in kilograms",
+            "input_type": "float"
+        },
+        {
+            "input_name": "measured_sodium_mmol_per_l",
+            "input_desc": "Measured sodium concentration in mmol/L",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "total_body_water_fraction_selection",
+            "step_description": "Determine the total body water fraction based on the patient's age and gender.",
+            "step_inputs": [
+                {
+                    "input_name": "age",
+                    "input_desc": "Patient's age in years",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.age"
+                },
+                {
+                    "input_name": "gender",
+                    "input_desc": "Patient's gender (male/female), allowed values: 'male', 'female'",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.gender"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "tbw_fraction",
+                    "output_desc": "Total body water fraction",
+                    "output_type": "float"
+                }
+            ],
+            "category": "ConditionEvaluation",
+            "reason": "The total body water fraction is selected from a set of predefined values based on conditional logic involving age thresholds and gender.",
+            "detail": "If gender is male: if age <= 65, tbw_fraction = 0.6; if age > 65, tbw_fraction = 0.5. If gender is female: if age <= 65, tbw_fraction = 0.5; if age > 65, tbw_fraction = 0.45."
+        },
+        {
+            "step_id": "2",
+            "step_name": "free_water_deficit_calculation",
+            "step_description": "Calculate the free water deficit in liters using the formula: (total body water fraction) * (body weight in kg) * (measured sodium concentration / 140 - 1).",
+            "step_inputs": [
+                {
+                    "input_name": "tbw_fraction",
+                    "input_desc": "Total body water fraction",
+                    "input_type": "float",
+                    "input_source": "$|1|.tbw_fraction"
+                },
+                {
+                    "input_name": "body_weight_kg",
+                    "input_desc": "Body weight in kilograms",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.body_weight_kg"
+                },
+                {
+                    "input_name": "measured_sodium_mmol_per_l",
+                    "input_desc": "Measured sodium concentration in mmol/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.measured_sodium_mmol_per_l"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "free_water_deficit_l",
+                    "output_desc": "Free water deficit in liters",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "This step involves a precise mathematical formula with multiplication, division and subtraction, resulting in a continuous numerical value.",
+            "detail": "free_water_deficit_l = tbw_fraction * body_weight_kg * (measured_sodium_mmol_per_l / 140 - 1). Round the result to 4 decimal places."
+        }
+    ],
+    "output": {
+        "output_name": "free_water_deficit_l",
+        "output_desc": "Final free water deficit result in liters, rounded to 4 decimal places",
+        "output_type": "float"
+    },
+    "code": "def solve(age, gender, body_weight_kg, measured_sodium_mmol_per_l):\n    # Step 1: total_body_water_fraction_selection\n    # Determine the total body water fraction based on the patient's age and gender.\n    if gender == 'male':\n        if age <= 65:\n            tbw_fraction = 0.6\n        else:\n            tbw_fraction = 0.5\n    elif gender == 'female':\n        if age <= 65:\n            tbw_fraction = 0.5\n        else:\n            tbw_fraction = 0.45\n    else:\n        raise ValueError(\"gender must be 'male' or 'female'\")\n    \n    yield {\n        \"step_name\": \"total_body_water_fraction_selection\",\n        \"step_description\": \"Determine the total body water fraction based on the patient's age and gender.\",\n        \"step_result\": tbw_fraction,\n        \"unit\": None\n    }\n    \n    # Step 2: free_water_deficit_calculation\n    # Calculate the free water deficit in liters using the formula:\n    # free_water_deficit_l = tbw_fraction * body_weight_kg * (measured_sodium_mmol_per_l / 140 - 1)\n    # Round the result to 4 decimal places.\n    free_water_deficit_l = round(tbw_fraction * body_weight_kg * (measured_sodium_mmol_per_l / 140 - 1), 4)\n    \n    yield {\n        \"step_name\": \"free_water_deficit_calculation\",\n        \"step_description\": \"Calculate the free water deficit in liters using the formula: (total body water fraction) * (body weight in kg) * (measured sodium concentration / 140 - 1).\",\n        \"step_result\": free_water_deficit_l,\n        \"unit\": \"liters\"\n    }\n    \n    # Final output\n    return free_water_deficit_l"
+}

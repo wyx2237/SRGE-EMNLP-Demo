@@ -1,0 +1,264 @@
+{
+    "name": "charlson_comorbidity_index_calculation_workflow",
+    "description": "Calculate the total Charlson Comorbidity Index (CCI) score based on patient age and 16 comorbidity conditions.",
+    "inputs": [
+        {
+            "input_name": "age",
+            "input_desc": "Patient's age in years",
+            "input_type": "int"
+        },
+        {
+            "input_name": "myocardial_infarction",
+            "input_desc": "History of myocardial infarction: true or false",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "congestive_heart_failure",
+            "input_desc": "Congestive heart failure diagnosis: true or false",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "peripheral_vascular_disease",
+            "input_desc": "Peripheral vascular disease diagnosis: true or false",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "cva_tia",
+            "input_desc": "History of cerebrovascular accident or transient ischemic attack: true or false",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "dementia",
+            "input_desc": "Dementia diagnosis: true or false",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "chronic_pulmonary_disease",
+            "input_desc": "Chronic pulmonary disease diagnosis: true or false",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "connective_tissue_disease",
+            "input_desc": "Connective tissue disease diagnosis: true or false",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "peptic_ulcer_disease",
+            "input_desc": "Peptic ulcer disease diagnosis: true or false",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "liver_disease",
+            "input_desc": "Liver disease severity: none, mild, moderate_severe",
+            "input_type": "str"
+        },
+        {
+            "input_name": "diabetes_mellitus",
+            "input_desc": "Diabetes mellitus severity: none, uncomplicated, end_organ",
+            "input_type": "str"
+        },
+        {
+            "input_name": "hemiplegia",
+            "input_desc": "Hemiplegia diagnosis: true or false",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "ckd",
+            "input_desc": "Moderate to severe chronic kidney disease: true or false",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "solid_tumor",
+            "input_desc": "Solid tumor status: none, localized, metastatic",
+            "input_type": "str"
+        },
+        {
+            "input_name": "leukemia",
+            "input_desc": "Leukemia diagnosis: true or false",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "lymphoma",
+            "input_desc": "Lymphoma diagnosis: true or false",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "aids",
+            "input_desc": "AIDS diagnosis: true or false",
+            "input_type": "bool"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "age_score_mapping",
+            "step_description": "Map patient age to CCI age score based on predefined age ranges.",
+            "step_inputs": [
+                {
+                    "input_name": "age",
+                    "input_desc": "Patient's age in years",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.age"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "age_score",
+                    "output_desc": "CCI age score (0 to 4)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "threshold_mapping",
+            "reason": "Age is a continuous numerical value that needs to be categorized into discrete score values based on multiple cutoffs, matching the ThresholdMapping template.",
+            "detail": "Evaluate age against thresholds: <50 years = 0; 50-59 years = 1; 60-69 years = 2; 70-79 years = 3; >=80 years = 4."
+        },
+        {
+            "step_id": "2",
+            "step_name": "individual_condition_scoring",
+            "step_description": "Calculate scores for 16 individual CCI conditions based on presence and severity.",
+            "step_inputs": [
+                {
+                    "input_name": "myocardial_infarction",
+                    "input_desc": "History of MI: true/false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.myocardial_infarction"
+                },
+                {
+                    "input_name": "congestive_heart_failure",
+                    "input_desc": "CHF diagnosis: true/false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.congestive_heart_failure"
+                },
+                {
+                    "input_name": "peripheral_vascular_disease",
+                    "input_desc": "PVD diagnosis: true/false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.peripheral_vascular_disease"
+                },
+                {
+                    "input_name": "cva_tia",
+                    "input_desc": "CVA or TIA history: true/false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.cva_tia"
+                },
+                {
+                    "input_name": "dementia",
+                    "input_desc": "Dementia diagnosis: true/false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.dementia"
+                },
+                {
+                    "input_name": "chronic_pulmonary_disease",
+                    "input_desc": "CPD diagnosis: true/false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.chronic_pulmonary_disease"
+                },
+                {
+                    "input_name": "connective_tissue_disease",
+                    "input_desc": "Connective tissue disease: true/false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.connective_tissue_disease"
+                },
+                {
+                    "input_name": "peptic_ulcer_disease",
+                    "input_desc": "Peptic ulcer disease: true/false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.peptic_ulcer_disease"
+                },
+                {
+                    "input_name": "liver_disease",
+                    "input_desc": "Liver disease severity: none/mild/moderate_severe",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.liver_disease"
+                },
+                {
+                    "input_name": "diabetes_mellitus",
+                    "input_desc": "Diabetes severity: none/uncomplicated/end_organ",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.diabetes_mellitus"
+                },
+                {
+                    "input_name": "hemiplegia",
+                    "input_desc": "Hemiplegia diagnosis: true/false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.hemiplegia"
+                },
+                {
+                    "input_name": "ckd",
+                    "input_desc": "Moderate to severe CKD: true/false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.ckd"
+                },
+                {
+                    "input_name": "solid_tumor",
+                    "input_desc": "Solid tumor status: none/localized/metastatic",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.solid_tumor"
+                },
+                {
+                    "input_name": "leukemia",
+                    "input_desc": "Leukemia diagnosis: true/false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.leukemia"
+                },
+                {
+                    "input_name": "lymphoma",
+                    "input_desc": "Lymphoma diagnosis: true/false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.lymphoma"
+                },
+                {
+                    "input_name": "aids",
+                    "input_desc": "AIDS diagnosis: true/false",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.aids"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "condition_scores",
+                    "output_desc": "List of 16 individual condition scores",
+                    "output_type": "array"
+                }
+            ],
+            "category": "discrete_value_mapping",
+            "reason": "Most conditions are simple yes/no mappings; multi-level conditions (liver, diabetes, tumor) also map discrete severity levels to specific scores, fitting the DiscreteValueMapping template.",
+            "detail": "Map each condition boolean/severity to points: MI, CHF, PVD, CVA/TIA, Dementia, CPD, Connective Tissue Disease, Peptic Ulcer (true=1, false=0); Liver Disease (none=0, mild=1, moderate_severe=3); Diabetes (none=0, uncomplicated=1, end_organ=2); Hemiplegia (true=2, false=0); CKD (true=2, false=0); Solid Tumor (none=0, localized=2, metastatic=6); Leukemia (true=2, false=0); Lymphoma (true=2, false=0); AIDS (true=6, false=0)."
+        },
+        {
+            "step_id": "3",
+            "step_name": "total_cci_calculation",
+            "step_description": "Sum all individual scores (age + 16 conditions) to compute total CCI.",
+            "step_inputs": [
+                {
+                    "input_name": "age_score",
+                    "input_desc": "Age component score",
+                    "input_type": "int",
+                    "input_source": "$|step1|.age_score"
+                },
+                {
+                    "input_name": "condition_scores",
+                    "input_desc": "List of 16 condition scores",
+                    "input_type": "array",
+                    "input_source": "$|step2|.condition_scores"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_cci",
+                    "output_desc": "Total Charlson Comorbidity Index score",
+                    "output_type": "int"
+                }
+            ],
+            "category": "statistical_aggregation",
+            "reason": "The final step involves summing multiple numerical scores into a single total, which is a basic statistical aggregation operation.",
+            "detail": "Sum age_score + sum of all 16 condition scores."
+        }
+    ],
+    "output": {
+        "output_name": "total_cci",
+        "output_desc": "Total Charlson Comorbidity Index score",
+        "output_type": "int"
+    },
+    "code": "def solve(age, myocardial_infarction, congestive_heart_failure, peripheral_vascular_disease,\n          cva_tia, dementia, chronic_pulmonary_disease, connective_tissue_disease,\n          peptic_ulcer_disease, liver_disease, diabetes_mellitus, hemiplegia,\n          ckd, solid_tumor, leukemia, lymphoma, aids):\n    # Step 1: Map patient age to CCI age score based on predefined age ranges\n    if age < 50:\n        age_score = 0\n    elif 50 <= age <= 59:\n        age_score = 1\n    elif 60 <= age <= 69:\n        age_score = 2\n    elif 70 <= age <= 79:\n        age_score = 3\n    else:  # age >= 80\n        age_score = 4\n\n    yield {\n        \"step_name\": \"age_score_mapping\",\n        \"step_description\": \"Map patient age to CCI age score based on predefined age ranges: <50=0, 50-59=1, 60-69=2, 70-79=3, >=80=4\",\n        \"step_result\": age_score,\n        \"unit\": None\n    }\n\n    # Step 2: Calculate scores for 16 individual CCI conditions based on presence and severity\n    condition_scores = []\n\n    # MI: true=1, false=0\n    score = 1 if myocardial_infarction else 0\n    condition_scores.append(score)\n\n    # CHF: true=1, false=0\n    score = 1 if congestive_heart_failure else 0\n    condition_scores.append(score)\n\n    # PVD: true=1, false=0\n    score = 1 if peripheral_vascular_disease else 0\n    condition_scores.append(score)\n\n    # CVA/TIA: true=1, false=0\n    score = 1 if cva_tia else 0\n    condition_scores.append(score)\n\n    # Dementia: true=1, false=0\n    score = 1 if dementia else 0\n    condition_scores.append(score)\n\n    # Chronic Pulmonary Disease: true=1, false=0\n    score = 1 if chronic_pulmonary_disease else 0\n    condition_scores.append(score)\n\n    # Connective Tissue Disease: true=1, false=0\n    score = 1 if connective_tissue_disease else 0\n    condition_scores.append(score)\n\n    # Peptic Ulcer Disease: true=1, false=0\n    score = 1 if peptic_ulcer_disease else 0\n    condition_scores.append(score)\n\n    # Liver Disease: none=0, mild=1, moderate_severe=3\n    if liver_disease == \"none\":\n        score = 0\n    elif liver_disease == \"mild\":\n        score = 1\n    elif liver_disease == \"moderate_severe\":\n        score = 3\n    else:\n        score = 0  # default if unexpected value\n    condition_scores.append(score)\n\n    # Diabetes Mellitus: none=0, uncomplicated=1, end_organ=2\n    if diabetes_mellitus == \"none\":\n        score = 0\n    elif diabetes_mellitus == \"uncomplicated\":\n        score = 1\n    elif diabetes_mellitus == \"end_organ\":\n        score = 2\n    else:\n        score = 0\n    condition_scores.append(score)\n\n    # Hemiplegia: true=2, false=0\n    score = 2 if hemiplegia else 0\n    condition_scores.append(score)\n\n    # CKD: true=2, false=0\n    score = 2 if ckd else 0\n    condition_scores.append(score)\n\n    # Solid Tumor: none=0, localized=2, metastatic=6\n    if solid_tumor == \"none\":\n        score = 0\n    elif solid_tumor == \"localized\":\n        score = 2\n    elif solid_tumor == \"metastatic\":\n        score = 6\n    else:\n        score = 0\n    condition_scores.append(score)\n\n    # Leukemia: true=2, false=0\n    score = 2 if leukemia else 0\n    condition_scores.append(score)\n\n    # Lymphoma: true=2, false=0\n    score = 2 if lymphoma else 0\n    condition_scores.append(score)\n\n    # AIDS: true=6, false=0\n    score = 6 if aids else 0\n    condition_scores.append(score)\n\n    yield {\n        \"step_name\": \"individual_condition_scoring\",\n        \"step_description\": \"Calculate scores for 16 individual CCI conditions based on presence and severity, returning list of scores\",\n        \"step_result\": condition_scores,\n        \"unit\": None\n    }\n\n    # Step 3: Sum all individual scores (age + 16 conditions) to compute total CCI\n    total_cci = age_score + sum(condition_scores)\n\n    yield {\n        \"step_name\": \"total_cci_calculation\",\n        \"step_description\": \"Sum age score and all 16 condition scores to compute total Charlson Comorbidity Index\",\n        \"step_result\": total_cci,\n        \"unit\": None\n    }\n\n    return total_cci"
+}

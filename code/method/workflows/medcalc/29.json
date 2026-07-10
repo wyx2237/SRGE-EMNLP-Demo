@@ -1,0 +1,320 @@
+{
+    "name": "pneumonia_severity_index_calculation_workflow",
+    "description": "Calculate the Pneumonia Severity Index (PSI) total score based on age, sex, and 18 binary clinical indicators.",
+    "inputs": [
+        {
+            "input_name": "age",
+            "input_desc": "Patient's age in years",
+            "input_type": "int"
+        },
+        {
+            "input_name": "sex",
+            "input_desc": "Patient's sex. Allowed values: 'Female', 'Male'",
+            "input_type": "str"
+        },
+        {
+            "input_name": "nursing_home",
+            "input_desc": "Is the patient a nursing home resident?",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "neoplastic",
+            "input_desc": "Does the patient have neoplastic disease?",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "liver",
+            "input_desc": "Does the patient have a history of liver disease?",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "chf",
+            "input_desc": "Does the patient have a history of congestive heart failure (CHF)?",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "cerebrovascular",
+            "input_desc": "Does the patient have a history of cerebrovascular disease?",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "renal",
+            "input_desc": "Does the patient have a history of renal disease?",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "altered_mental",
+            "input_desc": "Does the patient have altered mental status?",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "respiratory_rate",
+            "input_desc": "Is respiratory rate >= 30 breaths/min?",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "sbp",
+            "input_desc": "Is systolic blood pressure < 90 mmHg?",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "temperature",
+            "input_desc": "Is temperature < 35°C (95°F) or > 39.9°C (103.8°F)?",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "pulse",
+            "input_desc": "Is pulse >= 125 beats/min?",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "ph",
+            "input_desc": "Is pH < 7.35?",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "bun",
+            "input_desc": "Is BUN >= 30 mg/dL or >= 11 mmol/L?",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "sodium",
+            "input_desc": "Is sodium < 130 mmol/L?",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "glucose",
+            "input_desc": "Is glucose >= 250 mg/dL or >= 14 mmol/L?",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "hematocrit",
+            "input_desc": "Is hematocrit < 30%?",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "pao2",
+            "input_desc": "Is partial pressure of oxygen < 60 mmHg or < 8 kPa?",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "pleural_effusion",
+            "input_desc": "Is pleural effusion present on x-ray?",
+            "input_type": "bool"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "age_score_calculation",
+            "step_description": "Calculate the age score, which is equal to the patient's age in years.",
+            "step_inputs": [
+                {
+                    "input_name": "age",
+                    "input_desc": "Patient's age in years",
+                    "input_type": "int",
+                    "input_source": "$|raw input|.age"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "age_score",
+                    "output_desc": "Age score in points",
+                    "output_type": "int"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "The age score is determined by a direct mathematical formula where the score equals the age in years.",
+            "detail": "age_score = age"
+        },
+        {
+            "step_id": "2",
+            "step_name": "sex_score_calculation",
+            "step_description": "Determine the sex score based on the patient's sex.",
+            "step_inputs": [
+                {
+                    "input_name": "sex",
+                    "input_desc": "Patient's sex. Allowed values: 'Female', 'Male'",
+                    "input_type": "str",
+                    "input_source": "$|raw input|.sex"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "sex_score",
+                    "output_desc": "Sex score in points",
+                    "output_type": "int"
+                }
+            ],
+            "category": "ConditionEvaluation",
+            "reason": "The sex score requires a conditional branch based on the discrete value of sex (Female or Male).",
+            "detail": "If sex is 'Female', score = -10. If sex is 'Male', score = 0."
+        },
+        {
+            "step_id": "3",
+            "step_name": "binary_indicators_score_calculation",
+            "step_description": "Calculate the sum of points for the 18 binary clinical indicators (criteria 3-20). Each indicator contributes a fixed number of points if true, or 0 points if false.",
+            "step_inputs": [
+                {
+                    "input_name": "nursing_home",
+                    "input_desc": "Is the patient a nursing home resident?",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.nursing_home"
+                },
+                {
+                    "input_name": "neoplastic",
+                    "input_desc": "Does the patient have neoplastic disease?",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.neoplastic"
+                },
+                {
+                    "input_name": "liver",
+                    "input_desc": "Does the patient have a history of liver disease?",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.liver"
+                },
+                {
+                    "input_name": "chf",
+                    "input_desc": "Does the patient have a history of congestive heart failure (CHF)?",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.chf"
+                },
+                {
+                    "input_name": "cerebrovascular",
+                    "input_desc": "Does the patient have a history of cerebrovascular disease?",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.cerebrovascular"
+                },
+                {
+                    "input_name": "renal",
+                    "input_desc": "Does the patient have a history of renal disease?",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.renal"
+                },
+                {
+                    "input_name": "altered_mental",
+                    "input_desc": "Does the patient have altered mental status?",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.altered_mental"
+                },
+                {
+                    "input_name": "respiratory_rate",
+                    "input_desc": "Is respiratory rate >= 30 breaths/min?",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.respiratory_rate"
+                },
+                {
+                    "input_name": "sbp",
+                    "input_desc": "Is systolic blood pressure < 90 mmHg?",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.sbp"
+                },
+                {
+                    "input_name": "temperature",
+                    "input_desc": "Is temperature < 35°C (95°F) or > 39.9°C (103.8°F)?",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.temperature"
+                },
+                {
+                    "input_name": "pulse",
+                    "input_desc": "Is pulse >= 125 beats/min?",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.pulse"
+                },
+                {
+                    "input_name": "ph",
+                    "input_desc": "Is pH < 7.35?",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.ph"
+                },
+                {
+                    "input_name": "bun",
+                    "input_desc": "Is BUN >= 30 mg/dL or >= 11 mmol/L?",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.bun"
+                },
+                {
+                    "input_name": "sodium",
+                    "input_desc": "Is sodium < 130 mmol/L?",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.sodium"
+                },
+                {
+                    "input_name": "glucose",
+                    "input_desc": "Is glucose >= 250 mg/dL or >= 14 mmol/L?",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.glucose"
+                },
+                {
+                    "input_name": "hematocrit",
+                    "input_desc": "Is hematocrit < 30%?",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.hematocrit"
+                },
+                {
+                    "input_name": "pao2",
+                    "input_desc": "Is partial pressure of oxygen < 60 mmHg or < 8 kPa?",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.pao2"
+                },
+                {
+                    "input_name": "pleural_effusion",
+                    "input_desc": "Is pleural effusion present on x-ray?",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.pleural_effusion"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "binary_sum_score",
+                    "output_desc": "Sum of points for all binary indicators (criteria 3-20)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "StatisticalAggregation",
+            "reason": "This step aggregates the fixed point contributions from multiple boolean indicators into a single sum score. Each indicator's point value is a predefined constant based on its boolean state.",
+            "detail": "Sum the following contributions: nursing_home==True : +10; neoplastic==True : +30; liver==True : +20; chf==True : +10; cerebrovascular==True : +10; renal==True : +10; altered_mental==True : +20; respiratory_rate==True : +20; sbp==True : +20; temperature==True : +15; pulse==True : +10; ph==True : +30; bun==True : +20; sodium==True : +20; glucose==True : +10; hematocrit==True : +10; pao2==True : +10; pleural_effusion==True : +10. If any indicator is False, add 0."
+        },
+        {
+            "step_id": "4",
+            "step_name": "total_psi_score_calculation",
+            "step_description": "Calculate the total Pneumonia Severity Index (PSI) score by summing the age score, sex score, and binary indicators sum score.",
+            "step_inputs": [
+                {
+                    "input_name": "age_score",
+                    "input_desc": "Score from age criterion",
+                    "input_type": "int",
+                    "input_source": "$|step1|.age_score"
+                },
+                {
+                    "input_name": "sex_score",
+                    "input_desc": "Score from sex criterion",
+                    "input_type": "int",
+                    "input_source": "$|step2|.sex_score"
+                },
+                {
+                    "input_name": "binary_sum_score",
+                    "input_desc": "Sum of points from all binary clinical indicators",
+                    "input_type": "int",
+                    "input_source": "$|step3|.binary_sum_score"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_psi_score",
+                    "output_desc": "Total Pneumonia Severity Index score",
+                    "output_type": "int"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "The total PSI score is computed using a simple arithmetic sum of the previously calculated component scores.",
+            "detail": "total_psi_score = age_score + sex_score + binary_sum_score"
+        }
+    ],
+    "output": {
+        "output_name": "total_psi_score",
+        "output_desc": "Total Pneumonia Severity Index score",
+        "output_type": "int"
+    },
+    "code": "def solve(age, sex, nursing_home, neoplastic, liver, chf, cerebrovascular, renal, altered_mental, respiratory_rate, sbp, temperature, pulse, ph, bun, sodium, glucose, hematocrit, pao2, pleural_effusion):\n    # Step 1: age_score_calculation\n    # Calculate the age score, which is equal to the patient's age in years.\n    age_score = age\n    yield {\n        \"step_name\": \"age_score_calculation\",\n        \"step_description\": \"Calculate the age score, which is equal to the patient's age in years.\",\n        \"step_result\": age_score,\n        \"unit\": \"points\"\n    }\n\n    # Step 2: sex_score_calculation\n    # Determine the sex score based on the patient's sex.\n    # If sex is 'Female', score = -10. If sex is 'Male', score = 0.\n    if sex == 'Female':\n        sex_score = -10\n    else:  # sex == 'Male'\n        sex_score = 0\n    yield {\n        \"step_name\": \"sex_score_calculation\",\n        \"step_description\": \"Determine the sex score based on the patient's sex: -10 for Female, 0 for Male.\",\n        \"step_result\": sex_score,\n        \"unit\": \"points\"\n    }\n\n    # Step 3: binary_indicators_score_calculation\n    # Calculate the sum of points for the 18 binary clinical indicators.\n    # Each indicator contributes a fixed number of points if true, or 0 points if false.\n    binary_sum_score = 0\n    if nursing_home:\n        binary_sum_score += 10\n    if neoplastic:\n        binary_sum_score += 30\n    if liver:\n        binary_sum_score += 20\n    if chf:\n        binary_sum_score += 10\n    if cerebrovascular:\n        binary_sum_score += 10\n    if renal:\n        binary_sum_score += 10\n    if altered_mental:\n        binary_sum_score += 20\n    if respiratory_rate:\n        binary_sum_score += 20\n    if sbp:\n        binary_sum_score += 20\n    if temperature:\n        binary_sum_score += 15\n    if pulse:\n        binary_sum_score += 10\n    if ph:\n        binary_sum_score += 30\n    if bun:\n        binary_sum_score += 20\n    if sodium:\n        binary_sum_score += 20\n    if glucose:\n        binary_sum_score += 10\n    if hematocrit:\n        binary_sum_score += 10\n    if pao2:\n        binary_sum_score += 10\n    if pleural_effusion:\n        binary_sum_score += 10\n    yield {\n        \"step_name\": \"binary_indicators_score_calculation\",\n        \"step_description\": \"Sum the fixed point contributions from 18 binary clinical indicators based on their boolean values.\",\n        \"step_result\": binary_sum_score,\n        \"unit\": \"points\"\n    }\n\n    # Step 4: total_psi_score_calculation\n    # Calculate the total Pneumonia Severity Index (PSI) score by summing the age score, sex score, and binary indicators sum score.\n    total_psi_score = age_score + sex_score + binary_sum_score\n    yield {\n        \"step_name\": \"total_psi_score_calculation\",\n        \"step_description\": \"Sum the age score, sex score, and binary indicators sum score to obtain the total PSI score.\",\n        \"step_result\": total_psi_score,\n        \"unit\": \"points\"\n    }\n\n    # Final return: total PSI score\n    return total_psi_score"
+}

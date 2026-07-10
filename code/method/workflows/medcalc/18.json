@@ -1,0 +1,212 @@
+{
+    "name": "heart_score_calculation_workflow",
+    "description": "Calculate the HEART score for risk stratification in patients with chest pain by evaluating history, EKG, age, risk factors, and troponin level.",
+    "inputs": [
+        {
+            "input_name": "history_level",
+            "input_desc": "Suspicion level of patient history. Allowed values: 'Slightly suspicious', 'Moderately suspicious', 'Highly suspicious'.",
+            "input_type": "str"
+        },
+        {
+            "input_name": "ekg_finding",
+            "input_desc": "EKG finding description. Allowed values: 'Normal', 'Non-specific repolarization disturbance', 'Significant ST deviation'.",
+            "input_type": "str"
+        },
+        {
+            "input_name": "age",
+            "input_desc": "Patient's age in years.",
+            "input_type": "int"
+        },
+        {
+            "input_name": "risk_factor_count",
+            "input_desc": "Number of risk factors present (HTN, hypercholesterolemia, DM, obesity (BMI>30 kg/m²), smoking, positive family history).",
+            "input_type": "int"
+        },
+        {
+            "input_name": "has_atherosclerotic_disease",
+            "input_desc": "Whether patient has history of atherosclerotic disease (prior MI, PCI/CABG, CVA/TIA, or peripheral arterial disease).",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "troponin_ratio",
+            "input_desc": "Ratio of initial troponin level to the normal upper limit (e.g., 0.5 for below, 2.0 for 1-3x, 5.0 for >3x).",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "evaluate_history_score",
+            "step_description": "Map the patient's history suspicion level to points.",
+            "step_inputs": [
+                {
+                    "input_name": "history_level",
+                    "input_desc": "Suspicion level of patient history. Allowed values: 'Slightly suspicious', 'Moderately suspicious', 'Highly suspicious'.",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.history_level"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "history_points",
+                    "output_desc": "Points assigned for history (0, 1, or 2).",
+                    "output_type": "int"
+                }
+            ],
+            "category": "discrete_value_mapping",
+            "reason": "The patient's history suspicion level is a finite set of strings (Slightly, Moderately, Highly) mapped to a numeric score. This is a direct mapping of discrete categorical values to predefined output values, fitting the DiscreteValueMapping template.",
+            "detail": "Map the history level to points: 'Slightly suspicious' -> 0, 'Moderately suspicious' -> 1, 'Highly suspicious' -> 2."
+        },
+        {
+            "step_id": "2",
+            "step_name": "evaluate_ekg_score",
+            "step_description": "Map the patient's EKG finding to points.",
+            "step_inputs": [
+                {
+                    "input_name": "ekg_finding",
+                    "input_desc": "EKG finding description. Allowed values: 'Normal', 'Non-specific repolarization disturbance', 'Significant ST deviation'.",
+                    "input_type": "str",
+                    "input_source": "$|raw input|.ekg_finding"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "ekg_points",
+                    "output_desc": "Points assigned for EKG (0, 1, or 2).",
+                    "output_type": "int"
+                }
+            ],
+            "category": "discrete_value_mapping",
+            "reason": "The EKG findings are a finite set of distinct categories mapped to numeric scores. This is a direct discrete value mapping, aligning perfectly with the DiscreteValueMapping template.",
+            "detail": "Map the EKG finding to points: 'Normal' -> 0, 'Non-specific repolarization disturbance' -> 1, 'Significant ST deviation' -> 2."
+        },
+        {
+            "step_id": "3",
+            "step_name": "evaluate_age_score",
+            "step_description": "Assign points based on the patient's age group.",
+            "step_inputs": [
+                {
+                    "input_name": "age",
+                    "input_desc": "Patient's age in years.",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.age"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "age_points",
+                    "output_desc": "Points assigned for age (0, 1, or 2).",
+                    "output_type": "int"
+                }
+            ],
+            "category": "threshold_mapping",
+            "reason": "Age is a continuous numerical variable that must be categorized into bins (0-44, 45-64, >=65) to assign a discrete score. This is a classic threshold mapping operation.",
+            "detail": "Evaluate age against thresholds: if age < 45 -> 0 points; if 45 <= age <= 64 -> 1 point; if age >= 65 -> 2 points."
+        },
+        {
+            "step_id": "4",
+            "step_name": "evaluate_risk_factor_score",
+            "step_description": "Assign points based on number of risk factors and history of atherosclerotic disease.",
+            "step_inputs": [
+                {
+                    "input_name": "risk_factor_count",
+                    "input_desc": "Number of risk factors present (HTN, hypercholesterolemia, DM, obesity (BMI>30 kg/m²), smoking, positive family history).",
+                    "input_type": "int",
+                    "input_source": "$|raw input|.risk_factor_count"
+                },
+                {
+                    "input_name": "has_atherosclerotic_disease",
+                    "input_desc": "Whether patient has history of atherosclerotic disease (prior MI, PCI/CABG, CVA/TIA, or peripheral arterial disease).",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.has_atherosclerotic_disease"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "risk_factor_points",
+                    "output_desc": "Points assigned for risk factors (0, 1, or 2).",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "The scoring involves a conditional branch: first checking a boolean for atherosclerotic disease, then interpreting a count against thresholds. This requires condition evaluation logic (if-elif-else) which fits the ConditionEvaluation template.",
+            "detail": "If has_atherosclerotic_disease is True, assign 2 points. Else, evaluate risk_factor_count: if 0 -> 0 points; if 1 or 2 -> 1 point; if >=3 -> 2 points."
+        },
+        {
+            "step_id": "5",
+            "step_name": "evaluate_troponin_score",
+            "step_description": "Assign points based on the troponin ratio relative to normal upper limit.",
+            "step_inputs": [
+                {
+                    "input_name": "troponin_ratio",
+                    "input_desc": "Ratio of initial troponin level to the normal upper limit (e.g., 0.5 for below, 2.0 for 1-3x, 5.0 for >3x).",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.troponin_ratio"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "troponin_points",
+                    "output_desc": "Points assigned for troponin (0, 1, or 2).",
+                    "output_type": "int"
+                }
+            ],
+            "category": "threshold_mapping",
+            "reason": "The troponin level ratio is a continuous value that must be mapped to discrete score categories based on predefined thresholds (<=1, 1-3, >3). This matches the ThresholdMapping template.",
+            "detail": "Evaluate the troponin ratio: if ratio <= 1 -> 0 points; if 1 < ratio <= 3 -> 1 point; if ratio > 3 -> 2 points."
+        },
+        {
+            "step_id": "6",
+            "step_name": "calculate_total_heart_score",
+            "step_description": "Sum all individual component scores to obtain the total HEART score.",
+            "step_inputs": [
+                {
+                    "input_name": "history_points",
+                    "input_desc": "Points from History criterion.",
+                    "input_type": "int",
+                    "input_source": "$|step1|.history_points"
+                },
+                {
+                    "input_name": "ekg_points",
+                    "input_desc": "Points from EKG criterion.",
+                    "input_type": "int",
+                    "input_source": "$|step2|.ekg_points"
+                },
+                {
+                    "input_name": "age_points",
+                    "input_desc": "Points from Age criterion.",
+                    "input_type": "int",
+                    "input_source": "$|step3|.age_points"
+                },
+                {
+                    "input_name": "risk_factor_points",
+                    "input_desc": "Points from Risk Factors criterion.",
+                    "input_type": "int",
+                    "input_source": "$|step4|.risk_factor_points"
+                },
+                {
+                    "input_name": "troponin_points",
+                    "input_desc": "Points from Troponin criterion.",
+                    "input_type": "int",
+                    "input_source": "$|step5|.troponin_points"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_heart_score",
+                    "output_desc": "Total HEART score (sum of all criterion points, 0-10).",
+                    "output_type": "int"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "The final step requires summing a set of integer variables using a simple arithmetic formula (addition). This is a straightforward formula calculation.",
+            "detail": "Calculate sum: total = history_points + ekg_points + age_points + risk_factor_points + troponin_points."
+        }
+    ],
+    "output": {
+        "output_name": "total_heart_score",
+        "output_desc": "Final total HEART score for risk stratification.",
+        "output_type": "int"
+    },
+    "code": "def solve(history_level, ekg_finding, age, risk_factor_count, has_atherosclerotic_disease, troponin_ratio):\n    # Step 1: Evaluate history score\n    if history_level == 'Slightly suspicious':\n        history_points = 0\n    elif history_level == 'Moderately suspicious':\n        history_points = 1\n    elif history_level == 'Highly suspicious':\n        history_points = 2\n    else:\n        raise ValueError(\"Invalid history_level\")\n    yield {\n        \"step_name\": \"evaluate_history_score\",\n        \"step_description\": \"Map the patient's history suspicion level to points (0, 1, or 2).\",\n        \"step_result\": history_points,\n        \"unit\": None\n    }\n\n    # Step 2: Evaluate EKG score\n    if ekg_finding == 'Normal':\n        ekg_points = 0\n    elif ekg_finding == 'Non-specific repolarization disturbance':\n        ekg_points = 1\n    elif ekg_finding == 'Significant ST deviation':\n        ekg_points = 2\n    else:\n        raise ValueError(\"Invalid ekg_finding\")\n    yield {\n        \"step_name\": \"evaluate_ekg_score\",\n        \"step_description\": \"Map the patient's EKG finding to points (0, 1, or 2).\",\n        \"step_result\": ekg_points,\n        \"unit\": None\n    }\n\n    # Step 3: Evaluate age score\n    if age < 45:\n        age_points = 0\n    elif 45 <= age <= 64:\n        age_points = 1\n    else:  # age >= 65\n        age_points = 2\n    yield {\n        \"step_name\": \"evaluate_age_score\",\n        \"step_description\": \"Assign points based on patient's age group (0-44:0, 45-64:1, >=65:2).\",\n        \"step_result\": age_points,\n        \"unit\": None\n    }\n\n    # Step 4: Evaluate risk factor score\n    if has_atherosclerotic_disease:\n        risk_factor_points = 2\n    else:\n        if risk_factor_count == 0:\n            risk_factor_points = 0\n        elif 1 <= risk_factor_count <= 2:\n            risk_factor_points = 1\n        else:  # risk_factor_count >= 3\n            risk_factor_points = 2\n    yield {\n        \"step_name\": \"evaluate_risk_factor_score\",\n        \"step_description\": \"Assign points based on risk factor count and atherosclerotic disease history.\",\n        \"step_result\": risk_factor_points,\n        \"unit\": None\n    }\n\n    # Step 5: Evaluate troponin score\n    if troponin_ratio <= 1:\n        troponin_points = 0\n    elif troponin_ratio <= 3:\n        troponin_points = 1\n    else:  # troponin_ratio > 3\n        troponin_points = 2\n    yield {\n        \"step_name\": \"evaluate_troponin_score\",\n        \"step_description\": \"Assign points based on troponin ratio relative to normal upper limit.\",\n        \"step_result\": troponin_points,\n        \"unit\": None\n    }\n\n    # Step 6: Calculate total HEART score\n    total_heart_score = history_points + ekg_points + age_points + risk_factor_points + troponin_points\n    yield {\n        \"step_name\": \"calculate_total_heart_score\",\n        \"step_description\": \"Sum all individual component scores to obtain the total HEART score (0-10).\",\n        \"step_result\": total_heart_score,\n        \"unit\": None\n    }\n\n    return total_heart_score"
+}

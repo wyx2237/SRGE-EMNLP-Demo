@@ -1,0 +1,235 @@
+{
+    "name": "vte_major_bleeding_risk_score",
+    "description": "Calculate the total risk score for major bleeding in patients on anticoagulation therapy according to the VTE bleeding risk scoring system.",
+    "inputs": [
+        {
+            "input_name": "active_cancer_present",
+            "input_desc": "Whether the patient has active cancer (yes/no).",
+            "input_type": "boolean"
+        },
+        {
+            "input_name": "male_uncontrolled_hypertension_present",
+            "input_desc": "Whether the patient is a male with uncontrolled hypertension (yes/no).",
+            "input_type": "boolean"
+        },
+        {
+            "input_name": "anemia_present",
+            "input_desc": "Whether the patient has anemia (yes/no).",
+            "input_type": "boolean"
+        },
+        {
+            "input_name": "previous_bleeding_history_present",
+            "input_desc": "Whether the patient has a previous bleeding history (yes/no).",
+            "input_type": "boolean"
+        },
+        {
+            "input_name": "age_60_or_more_present",
+            "input_desc": "Whether the patient is aged ≥60 years (yes/no).",
+            "input_type": "boolean"
+        },
+        {
+            "input_name": "renal_insufficiency_present",
+            "input_desc": "Whether the patient has renal insufficiency (yes/no).",
+            "input_type": "boolean"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "active_cancer_score",
+            "step_description": "Assign a score based on the presence of active cancer according to the VTE bleeding risk scoring system.",
+            "step_inputs": [
+                {
+                    "input_name": "active_cancer_present",
+                    "input_desc": "Whether the patient has active cancer (yes/no).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.active_cancer_present"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "active_cancer_score",
+                    "output_desc": "Score for active cancer according to the VTE bleeding risk scoring system.",
+                    "output_type": "float"
+                }
+            ],
+            "category": "ConditionEvaluation",
+            "reason": "This step evaluates whether the condition (active cancer) is met and assigns the corresponding score. This fits the ConditionEvaluation category.",
+            "detail": "If active cancer is present, assign 2 points. If not, assign 0 points."
+        },
+        {
+            "step_id": "2",
+            "step_name": "male_uncontrolled_hypertension_score",
+            "step_description": "Assign a score based on the presence of male with uncontrolled hypertension according to the VTE bleeding risk scoring system.",
+            "step_inputs": [
+                {
+                    "input_name": "male_uncontrolled_hypertension_present",
+                    "input_desc": "Whether the patient is a male with uncontrolled hypertension (yes/no).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.male_uncontrolled_hypertension_present"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "male_uncontrolled_hypertension_score",
+                    "output_desc": "Score for male with uncontrolled hypertension according to the VTE bleeding risk scoring system.",
+                    "output_type": "float"
+                }
+            ],
+            "category": "ConditionEvaluation",
+            "reason": "This step evaluates whether the condition (male with uncontrolled hypertension) is met and assigns the corresponding score. This fits the ConditionEvaluation category.",
+            "detail": "If the patient is a male with uncontrolled hypertension, assign 1 point. If not, assign 0 points."
+        },
+        {
+            "step_id": "3",
+            "step_name": "anemia_score",
+            "step_description": "Assign a score based on the presence of anemia according to the VTE bleeding risk scoring system.",
+            "step_inputs": [
+                {
+                    "input_name": "anemia_present",
+                    "input_desc": "Whether the patient has anemia (yes/no).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.anemia_present"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "anemia_score",
+                    "output_desc": "Score for anemia according to the VTE bleeding risk scoring system.",
+                    "output_type": "float"
+                }
+            ],
+            "category": "ConditionEvaluation",
+            "reason": "This step evaluates whether the condition (anemia) is met and assigns the corresponding score. This fits the ConditionEvaluation category.",
+            "detail": "If anemia is present, assign 1.5 points. If not, assign 0 points."
+        },
+        {
+            "step_id": "4",
+            "step_name": "previous_bleeding_history_score",
+            "step_description": "Assign a score based on the presence of previous bleeding history according to the VTE bleeding risk scoring system.",
+            "step_inputs": [
+                {
+                    "input_name": "previous_bleeding_history_present",
+                    "input_desc": "Whether the patient has a previous bleeding history (yes/no).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.previous_bleeding_history_present"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "previous_bleeding_history_score",
+                    "output_desc": "Score for previous bleeding history according to the VTE bleeding risk scoring system.",
+                    "output_type": "float"
+                }
+            ],
+            "category": "ConditionEvaluation",
+            "reason": "This step evaluates whether the condition (previous bleeding history) is met and assigns the corresponding score. This fits the ConditionEvaluation category.",
+            "detail": "If previous bleeding history is present, assign 1.5 points. If not, assign 0 points."
+        },
+        {
+            "step_id": "5",
+            "step_name": "age_score",
+            "step_description": "Assign a score based on the presence of age ≥60 years according to the VTE bleeding risk scoring system.",
+            "step_inputs": [
+                {
+                    "input_name": "age_60_or_more_present",
+                    "input_desc": "Whether the patient is aged ≥60 years (yes/no).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.age_60_or_more_present"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "age_score",
+                    "output_desc": "Score for age ≥60 years according to the VTE bleeding risk scoring system.",
+                    "output_type": "float"
+                }
+            ],
+            "category": "ConditionEvaluation",
+            "reason": "This step evaluates whether the condition (age ≥60 years) is met and assigns the corresponding score. This fits the ConditionEvaluation category.",
+            "detail": "If the patient is aged ≥60 years, assign 1.5 points. If not, assign 0 points."
+        },
+        {
+            "step_id": "6",
+            "step_name": "renal_insufficiency_score",
+            "step_description": "Assign a score based on the presence of renal insufficiency according to the VTE bleeding risk scoring system.",
+            "step_inputs": [
+                {
+                    "input_name": "renal_insufficiency_present",
+                    "input_desc": "Whether the patient has renal insufficiency (yes/no).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.renal_insufficiency_present"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "renal_insufficiency_score",
+                    "output_desc": "Score for renal insufficiency according to the VTE bleeding risk scoring system.",
+                    "output_type": "float"
+                }
+            ],
+            "category": "ConditionEvaluation",
+            "reason": "This step evaluates whether the condition (renal insufficiency) is met and assigns the corresponding score. This fits the ConditionEvaluation category.",
+            "detail": "If renal insufficiency is present, assign 1.5 points. If not, assign 0 points."
+        },
+        {
+            "step_id": "7",
+            "step_name": "total_score_calculation",
+            "step_description": "Calculate the total risk score by summing all individual scores.",
+            "step_inputs": [
+                {
+                    "input_name": "active_cancer_score",
+                    "input_desc": "Score for active cancer.",
+                    "input_type": "float",
+                    "input_source": "$|step1|.active_cancer_score"
+                },
+                {
+                    "input_name": "male_uncontrolled_hypertension_score",
+                    "input_desc": "Score for male with uncontrolled hypertension.",
+                    "input_type": "float",
+                    "input_source": "$|step2|.male_uncontrolled_hypertension_score"
+                },
+                {
+                    "input_name": "anemia_score",
+                    "input_desc": "Score for anemia.",
+                    "input_type": "float",
+                    "input_source": "$|step3|.anemia_score"
+                },
+                {
+                    "input_name": "previous_bleeding_history_score",
+                    "input_desc": "Score for previous bleeding history.",
+                    "input_type": "float",
+                    "input_source": "$|step4|.previous_bleeding_history_score"
+                },
+                {
+                    "input_name": "age_score",
+                    "input_desc": "Score for age ≥60 years.",
+                    "input_type": "float",
+                    "input_source": "$|step5|.age_score"
+                },
+                {
+                    "input_name": "renal_insufficiency_score",
+                    "input_desc": "Score for renal insufficiency.",
+                    "input_type": "float",
+                    "input_source": "$|step6|.renal_insufficiency_score"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_score",
+                    "output_desc": "Total risk score for major bleeding in patients on anticoagulation therapy.",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "This step involves summing all individual scores to get the total score, which is a simple arithmetic operation. This fits the FormulaCalculation category.",
+            "detail": "The total score is calculated by summing up all individual scores. The maximum possible score is 2 + 1 + 1.5 + 1.5 + 1.5 + 1.5 = 9."
+        }
+    ],
+    "output": {
+        "output_name": "total_score",
+        "output_desc": "Total risk score for major bleeding in patients on anticoagulation therapy.",
+        "output_type": "float"
+    },
+    "code": "def solve(active_cancer_present, male_uncontrolled_hypertension_present, anemia_present, previous_bleeding_history_present, age_60_or_more_present, renal_insufficiency_present):\n    # Step 1: Active Cancer Score Calculation\n    # Assign a score based on the presence of active cancer according to the VTE bleeding risk scoring system.\n    active_cancer_score = 2.0 if active_cancer_present else 0.0\n    yield {\n        \"step_name\": \"active_cancer_score\",\n        \"step_description\": \"Assign a score based on the presence of active cancer according to the VTE bleeding risk scoring system.\",\n        \"step_result\": active_cancer_score,\n        \"unit\": None\n    }\n\n    # Step 2: Male with Uncontrolled Hypertension Score Calculation\n    # Assign a score based on the presence of male with uncontrolled hypertension according to the VTE bleeding risk scoring system.\n    male_uncontrolled_hypertension_score = 1.0 if male_uncontrolled_hypertension_present else 0.0\n    yield {\n        \"step_name\": \"male_uncontrolled_hypertension_score\",\n        \"step_description\": \"Assign a score based on the presence of male with uncontrolled hypertension according to the VTE bleeding risk scoring system.\",\n        \"step_result\": male_uncontrolled_hypertension_score,\n        \"unit\": None\n    }\n\n    # Step 3: Anemia Score Calculation\n    # Assign a score based on the presence of anemia according to the VTE bleeding risk scoring system.\n    anemia_score = 1.5 if anemia_present else 0.0\n    yield {\n        \"step_name\": \"anemia_score\",\n        \"step_description\": \"Assign a score based on the presence of anemia according to the VTE bleeding risk scoring system.\",\n        \"step_result\": anemia_score,\n        \"unit\": None\n    }\n\n    # Step 4: Previous Bleeding History Score Calculation\n    # Assign a score based on the presence of previous bleeding history according to the VTE bleeding risk scoring system.\n    previous_bleeding_history_score = 1.5 if previous_bleeding_history_present else 0.0\n    yield {\n        \"step_name\": \"previous_bleeding_history_score\",\n        \"step_description\": \"Assign a score based on the presence of previous bleeding history according to the VTE bleeding risk scoring system.\",\n        \"step_result\": previous_bleeding_history_score,\n        \"unit\": None\n    }\n\n    # Step 5: Age ≥60 Years Score Calculation\n    # Assign a score based on the presence of age ≥60 years according to the VTE bleeding risk scoring system.\n    age_score = 1.5 if age_60_or_more_present else 0.0\n    yield {\n        \"step_name\": \"age_score\",\n        \"step_description\": \"Assign a score based on the presence of age ≥60 years according to the VTE bleeding risk scoring system.\",\n        \"step_result\": age_score,\n        \"unit\": None\n    }\n\n    # Step 6: Renal Insufficiency Score Calculation\n    # Assign a score based on the presence of renal insufficiency according to the VTE bleeding risk scoring system.\n    renal_insufficiency_score = 1.5 if renal_insufficiency_present else 0.0\n    yield {\n        \"step_name\": \"renal_insufficiency_score\",\n        \"step_description\": \"Assign a score based on the presence of renal insufficiency according to the VTE bleeding risk scoring system.\",\n        \"step_result\": renal_insufficiency_score,\n        \"unit\": None\n    }\n\n    # Step 7: Total Score Calculation\n    # Calculate the total risk score by summing all individual scores.\n    total_score = (\n        active_cancer_score +\n        male_uncontrolled_hypertension_score +\n        anemia_score +\n        previous_bleeding_history_score +\n        age_score +\n        renal_insufficiency_score\n    )\n    yield {\n        \"step_name\": \"total_score_calculation\",\n        \"step_description\": \"Calculate the total risk score by summing all individual scores.\",\n        \"step_result\": total_score,\n        \"unit\": None\n    }\n\n    return total_score"
+}

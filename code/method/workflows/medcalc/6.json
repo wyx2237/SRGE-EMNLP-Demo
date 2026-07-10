@@ -1,0 +1,53 @@
+{
+    "name": "bmi_calculation_workflow",
+    "description": "Calculate patient's Body Mass Index (BMI) using weight in kg and height in m, with result rounded to 4 decimal places.",
+    "inputs": [
+        {
+            "input_name": "weight_kg",
+            "input_desc": "The patient's weight in kilograms (kg)",
+            "input_type": "float"
+        },
+        {
+            "input_name": "height_m",
+            "input_desc": "The patient's height in meters (m)",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "bmi_calculation",
+            "step_description": "Calculate the patient's Body Mass Index (BMI) using the standard formula.",
+            "step_inputs": [
+                {
+                    "input_name": "weight_kg",
+                    "input_desc": "The patient's weight in kilograms (kg)",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.weight_kg"
+                },
+                {
+                    "input_name": "height_m",
+                    "input_desc": "The patient's height in meters (m)",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.height_m"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "bmi",
+                    "output_desc": "The calculated BMI value in kg/m²",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "This step requires a precise numerical calculation using the standard BMI formula (weight / height^2), which perfectly matches the FormulaCalculation tool template.",
+            "detail": "BMI = weight_kg / (height_m * height_m). The result is rounded to 4 decimal places."
+        }
+    ],
+    "output": {
+        "output_name": "bmi",
+        "output_desc": "The final calculated BMI value in kg/m²",
+        "output_type": "float"
+    },
+    "code": "def solve(weight_kg, height_m):\n    \"\"\"\n    Calculate BMI using weight in kg and height in meters.\n    Returns the BMI value rounded to 4 decimal places.\n    \"\"\"\n    # Step 1: bmi_calculation - Calculate BMI using formula weight / (height^2)\n    bmi = weight_kg / (height_m * height_m)\n    bmi = round(bmi, 4)\n    \n    yield {\n        \"step_name\": \"bmi_calculation\",\n        \"step_description\": \"Calculate the patient's Body Mass Index (BMI) using the standard formula: BMI = weight_kg / (height_m * height_m), rounded to 4 decimal places\",\n        \"step_result\": bmi,\n        \"unit\": \"kg/m²\"\n    }\n    \n    return bmi"
+}

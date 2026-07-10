@@ -1,0 +1,53 @@
+{
+    "name": "hodges_qtc_calculation_workflow",
+    "description": "Calculate the corrected QT interval (QTc) using the Hodges formula: QTc = QT_interval + 1.75 × (heart_rate - 60).",
+    "inputs": [
+        {
+            "input_name": "qt_interval",
+            "input_desc": "Measured QT interval in milliseconds (ms)",
+            "input_type": "float"
+        },
+        {
+            "input_name": "heart_rate",
+            "input_desc": "Heart rate in beats per minute (beats/min)",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "compute_hodges_qtc",
+            "step_description": "Calculate QTc using the Hodges formula: QTc = QT_interval + 1.75 × (heart_rate - 60)",
+            "step_inputs": [
+                {
+                    "input_name": "qt_interval",
+                    "input_desc": "Measured QT interval in milliseconds (ms)",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.qt_interval"
+                },
+                {
+                    "input_name": "heart_rate",
+                    "input_desc": "Heart rate in beats per minute (beats/min)",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.heart_rate"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "qtc",
+                    "output_desc": "Corrected QT interval in milliseconds (ms)",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "The Hodges formula is a precise mathematical equation requiring numerical computation of all variables to produce a single QTc value. No conditional branching or lookup tables are involved.",
+            "detail": "QTc = QT_interval (ms) + 1.75 × (heart_rate (beats/min) - 60). The result is calculated and should be rounded to a reasonable number of decimal places, such as 4."
+        }
+    ],
+    "output": {
+        "output_name": "qtc",
+        "output_desc": "The corrected QT interval calculated using the Hodges formula, in milliseconds (ms)",
+        "output_type": "float"
+    },
+    "code": "import math\n\ndef solve(qt_interval, heart_rate):\n    \"\"\"\n    Calculate the corrected QT interval (QTc) using the Hodges formula.\n    \n    Args:\n        qt_interval: Measured QT interval in milliseconds (ms)\n        heart_rate: Heart rate in beats per minute (beats/min)\n    \n    Yields:\n        dict: Step information with keys step_name, step_description, step_result, unit\n    \"\"\"\n    # Step 1: Compute QTc using Hodges formula\n    # QTc = QT_interval + 1.75 * (heart_rate - 60)\n    qtc = qt_interval + 1.75 * (heart_rate - 60)\n    # Round to 4 decimal places as specified\n    qtc = round(qtc, 4)\n    \n    yield {\n        \"step_name\": \"compute_hodges_qtc\",\n        \"step_description\": \"Calculate QTc using the Hodges formula: QTc = QT_interval + 1.75 * (heart_rate - 60)\",\n        \"step_result\": qtc,\n        \"unit\": \"ms\"\n    }\n    \n    # Return the final corrected QT interval\n    return qtc"
+}

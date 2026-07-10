@@ -1,0 +1,241 @@
+{
+    "name": "major_bleeding_risk_score_calculation",
+    "description": "Calculate the total score for the risk of major bleeding in patients on oral anticoagulation therapy within 1 year based on predefined criteria.",
+    "inputs": [
+        {
+            "input_name": "hypertension_uncontrolled",
+            "input_desc": "Whether the patient has uncontrolled hypertension (yes/no).",
+            "input_type": "boolean"
+        },
+        {
+            "input_name": "renal_abnormalities",
+            "input_desc": "Whether the patient has renal abnormalities (yes/no).",
+            "input_type": "boolean"
+        },
+        {
+            "input_name": "liver_abnormalities",
+            "input_desc": "Whether the patient has liver abnormalities (yes/no).",
+            "input_type": "boolean"
+        },
+        {
+            "input_name": "stroke_history",
+            "input_desc": "Whether the patient has a history of stroke or TIA (yes/no).",
+            "input_type": "boolean"
+        },
+        {
+            "input_name": "bleeding_history",
+            "input_desc": "Whether the patient has a history of bleeding or bleeding tendency (yes/no).",
+            "input_type": "boolean"
+        },
+        {
+            "input_name": "inr_unstable",
+            "input_desc": "Whether the patient has unstable INR (TTR <60%) while on warfarin (yes/no).",
+            "input_type": "boolean"
+        },
+        {
+            "input_name": "elderly",
+            "input_desc": "Whether the patient is aged ≥65 years (yes/no).",
+            "input_type": "boolean"
+        },
+        {
+            "input_name": "drug_use",
+            "input_desc": "Whether the patient is using antiplatelet drugs or NSAIDs (yes/no).",
+            "input_type": "boolean"
+        },
+        {
+            "input_name": "excessive_alcohol",
+            "input_desc": "Whether the patient consumes excessive alcohol (weekly >8 units, Chinese standard) (yes/no).",
+            "input_type": "boolean"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "score_calculation",
+            "step_description": "Evaluate each condition and assign a score of 1 if the condition is met.",
+            "step_inputs": [
+                {
+                    "input_name": "hypertension_uncontrolled",
+                    "input_desc": "Whether the patient has uncontrolled hypertension (yes/no).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.hypertension_uncontrolled"
+                },
+                {
+                    "input_name": "renal_abnormalities",
+                    "input_desc": "Whether the patient has renal abnormalities (yes/no).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.renal_abnormalities"
+                },
+                {
+                    "input_name": "liver_abnormalities",
+                    "input_desc": "Whether the patient has liver abnormalities (yes/no).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.liver_abnormalities"
+                },
+                {
+                    "input_name": "stroke_history",
+                    "input_desc": "Whether the patient has a history of stroke or TIA (yes/no).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.stroke_history"
+                },
+                {
+                    "input_name": "bleeding_history",
+                    "input_desc": "Whether the patient has a history of bleeding or bleeding tendency (yes/no).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.bleeding_history"
+                },
+                {
+                    "input_name": "inr_unstable",
+                    "input_desc": "Whether the patient has unstable INR (TTR <60%) while on warfarin (yes/no).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.inr_unstable"
+                },
+                {
+                    "input_name": "elderly",
+                    "input_desc": "Whether the patient is aged ≥65 years (yes/no).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.elderly"
+                },
+                {
+                    "input_name": "drug_use",
+                    "input_desc": "Whether the patient is using antiplatelet drugs or NSAIDs (yes/no).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.drug_use"
+                },
+                {
+                    "input_name": "excessive_alcohol",
+                    "input_desc": "Whether the patient consumes excessive alcohol (weekly >8 units, Chinese standard) (yes/no).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.excessive_alcohol"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "hypertension_uncontrolled_score",
+                    "output_desc": "Score for uncontrolled hypertension (0 or 1).",
+                    "output_type": "integer"
+                },
+                {
+                    "output_name": "renal_abnormalities_score",
+                    "output_desc": "Score for renal abnormalities (0 or 1).",
+                    "output_type": "integer"
+                },
+                {
+                    "output_name": "liver_abnormalities_score",
+                    "output_desc": "Score for liver abnormalities (0 or 1).",
+                    "output_type": "integer"
+                },
+                {
+                    "output_name": "stroke_history_score",
+                    "output_desc": "Score for stroke history (0 or 1).",
+                    "output_type": "integer"
+                },
+                {
+                    "output_name": "bleeding_history_score",
+                    "output_desc": "Score for bleeding history (0 or 1).",
+                    "output_type": "integer"
+                },
+                {
+                    "output_name": "inr_unstable_score",
+                    "output_desc": "Score for unstable INR (0 or 1).",
+                    "output_type": "integer"
+                },
+                {
+                    "output_name": "elderly_score",
+                    "output_desc": "Score for being elderly (0 or 1).",
+                    "output_type": "integer"
+                },
+                {
+                    "output_name": "drug_use_score",
+                    "output_desc": "Score for drug use (0 or 1).",
+                    "output_type": "integer"
+                },
+                {
+                    "output_name": "excessive_alcohol_score",
+                    "output_desc": "Score for excessive alcohol consumption (0 or 1).",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "ConditionEvaluation",
+            "reason": "This step evaluates whether each condition is met and assigns a score of 1 if it is. Since each condition is independent and contributes a fixed value of 1 if true, this fits the ConditionEvaluation category.",
+            "detail": "Each condition is evaluated individually. If the condition is met, a score of 1 is assigned; otherwise, a score of 0 is assigned."
+        },
+        {
+            "step_id": "2",
+            "step_name": "sum_score",
+            "step_description": "Sum all individual scores to get the total score for the risk of major bleeding.",
+            "step_inputs": [
+                {
+                    "input_name": "hypertension_uncontrolled_score",
+                    "input_desc": "Score for uncontrolled hypertension (0 or 1).",
+                    "input_type": "integer",
+                    "input_source": "$|step1|.hypertension_uncontrolled_score"
+                },
+                {
+                    "input_name": "renal_abnormalities_score",
+                    "input_desc": "Score for renal abnormalities (0 or 1).",
+                    "input_type": "integer",
+                    "input_source": "$|step1|.renal_abnormalities_score"
+                },
+                {
+                    "input_name": "liver_abnormalities_score",
+                    "input_desc": "Score for liver abnormalities (0 or 1).",
+                    "input_type": "integer",
+                    "input_source": "$|step1|.liver_abnormalities_score"
+                },
+                {
+                    "input_name": "stroke_history_score",
+                    "input_desc": "Score for stroke history (0 or 1).",
+                    "input_type": "integer",
+                    "input_source": "$|step1|.stroke_history_score"
+                },
+                {
+                    "input_name": "bleeding_history_score",
+                    "input_desc": "Score for bleeding history (0 or 1).",
+                    "input_type": "integer",
+                    "input_source": "$|step1|.bleeding_history_score"
+                },
+                {
+                    "input_name": "inr_unstable_score",
+                    "input_desc": "Score for unstable INR (0 or 1).",
+                    "input_type": "integer",
+                    "input_source": "$|step1|.inr_unstable_score"
+                },
+                {
+                    "input_name": "elderly_score",
+                    "input_desc": "Score for being elderly (0 or 1).",
+                    "input_type": "integer",
+                    "input_source": "$|step1|.elderly_score"
+                },
+                {
+                    "input_name": "drug_use_score",
+                    "input_desc": "Score for drug use (0 or 1).",
+                    "input_type": "integer",
+                    "input_source": "$|step1|.drug_use_score"
+                },
+                {
+                    "input_name": "excessive_alcohol_score",
+                    "input_desc": "Score for excessive alcohol consumption (0 or 1).",
+                    "input_type": "integer",
+                    "input_source": "$|step1|.excessive_alcohol_score"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_score",
+                    "output_desc": "Total score for the risk of major bleeding in patients on oral anticoagulation therapy within 1 year.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "This step sums all individual scores to obtain the total score. This involves a simple arithmetic operation, which fits the FormulaCalculation category.",
+            "detail": "All individual scores are summed together to calculate the total score."
+        }
+    ],
+    "output": {
+        "output_name": "total_score",
+        "output_desc": "Total score for the risk of major bleeding in patients on oral anticoagulation therapy within 1 year.",
+        "output_type": "integer"
+    },
+    "code": "def solve(hypertension_uncontrolled, renal_abnormalities, liver_abnormalities, stroke_history, bleeding_history, inr_unstable, elderly, drug_use, excessive_alcohol):\n    # Step 1: Score Calculation for Each Condition\n    # Evaluate each condition and assign a score of 1 if the condition is met.\n    hypertension_uncontrolled_score = 1 if hypertension_uncontrolled else 0\n    renal_abnormalities_score = 1 if renal_abnormalities else 0\n    liver_abnormalities_score = 1 if liver_abnormalities else 0\n    stroke_history_score = 1 if stroke_history else 0\n    bleeding_history_score = 1 if bleeding_history else 0\n    inr_unstable_score = 1 if inr_unstable else 0\n    elderly_score = 1 if elderly else 0\n    drug_use_score = 1 if drug_use else 0\n    excessive_alcohol_score = 1 if excessive_alcohol else 0\n\n    yield {\n        \"step_name\": \"score_calculation\",\n        \"step_description\": \"Evaluate each condition and assign a score of 1 if the condition is met.\",\n        \"step_result\": {\n            \"hypertension_uncontrolled_score\": hypertension_uncontrolled_score,\n            \"renal_abnormalities_score\": renal_abnormalities_score,\n            \"liver_abnormalities_score\": liver_abnormalities_score,\n            \"stroke_history_score\": stroke_history_score,\n            \"bleeding_history_score\": bleeding_history_score,\n            \"inr_unstable_score\": inr_unstable_score,\n            \"elderly_score\": elderly_score,\n            \"drug_use_score\": drug_use_score,\n            \"excessive_alcohol_score\": excessive_alcohol_score\n        },\n        \"unit\": None\n    }\n\n    # Step 2: Sum All Individual Scores to Get the Total Score\n    # Sum all individual scores to get the total score for the risk of major bleeding.\n    total_score = (\n        hypertension_uncontrolled_score +\n        renal_abnormalities_score +\n        liver_abnormalities_score +\n        stroke_history_score +\n        bleeding_history_score +\n        inr_unstable_score +\n        elderly_score +\n        drug_use_score +\n        excessive_alcohol_score\n    )\n\n    yield {\n        \"step_name\": \"sum_score\",\n        \"step_description\": \"Sum all individual scores to get the total score for the risk of major bleeding.\",\n        \"step_result\": total_score,\n        \"unit\": None\n    }\n\n    return total_score"
+}

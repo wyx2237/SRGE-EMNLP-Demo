@@ -1,0 +1,221 @@
+{
+    "name": "cha2ds2_vasc_score_calculation_workflow",
+    "description": "Calculate the CHA2DS2-VASc score based on patient age, sex, and clinical history criteria.",
+    "inputs": [
+        {
+            "input_name": "age",
+            "input_desc": "Patient's age in years",
+            "input_type": "int"
+        },
+        {
+            "input_name": "sex",
+            "input_desc": "Patient's biological sex. Allowed values: 'Female', 'Male'.",
+            "input_type": "str"
+        },
+        {
+            "input_name": "chf",
+            "input_desc": "History of congestive heart failure. True for Yes, False for No.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "hypertension",
+            "input_desc": "History of hypertension. True for Yes, False for No.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "stroke",
+            "input_desc": "History of stroke, TIA, or thromboembolism. True for Yes, False for No.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "vascular_disease",
+            "input_desc": "History of vascular disease (previous MI, peripheral artery disease, or aortic plaque). True for Yes, False for No.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "diabetes",
+            "input_desc": "History of diabetes mellitus. True for Yes, False for No.",
+            "input_type": "bool"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "age_points_assessment",
+            "step_description": "Determine the point value for age based on CHA2DS2-VASc criteria.",
+            "step_inputs": [
+                {
+                    "input_name": "age",
+                    "input_desc": "Patient's age in years",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.age"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "age_points",
+                    "output_desc": "Points assigned for age criterion",
+                    "output_type": "int"
+                }
+            ],
+            "category": "threshold_mapping",
+            "reason": "This step maps the continuous numerical age value to discrete point categories (0, 1, 2) based on predefined threshold ranges.",
+            "detail": "If age < 65: 0 points; If 65 ≤ age ≤ 74: 1 point; If age ≥ 75: 2 points."
+        },
+        {
+            "step_id": "2",
+            "step_name": "sex_points_assessment",
+            "step_description": "Determine the point value for sex based on CHA2DS2-VASc criteria.",
+            "step_inputs": [
+                {
+                    "input_name": "sex",
+                    "input_desc": "Patient's biological sex. Allowed values: 'Female', 'Male'.",
+                    "input_type": "str",
+                    "input_source": "$|raw input|.sex"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "sex_points",
+                    "output_desc": "Points assigned for sex criterion",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step evaluates a condition (sex equals 'Female') to determine a predefined output value.",
+            "detail": "If sex is 'Female': 1 point; If sex is 'Male': 0 points."
+        },
+        {
+            "step_id": "3",
+            "step_name": "clinical_history_points_assessment",
+            "step_description": "Determine the point values for five clinical history criteria: CHF, Hypertension, Stroke/TIA/Thromboembolism, Vascular disease, and Diabetes.",
+            "step_inputs": [
+                {
+                    "input_name": "chf",
+                    "input_desc": "History of congestive heart failure. True for Yes, False for No.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.chf"
+                },
+                {
+                    "input_name": "hypertension",
+                    "input_desc": "History of hypertension. True for Yes, False for No.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.hypertension"
+                },
+                {
+                    "input_name": "stroke",
+                    "input_desc": "History of stroke, TIA, or thromboembolism. True for Yes, False for No.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.stroke"
+                },
+                {
+                    "input_name": "vascular_disease",
+                    "input_desc": "History of vascular disease (MI, PAD, or aortic plaque). True for Yes, False for No.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.vascular_disease"
+                },
+                {
+                    "input_name": "diabetes",
+                    "input_desc": "History of diabetes mellitus. True for Yes, False for No.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.diabetes"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "chf_points",
+                    "output_desc": "Points for CHF",
+                    "output_type": "int"
+                },
+                {
+                    "output_name": "hypertension_points",
+                    "output_desc": "Points for hypertension",
+                    "output_type": "int"
+                },
+                {
+                    "output_name": "stroke_points",
+                    "output_desc": "Points for stroke/TIA/thromboembolism",
+                    "output_type": "int"
+                },
+                {
+                    "output_name": "vascular_points",
+                    "output_desc": "Points for vascular disease",
+                    "output_type": "int"
+                },
+                {
+                    "output_name": "diabetes_points",
+                    "output_desc": "Points for diabetes",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "Each clinical history criterion is a boolean condition that, when true, yields a specific point value. This bundles five parallel evaluations for efficiency.",
+            "detail": "For each history condition, assign points as follows: CHF: True=1, False=0; Hypertension: True=1, False=0; Stroke/TIA/Thromboembolism: True=2, False=0; Vascular disease: True=1, False=0; Diabetes: True=1, False=0."
+        },
+        {
+            "step_id": "4",
+            "step_name": "total_score_calculation",
+            "step_description": "Sum all individual criterion points to compute the final CHA2DS2-VASc score.",
+            "step_inputs": [
+                {
+                    "input_name": "age_points",
+                    "input_desc": "Points from age criterion",
+                    "input_type": "int",
+                    "input_source": "$|step1|.age_points"
+                },
+                {
+                    "input_name": "sex_points",
+                    "input_desc": "Points from sex criterion",
+                    "input_type": "int",
+                    "input_source": "$|step2|.sex_points"
+                },
+                {
+                    "input_name": "chf_points",
+                    "input_desc": "Points from CHF criterion",
+                    "input_type": "int",
+                    "input_source": "$|step3|.chf_points"
+                },
+                {
+                    "input_name": "hypertension_points",
+                    "input_desc": "Points from hypertension criterion",
+                    "input_type": "int",
+                    "input_source": "$|step3|.hypertension_points"
+                },
+                {
+                    "input_name": "stroke_points",
+                    "input_desc": "Points from stroke/TIA/thromboembolism criterion",
+                    "input_type": "int",
+                    "input_source": "$|step3|.stroke_points"
+                },
+                {
+                    "input_name": "vascular_points",
+                    "input_desc": "Points from vascular disease criterion",
+                    "input_type": "int",
+                    "input_source": "$|step3|.vascular_points"
+                },
+                {
+                    "input_name": "diabetes_points",
+                    "input_desc": "Points from diabetes criterion",
+                    "input_type": "int",
+                    "input_source": "$|step3|.diabetes_points"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_score",
+                    "output_desc": "Final CHA2DS2-VASc score (sum of all points)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step performs a simple arithmetic sum of all individual point values.",
+            "detail": "Sum = age_points + sex_points + chf_points + hypertension_points + stroke_points + vascular_points + diabetes_points."
+        }
+    ],
+    "output": {
+        "output_name": "total_score",
+        "output_desc": "The calculated CHA2DS2-VASc score",
+        "output_type": "int"
+    },
+    "code": "def solve(age, sex, chf, hypertension, stroke, vascular_disease, diabetes):\n    # Step 1: age_points_assessment\n    # Determine the point value for age based on CHA2DS2-VASc criteria.\n    if age < 65:\n        age_points = 0\n    elif 65 <= age <= 74:\n        age_points = 1\n    else:  # age >= 75\n        age_points = 2\n    yield {\n        \"step_name\": \"age_points_assessment\",\n        \"step_description\": \"Determine the point value for age based on CHA2DS2-VASc criteria: age < 65 gives 0, 65-74 gives 1, >=75 gives 2\",\n        \"step_result\": age_points,\n        \"unit\": None\n    }\n\n    # Step 2: sex_points_assessment\n    # Determine the point value for sex based on CHA2DS2-VASc criteria.\n    if sex == 'Female':\n        sex_points = 1\n    else:  # sex == 'Male'\n        sex_points = 0\n    yield {\n        \"step_name\": \"sex_points_assessment\",\n        \"step_description\": \"Determine the point value for sex: Female gives 1 point, Male gives 0 points\",\n        \"step_result\": sex_points,\n        \"unit\": None\n    }\n\n    # Step 3: clinical_history_points_assessment\n    # Determine the point values for five clinical history criteria.\n    chf_points = 1 if chf else 0\n    hypertension_points = 1 if hypertension else 0\n    stroke_points = 2 if stroke else 0\n    vascular_points = 1 if vascular_disease else 0\n    diabetes_points = 1 if diabetes else 0\n    yield {\n        \"step_name\": \"clinical_history_points_assessment\",\n        \"step_description\": \"Assign points for clinical history: CHF (1 if True), Hypertension (1 if True), Stroke/TIA (2 if True), Vascular disease (1 if True), Diabetes (1 if True)\",\n        \"step_result\": {\n            \"chf_points\": chf_points,\n            \"hypertension_points\": hypertension_points,\n            \"stroke_points\": stroke_points,\n            \"vascular_points\": vascular_points,\n            \"diabetes_points\": diabetes_points\n        },\n        \"unit\": None\n    }\n\n    # Step 4: total_score_calculation\n    # Sum all individual criterion points to compute the final CHA2DS2-VASc score.\n    total_score = age_points + sex_points + chf_points + hypertension_points + stroke_points + vascular_points + diabetes_points\n    yield {\n        \"step_name\": \"total_score_calculation\",\n        \"step_description\": \"Sum all individual criterion points to compute the final CHA2DS2-VASc score\",\n        \"step_result\": total_score,\n        \"unit\": None\n    }\n\n    # Final output\n    return total_score"
+}

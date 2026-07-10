@@ -1,0 +1,53 @@
+{
+    "name": "body_surface_area_calculation_workflow",
+    "description": "Calculate body surface area using the Mosteller formula: sqrt((weight in kg * height in cm) / 3600).",
+    "inputs": [
+        {
+            "input_name": "weight_in_kg",
+            "input_desc": "Patient's weight in kilograms",
+            "input_type": "float"
+        },
+        {
+            "input_name": "height_in_cm",
+            "input_desc": "Patient's height in centimeters",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "body_surface_area_calculation",
+            "step_description": "Calculate the patient's body surface area using the Mosteller formula: sqrt((weight_in_kg * height_in_cm) / 3600).",
+            "step_inputs": [
+                {
+                    "input_name": "weight_in_kg",
+                    "input_desc": "Patient's weight in kilograms",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.weight_in_kg"
+                },
+                {
+                    "input_name": "height_in_cm",
+                    "input_desc": "Patient's height in centimeters",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.height_in_cm"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "body_surface_area",
+                    "output_desc": "Body surface area in square meters, rounded to 4 decimal places",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step calculates body surface area directly using a single, clear mathematical formula. It requires precise numerical computation and outputs a single numeric result, fitting the FormulaCalculation tool template.",
+            "detail": "BSA = sqrt((weight_in_kg * height_in_cm) / 3600). The result is rounded to 4 decimal places."
+        }
+    ],
+    "output": {
+        "output_name": "body_surface_area",
+        "output_desc": "The final calculated body surface area in square meters",
+        "output_type": "float"
+    },
+    "code": "import math\n\ndef solve(weight_in_kg, height_in_cm):\n    # Step 1: body_surface_area_calculation\n    # Calculate the patient's body surface area using the Mosteller formula: sqrt((weight_in_kg * height_in_cm) / 3600).\n    body_surface_area = math.sqrt((weight_in_kg * height_in_cm) / 3600)\n    body_surface_area = round(body_surface_area, 4)\n    \n    yield {\n        \"step_name\": \"body_surface_area_calculation\",\n        \"step_description\": \"Calculate the patient's body surface area using the Mosteller formula: sqrt((weight_in_kg * height_in_cm) / 3600).\",\n        \"step_result\": body_surface_area,\n        \"unit\": \"m^2\"\n    }\n    \n    return body_surface_area"
+}

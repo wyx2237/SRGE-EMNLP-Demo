@@ -1,0 +1,269 @@
+{
+    "name": "burch_wartofsky_score_calculation",
+    "description": "Calculate the total Burch-Wartofsky Point Scale (BWPS) score for a patient with thyrotoxicosis by summing scores from seven categories: thermoregulatory dysfunction, tachycardia, atrial fibrillation, congestive heart failure, CNS dysfunction, GI/hepatic dysfunction, and precipitating factor status.",
+    "inputs": [
+        {
+            "input_name": "highest_temperature",
+            "input_desc": "The highest measured body temperature in Celsius",
+            "input_type": "float"
+        },
+        {
+            "input_name": "heart_rate",
+            "input_desc": "Heart rate in beats per minute",
+            "input_type": "int"
+        },
+        {
+            "input_name": "atrial_fibrillation",
+            "input_desc": "Presence of atrial fibrillation",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "chf_severity",
+            "input_desc": "Severity of congestive heart failure (enum: none, mild, moderate, severe)",
+            "input_type": "str"
+        },
+        {
+            "input_name": "cns_severity",
+            "input_desc": "Severity of CNS dysfunction (enum: none, mild, moderate, severe)",
+            "input_type": "str"
+        },
+        {
+            "input_name": "gi_hepatic_severity",
+            "input_desc": "Severity of GI/hepatic dysfunction (enum: none, moderate, severe)",
+            "input_type": "str"
+        },
+        {
+            "input_name": "precipitant_present",
+            "input_desc": "Presence of a precipitating factor (e.g., infection, surgery, trauma, thyroidectomy, DKA)",
+            "input_type": "bool"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "temperature_score",
+            "step_description": "Assign a score based on the highest body temperature measured in Celsius.",
+            "step_inputs": [
+                {
+                    "input_name": "highest_temperature",
+                    "input_desc": "The highest measured body temperature in Celsius",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.highest_temperature"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "temperature_score",
+                    "output_desc": "Score for thermoregulatory dysfunction",
+                    "output_type": "int"
+                }
+            ],
+            "category": "tabular_mapping",
+            "reason": "This step maps a numerical temperature value to a categorical score based on predefined intervals.",
+            "detail": "If temperature <= 37.1, score = 0. If 37.2 <= temperature <= 37.7, score = 5. If 37.8 <= temperature <= 38.2, score = 10. If 38.3 <= temperature <= 38.8, score = 15. If 38.9 <= temperature <= 39.4, score = 20. If 39.5 <= temperature <= 39.9, score = 25. If temperature >= 40.0, score = 30."
+        },
+        {
+            "step_id": "2",
+            "step_name": "tachycardia_score",
+            "step_description": "Assign a score based on the heart rate in beats per minute.",
+            "step_inputs": [
+                {
+                    "input_name": "heart_rate",
+                    "input_desc": "Heart rate in beats per minute",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.heart_rate"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "tachycardia_score",
+                    "output_desc": "Score for tachycardia",
+                    "output_type": "int"
+                }
+            ],
+            "category": "tabular_mapping",
+            "reason": "This step maps a numerical heart rate value to a categorical score based on predefined intervals.",
+            "detail": "If heart_rate < 90, score = 0. If 90 <= heart_rate <= 109, score = 5. If 110 <= heart_rate <= 119, score = 10. If 120 <= heart_rate <= 129, score = 15. If 130 <= heart_rate <= 139, score = 20. If heart_rate >= 140, score = 25."
+        },
+        {
+            "step_id": "3",
+            "step_name": "atrial_fibrillation_score",
+            "step_description": "Assign a score based on the presence or absence of atrial fibrillation.",
+            "step_inputs": [
+                {
+                    "input_name": "atrial_fibrillation",
+                    "input_desc": "Presence of atrial fibrillation",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.atrial_fibrillation"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "atrial_fibrillation_score",
+                    "output_desc": "Score for atrial fibrillation",
+                    "output_type": "int"
+                }
+            ],
+            "category": "binary_choice",
+            "reason": "This step assigns a fixed score based on a binary condition (present/absent).",
+            "detail": "If atrial_fibrillation is False, score = 0. If atrial_fibrillation is True, score = 10."
+        },
+        {
+            "step_id": "4",
+            "step_name": "congestive_heart_failure_score",
+            "step_description": "Assign a score based on the severity of congestive heart failure.",
+            "step_inputs": [
+                {
+                    "input_name": "chf_severity",
+                    "input_desc": "Severity of congestive heart failure (enum: none, mild, moderate, severe)",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.chf_severity"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "chf_score",
+                    "output_desc": "Score for congestive heart failure",
+                    "output_type": "int"
+                }
+            ],
+            "category": "categorical_mapping",
+            "reason": "This step maps a categorical severity level to a corresponding score.",
+            "detail": "If chf_severity == 'none', score = 0. If 'mild', score = 5. If 'moderate', score = 10. If 'severe', score = 15."
+        },
+        {
+            "step_id": "5",
+            "step_name": "cns_dysfunction_score",
+            "step_description": "Assign a score based on the severity of central nervous system involvement.",
+            "step_inputs": [
+                {
+                    "input_name": "cns_severity",
+                    "input_desc": "Severity of CNS dysfunction (enum: none, mild, moderate, severe)",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.cns_severity"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "cns_score",
+                    "output_desc": "Score for CNS involvement",
+                    "output_type": "int"
+                }
+            ],
+            "category": "categorical_mapping",
+            "reason": "This step maps a categorical severity level to a corresponding score.",
+            "detail": "If cns_severity == 'none', score = 0. If 'mild', score = 10. If 'moderate', score = 20. If 'severe', score = 30."
+        },
+        {
+            "step_id": "6",
+            "step_name": "gi_hepatic_dysfunction_score",
+            "step_description": "Assign a score based on the severity of gastrointestinal or hepatic dysfunction.",
+            "step_inputs": [
+                {
+                    "input_name": "gi_hepatic_severity",
+                    "input_desc": "Severity of GI/hepatic dysfunction (enum: none, moderate, severe)",
+                    "input_type": "str",
+                    "input_source": "$|raw input|.gi_hepatic_severity"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "gi_hepatic_score",
+                    "output_desc": "Score for GI/hepatic dysfunction",
+                    "output_type": "int"
+                }
+            ],
+            "category": "categorical_mapping",
+            "reason": "This step maps a categorical severity level to a corresponding score.",
+            "detail": "If gi_hepatic_severity == 'none', score = 0. If 'moderate', score = 10. If 'severe', score = 20."
+        },
+        {
+            "step_id": "7",
+            "step_name": "precipitant_score",
+            "step_description": "Assign a score based on the presence or absence of a precipitating factor.",
+            "step_inputs": [
+                {
+                    "input_name": "precipitant_present",
+                    "input_desc": "Presence of a precipitating factor (e.g., infection, surgery, trauma, thyroidectomy, DKA)",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.precipitant_present"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "precipitant_score",
+                    "output_desc": "Score for precipitating factor status",
+                    "output_type": "int"
+                }
+            ],
+            "category": "binary_choice",
+            "reason": "This step assigns a fixed score based on a binary condition (present/absent).",
+            "detail": "If precipitant_present is False, score = 0. If precipitant_present is True, score = 10."
+        },
+        {
+            "step_id": "8",
+            "step_name": "total_bwps_score",
+            "step_description": "Sum all individual category scores to compute the total BWPS score.",
+            "step_inputs": [
+                {
+                    "input_name": "temperature_score",
+                    "input_desc": "Score for thermoregulatory dysfunction",
+                    "input_type": "int",
+                    "input_source": "$|1|.temperature_score"
+                },
+                {
+                    "input_name": "tachycardia_score",
+                    "input_desc": "Score for tachycardia",
+                    "input_type": "int",
+                    "input_source": "$|2|.tachycardia_score"
+                },
+                {
+                    "input_name": "atrial_fibrillation_score",
+                    "input_desc": "Score for atrial fibrillation",
+                    "input_type": "int",
+                    "input_source": "$|3|.atrial_fibrillation_score"
+                },
+                {
+                    "input_name": "chf_score",
+                    "input_desc": "Score for congestive heart failure",
+                    "input_type": "int",
+                    "input_source": "$|4|.chf_score"
+                },
+                {
+                    "input_name": "cns_score",
+                    "input_desc": "Score for CNS involvement",
+                    "input_type": "int",
+                    "input_source": "$|5|.cns_score"
+                },
+                {
+                    "input_name": "gi_hepatic_score",
+                    "input_desc": "Score for GI/hepatic dysfunction",
+                    "input_type": "int",
+                    "input_source": "$|6|.gi_hepatic_score"
+                },
+                {
+                    "input_name": "precipitant_score",
+                    "input_desc": "Score for precipitating factor status",
+                    "input_type": "int",
+                    "input_source": "$|7|.precipitant_score"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_score",
+                    "output_desc": "Total BWPS score",
+                    "output_type": "int"
+                }
+            ],
+            "category": "arithmetic_operation",
+            "reason": "This step performs an arithmetic sum of multiple integer scores.",
+            "detail": "total_score = temperature_score + tachycardia_score + atrial_fibrillation_score + chf_score + cns_score + gi_hepatic_score + precipitant_score."
+        }
+    ],
+    "output": {
+        "output_name": "total_score",
+        "output_desc": "The final total BWPS score",
+        "output_type": "int"
+    },
+    "code": "def solve(highest_temperature, heart_rate, atrial_fibrillation, chf_severity, cns_severity, gi_hepatic_severity, precipitant_present):\n    # Step 1: temperature_score - Assign a score based on the highest body temperature measured in Celsius.\n    if highest_temperature <= 37.1:\n        temperature_score = 0\n    elif 37.2 <= highest_temperature <= 37.7:\n        temperature_score = 5\n    elif 37.8 <= highest_temperature <= 38.2:\n        temperature_score = 10\n    elif 38.3 <= highest_temperature <= 38.8:\n        temperature_score = 15\n    elif 38.9 <= highest_temperature <= 39.4:\n        temperature_score = 20\n    elif 39.5 <= highest_temperature <= 39.9:\n        temperature_score = 25\n    else:  # temperature >= 40.0\n        temperature_score = 30\n    yield {\n        \"step_name\": \"temperature_score\",\n        \"step_description\": \"Assign a score based on the highest body temperature measured in Celsius.\",\n        \"step_result\": temperature_score,\n        \"unit\": None\n    }\n\n    # Step 2: tachycardia_score - Assign a score based on the heart rate in beats per minute.\n    if heart_rate < 90:\n        tachycardia_score = 0\n    elif 90 <= heart_rate <= 109:\n        tachycardia_score = 5\n    elif 110 <= heart_rate <= 119:\n        tachycardia_score = 10\n    elif 120 <= heart_rate <= 129:\n        tachycardia_score = 15\n    elif 130 <= heart_rate <= 139:\n        tachycardia_score = 20\n    else:  # heart_rate >= 140\n        tachycardia_score = 25\n    yield {\n        \"step_name\": \"tachycardia_score\",\n        \"step_description\": \"Assign a score based on the heart rate in beats per minute.\",\n        \"step_result\": tachycardia_score,\n        \"unit\": None\n    }\n\n    # Step 3: atrial_fibrillation_score - Assign a score based on the presence or absence of atrial fibrillation.\n    atrial_fibrillation_score = 10 if atrial_fibrillation else 0\n    yield {\n        \"step_name\": \"atrial_fibrillation_score\",\n        \"step_description\": \"Assign a score based on the presence or absence of atrial fibrillation.\",\n        \"step_result\": atrial_fibrillation_score,\n        \"unit\": None\n    }\n\n    # Step 4: congestive_heart_failure_score - Assign a score based on the severity of congestive heart failure.\n    chf_map = {'none': 0, 'mild': 5, 'moderate': 10, 'severe': 15}\n    chf_score = chf_map.get(chf_severity, 0)\n    yield {\n        \"step_name\": \"congestive_heart_failure_score\",\n        \"step_description\": \"Assign a score based on the severity of congestive heart failure.\",\n        \"step_result\": chf_score,\n        \"unit\": None\n    }\n\n    # Step 5: cns_dysfunction_score - Assign a score based on the severity of central nervous system involvement.\n    cns_map = {'none': 0, 'mild': 10, 'moderate': 20, 'severe': 30}\n    cns_score = cns_map.get(cns_severity, 0)\n    yield {\n        \"step_name\": \"cns_dysfunction_score\",\n        \"step_description\": \"Assign a score based on the severity of central nervous system involvement.\",\n        \"step_result\": cns_score,\n        \"unit\": None\n    }\n\n    # Step 6: gi_hepatic_dysfunction_score - Assign a score based on the severity of gastrointestinal or hepatic dysfunction.\n    gi_hepatic_map = {'none': 0, 'moderate': 10, 'severe': 20}\n    gi_hepatic_score = gi_hepatic_map.get(gi_hepatic_severity, 0)\n    yield {\n        \"step_name\": \"gi_hepatic_dysfunction_score\",\n        \"step_description\": \"Assign a score based on the severity of gastrointestinal or hepatic dysfunction.\",\n        \"step_result\": gi_hepatic_score,\n        \"unit\": None\n    }\n\n    # Step 7: precipitant_score - Assign a score based on the presence or absence of a precipitating factor.\n    precipitant_score = 10 if precipitant_present else 0\n    yield {\n        \"step_name\": \"precipitant_score\",\n        \"step_description\": \"Assign a score based on the presence or absence of a precipitating factor.\",\n        \"step_result\": precipitant_score,\n        \"unit\": None\n    }\n\n    # Step 8: total_bwps_score - Sum all individual category scores to compute the total BWPS score.\n    total_score = (temperature_score + tachycardia_score + atrial_fibrillation_score +\n                   chf_score + cns_score + gi_hepatic_score + precipitant_score)\n    yield {\n        \"step_name\": \"total_bwps_score\",\n        \"step_description\": \"Sum all individual category scores to compute the total BWPS score.\",\n        \"step_result\": total_score,\n        \"unit\": None\n    }\n\n    return total_score"
+}

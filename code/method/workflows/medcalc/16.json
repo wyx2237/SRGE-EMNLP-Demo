@@ -1,0 +1,141 @@
+{
+    "name": "wells_criteria_dvt_scoring_workflow",
+    "description": "Calculate the Wells' criteria score for Deep Vein Thrombosis (DVT) by evaluating 10 clinical criteria and summing their associated points.",
+    "inputs": [
+        {
+            "input_name": "active_cancer",
+            "input_desc": "Presence of active cancer (treatment or palliation within 6 months). Accepted values: true or false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "bedridden_or_surgery",
+            "input_desc": "Bedridden recently >3 days or major surgery within 12 weeks. Accepted values: true or false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "calf_swelling",
+            "input_desc": "Calf swelling >3 cm compared to the other leg (measured 10 cm below tibial tuberosity). Accepted values: true or false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "collateral_veins",
+            "input_desc": "Presence of collateral (nonvaricose) superficial veins. Accepted values: true or false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "entire_leg_swollen",
+            "input_desc": "Entire leg swollen. Accepted values: true or false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "localized_tenderness",
+            "input_desc": "Localized tenderness along the deep venous system. Accepted values: true or false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "pitting_edema",
+            "input_desc": "Pitting edema, confined to symptomatic leg. Accepted values: true or false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "paralysis_or_immobilization",
+            "input_desc": "Paralysis, paresis, or recent plaster immobilization of the lower extremity. Accepted values: true or false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "previous_dvt",
+            "input_desc": "Previously documented DVT. Accepted values: true or false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "alternative_diagnosis",
+            "input_desc": "Alternative diagnosis to DVT as likely or more likely. Accepted values: true or false.",
+            "input_type": "bool"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "wells_criteria_scoring",
+            "step_description": "Evaluate each of the 10 Wells' criteria for DVT and sum the points based on the presence or absence of each criterion.",
+            "step_inputs": [
+                {
+                    "input_name": "active_cancer",
+                    "input_desc": "Active cancer (treatment or palliation within 6 months). Accepted values: true or false.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.active_cancer"
+                },
+                {
+                    "input_name": "bedridden_or_surgery",
+                    "input_desc": "Bedridden recently >3 days or major surgery within 12 weeks. Accepted values: true or false.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.bedridden_or_surgery"
+                },
+                {
+                    "input_name": "calf_swelling",
+                    "input_desc": "Calf swelling >3 cm compared to the other leg. Accepted values: true or false.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.calf_swelling"
+                },
+                {
+                    "input_name": "collateral_veins",
+                    "input_desc": "Collateral superficial veins (nonvaricose) present. Accepted values: true or false.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.collateral_veins"
+                },
+                {
+                    "input_name": "entire_leg_swollen",
+                    "input_desc": "Entire leg swollen. Accepted values: true or false.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.entire_leg_swollen"
+                },
+                {
+                    "input_name": "localized_tenderness",
+                    "input_desc": "Localized tenderness along the deep venous system. Accepted values: true or false.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.localized_tenderness"
+                },
+                {
+                    "input_name": "pitting_edema",
+                    "input_desc": "Pitting edema, confined to symptomatic leg. Accepted values: true or false.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.pitting_edema"
+                },
+                {
+                    "input_name": "paralysis_or_immobilization",
+                    "input_desc": "Paralysis, paresis, or recent plaster immobilization of the lower extremity. Accepted values: true or false.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.paralysis_or_immobilization"
+                },
+                {
+                    "input_name": "previous_dvt",
+                    "input_desc": "Previously documented DVT. Accepted values: true or false.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.previous_dvt"
+                },
+                {
+                    "input_name": "alternative_diagnosis",
+                    "input_desc": "Alternative diagnosis to DVT as likely or more likely. Accepted values: true or false.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.alternative_diagnosis"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_score",
+                    "output_desc": "Total Wells' score for DVT",
+                    "output_type": "int"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step involves a straightforward summation of discrete point values assigned based on boolean inputs, which is a simple mathematical formula requiring no conditional branching or threshold mapping.",
+            "detail": "Calculate the total score by assigning points for each criterion: Criteria 1-8: +1 point if true, 0 points if false. Criterion 9: +1 point if true, 0 points if false. Criterion 10: -2 points if true, 0 points if false. Sum all assigned points."
+        }
+    ],
+    "output": {
+        "output_name": "total_score",
+        "output_desc": "Total Wells' score for DVT",
+        "output_type": "int"
+    },
+    "code": "def solve(active_cancer, bedridden_or_surgery, calf_swelling, collateral_veins, entire_leg_swollen, localized_tenderness, pitting_edema, paralysis_or_immobilization, previous_dvt, alternative_diagnosis):\n    # Step 1: wells_criteria_scoring - Evaluate each of the 10 Wells' criteria for DVT and sum the points based on the presence or absence of each criterion.\n    total_score = 0\n    # Criteria 1-8: +1 point if true, 0 points if false\n    total_score += 1 if active_cancer else 0\n    total_score += 1 if bedridden_or_surgery else 0\n    total_score += 1 if calf_swelling else 0\n    total_score += 1 if collateral_veins else 0\n    total_score += 1 if entire_leg_swollen else 0\n    total_score += 1 if localized_tenderness else 0\n    total_score += 1 if pitting_edema else 0\n    total_score += 1 if paralysis_or_immobilization else 0\n    # Criterion 9: +1 point if true, 0 points if false\n    total_score += 1 if previous_dvt else 0\n    # Criterion 10: -2 points if true, 0 points if false\n    total_score += -2 if alternative_diagnosis else 0\n\n    yield {\n        \"step_name\": \"wells_criteria_scoring\",\n        \"step_description\": \"Evaluate each of the 10 Wells' criteria for DVT and sum the points based on the presence or absence of each criterion.\",\n        \"step_result\": total_score,\n        \"unit\": None\n    }\n    return total_score"
+}

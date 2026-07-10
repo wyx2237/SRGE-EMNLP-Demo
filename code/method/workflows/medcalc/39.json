@@ -1,0 +1,64 @@
+{
+    "name": "anion_gap_calculation_workflow",
+    "description": "Calculate the patient's anion gap using the formula: sodium - (chloride + bicarbonate). All values are in mEq/L.",
+    "inputs": [
+        {
+            "input_name": "sodium",
+            "input_desc": "Patient's sodium level, in mEq/L",
+            "input_type": "float"
+        },
+        {
+            "input_name": "chloride",
+            "input_desc": "Patient's chloride level, in mEq/L",
+            "input_type": "float"
+        },
+        {
+            "input_name": "bicarbonate",
+            "input_desc": "Patient's bicarbonate level, in mEq/L",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "calculate_anion_gap",
+            "step_description": "Calculate the anion gap using the formula: Anion Gap = sodium - (chloride + bicarbonate).",
+            "step_inputs": [
+                {
+                    "input_name": "sodium",
+                    "input_desc": "Patient's sodium level, in mEq/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.sodium"
+                },
+                {
+                    "input_name": "chloride",
+                    "input_desc": "Patient's chloride level, in mEq/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.chloride"
+                },
+                {
+                    "input_name": "bicarbonate",
+                    "input_desc": "Patient's bicarbonate level, in mEq/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.bicarbonate"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "anion_gap",
+                    "output_desc": "Calculated anion gap, in mEq/L",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step directly applies a fixed mathematical formula (sodium - (chloride + bicarbonate)) to compute the anion gap, which is a standard numerical calculation.",
+            "detail": "Anion Gap = sodium - (chloride + bicarbonate). All values are in mEq/L."
+        }
+    ],
+    "output": {
+        "output_name": "anion_gap",
+        "output_desc": "The final calculated anion gap in mEq/L",
+        "output_type": "float"
+    },
+    "code": "import math\n\ndef solve(sodium, chloride, bicarbonate):\n    # Step 1: calculate_anion_gap\n    # Calculate the anion gap using the formula: Anion Gap = sodium - (chloride + bicarbonate).\n    anion_gap = sodium - (chloride + bicarbonate)\n    \n    yield {\n        \"step_name\": \"calculate_anion_gap\",\n        \"step_description\": \"Calculate the anion gap using the formula: Anion Gap = sodium - (chloride + bicarbonate).\",\n        \"step_result\": anion_gap,\n        \"unit\": \"mEq/L\"\n    }\n    \n    return anion_gap"
+}

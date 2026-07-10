@@ -1,0 +1,98 @@
+{
+    "name": "albumin_corrected_anion_gap_calculation_workflow",
+    "description": "Calculate a patient's albumin corrected anion gap in mEq/L using serum sodium, chloride, bicarbonate, and albumin values.",
+    "inputs": [
+        {
+            "input_name": "sodium",
+            "input_desc": "Serum sodium level in mEq/L",
+            "input_type": "float"
+        },
+        {
+            "input_name": "chloride",
+            "input_desc": "Serum chloride level in mEq/L",
+            "input_type": "float"
+        },
+        {
+            "input_name": "bicarbonate",
+            "input_desc": "Serum bicarbonate level in mEq/L",
+            "input_type": "float"
+        },
+        {
+            "input_name": "albumin",
+            "input_desc": "Serum albumin level in g/dL",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "anion_gap_calculation",
+            "step_description": "Calculate the patient's anion gap in mEq/L using serum sodium, chloride, and bicarbonate values.",
+            "step_inputs": [
+                {
+                    "input_name": "sodium",
+                    "input_desc": "Serum sodium level in mEq/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.sodium"
+                },
+                {
+                    "input_name": "chloride",
+                    "input_desc": "Serum chloride level in mEq/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.chloride"
+                },
+                {
+                    "input_name": "bicarbonate",
+                    "input_desc": "Serum bicarbonate level in mEq/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.bicarbonate"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "anion_gap",
+                    "output_desc": "Calculated anion gap in mEq/L",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step requires precise numerical computation using the defined mathematical formula for anion gap, matching the FormulaCalculation template.",
+            "detail": "anion_gap = sodium - (chloride + bicarbonate)"
+        },
+        {
+            "step_id": "2",
+            "step_name": "albumin_corrected_anion_gap_calculation",
+            "step_description": "Calculate the albumin corrected anion gap using the previously calculated anion gap and the patient's serum albumin level.",
+            "step_inputs": [
+                {
+                    "input_name": "anion_gap",
+                    "input_desc": "Anion gap in mEq/L calculated from the previous step",
+                    "input_type": "float",
+                    "input_source": "$|1|.anion_gap"
+                },
+                {
+                    "input_name": "albumin",
+                    "input_desc": "Serum albumin level in g/dL",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.albumin"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "albumin_corrected_anion_gap",
+                    "output_desc": "Albumin corrected anion gap in mEq/L",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step involves a precise mathematical formula calculating the final target value, fitting the FormulaCalculation template perfectly.",
+            "detail": "albumin_corrected_anion_gap = anion_gap + 2.5 * (4 - albumin)"
+        }
+    ],
+    "output": {
+        "output_name": "albumin_corrected_anion_gap",
+        "output_desc": "Final albumin corrected anion gap in mEq/L",
+        "output_type": "float"
+    },
+    "code": "def solve(sodium, chloride, bicarbonate, albumin):\n    # Step 1: anion_gap_calculation\n    # Calculate the patient's anion gap in mEq/L using serum sodium, chloride, and bicarbonate values.\n    # Formula: anion_gap = sodium - (chloride + bicarbonate)\n    anion_gap = sodium - (chloride + bicarbonate)\n    yield {\n        \"step_name\": \"anion_gap_calculation\",\n        \"step_description\": \"Calculate the patient's anion gap in mEq/L using serum sodium, chloride, and bicarbonate values.\",\n        \"step_result\": anion_gap,\n        \"unit\": \"mEq/L\"\n    }\n\n    # Step 2: albumin_corrected_anion_gap_calculation\n    # Calculate the albumin corrected anion gap using the previously calculated anion gap and the patient's serum albumin level.\n    # Formula: albumin_corrected_anion_gap = anion_gap + 2.5 * (4 - albumin)\n    albumin_corrected_anion_gap = anion_gap + 2.5 * (4 - albumin)\n    yield {\n        \"step_name\": \"albumin_corrected_anion_gap_calculation\",\n        \"step_description\": \"Calculate the albumin corrected anion gap using the previously calculated anion gap and the patient's serum albumin level.\",\n        \"step_result\": albumin_corrected_anion_gap,\n        \"unit\": \"mEq/L\"\n    }\n\n    return albumin_corrected_anion_gap"
+}

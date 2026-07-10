@@ -1,0 +1,116 @@
+{
+    "name": "delta_ratio_calculation_workflow",
+    "description": "Calculate the patient's delta ratio based on serum sodium, chloride, and bicarbonate levels. It sequentially computes the anion gap, delta gap, and finally the delta ratio.",
+    "inputs": [
+        {
+            "input_name": "sodium",
+            "input_desc": "Patient's serum sodium level in mEq/L",
+            "input_type": "float"
+        },
+        {
+            "input_name": "chloride",
+            "input_desc": "Patient's serum chloride level in mEq/L",
+            "input_type": "float"
+        },
+        {
+            "input_name": "bicarbonate",
+            "input_desc": "Patient's serum bicarbonate level in mEq/L",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "anion_gap_calculation",
+            "step_description": "Calculate the patient's anion gap using sodium, chloride, and bicarbonate levels.",
+            "step_inputs": [
+                {
+                    "input_name": "sodium",
+                    "input_desc": "Patient's serum sodium level in mEq/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.sodium"
+                },
+                {
+                    "input_name": "chloride",
+                    "input_desc": "Patient's serum chloride level in mEq/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.chloride"
+                },
+                {
+                    "input_name": "bicarbonate",
+                    "input_desc": "Patient's serum bicarbonate level in mEq/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.bicarbonate"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "anion_gap",
+                    "output_desc": "Calculated anion gap in mEq/L",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step applies a straightforward mathematical formula (anion gap = sodium - (chloride + bicarbonate)) to compute a numeric result from three input values.",
+            "detail": "Calculate anion gap using the formula: anion_gap = sodium - (chloride + bicarbonate). Round result to 4 decimal places."
+        },
+        {
+            "step_id": "2",
+            "step_name": "delta_gap_calculation",
+            "step_description": "Calculate the delta gap by subtracting 12 from the anion gap.",
+            "step_inputs": [
+                {
+                    "input_name": "anion_gap",
+                    "input_desc": "Anion gap value in mEq/L from previous step",
+                    "input_type": "float",
+                    "input_source": "$|1|.anion_gap"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "delta_gap",
+                    "output_desc": "Calculated delta gap in mEq/L",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step is a simple arithmetic subtraction of a constant from a numeric value, requiring precise computation.",
+            "detail": "Calculate delta gap using the formula: delta_gap = anion_gap - 12. Round result to 4 decimal places."
+        },
+        {
+            "step_id": "3",
+            "step_name": "delta_ratio_calculation",
+            "step_description": "Calculate the delta ratio using the delta gap and bicarbonate level.",
+            "step_inputs": [
+                {
+                    "input_name": "delta_gap",
+                    "input_desc": "Delta gap value in mEq/L from previous step",
+                    "input_type": "float",
+                    "input_source": "$|2|.delta_gap"
+                },
+                {
+                    "input_name": "bicarbonate",
+                    "input_desc": "Patient's serum bicarbonate level in mEq/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.bicarbonate"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "delta_ratio",
+                    "output_desc": "Calculated delta ratio",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step computes the final delta ratio using a precise mathematical formula with two numeric inputs.",
+            "detail": "Calculate delta ratio using the formula: delta_ratio = delta_gap / (24 - bicarbonate). Round result to 4 decimal places. If denominator is zero, handle appropriately (e.g., return error or infinity)."
+        }
+    ],
+    "output": {
+        "output_name": "delta_ratio",
+        "output_desc": "Final calculated delta ratio",
+        "output_type": "float"
+    },
+    "code": "def solve(sodium, chloride, bicarbonate):\n    \"\"\"\n    Calculate the patient's delta ratio based on serum sodium, chloride, and bicarbonate levels.\n    It sequentially computes the anion gap, delta gap, and finally the delta ratio.\n    \n    Args:\n        sodium: Patient's serum sodium level in mEq/L\n        chloride: Patient's serum chloride level in mEq/L\n        bicarbonate: Patient's serum bicarbonate level in mEq/L\n    \n    Yields:\n        dict: Step result with step_name, step_description, step_result, unit\n    \"\"\"\n    \n    # Step 1: Calculate anion gap\n    anion_gap = round(sodium - (chloride + bicarbonate), 4)\n    yield {\n        \"step_name\": \"anion_gap_calculation\",\n        \"step_description\": \"Calculate the patient's anion gap using sodium, chloride, and bicarbonate levels.\",\n        \"step_result\": anion_gap,\n        \"unit\": \"mEq/L\"\n    }\n    \n    # Step 2: Calculate delta gap\n    delta_gap = round(anion_gap - 12, 4)\n    yield {\n        \"step_name\": \"delta_gap_calculation\",\n        \"step_description\": \"Calculate the delta gap by subtracting 12 from the anion gap.\",\n        \"step_result\": delta_gap,\n        \"unit\": \"mEq/L\"\n    }\n    \n    # Step 3: Calculate delta ratio\n    denominator = 24 - bicarbonate\n    if denominator == 0:\n        delta_ratio = float('inf') if delta_gap > 0 else float('-inf') if delta_gap < 0 else 0.0\n    else:\n        delta_ratio = round(delta_gap / denominator, 4)\n    \n    yield {\n        \"step_name\": \"delta_ratio_calculation\",\n        \"step_description\": \"Calculate the delta ratio using the delta gap and bicarbonate level.\",\n        \"step_result\": delta_ratio,\n        \"unit\": None\n    }\n    \n    return delta_ratio"
+}

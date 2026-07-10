@@ -1,0 +1,137 @@
+{
+    "name": "hypokalemia_kcl_volume_calculation",
+    "description": "Calculate the required volume of 10% potassium chloride solution for an adult patient with hypokalemia, based on target potassium level, current measured potassium level, and patient weight.",
+    "inputs": [
+        {
+            "input_name": "desired_potassium",
+            "input_desc": "Target potassium concentration in mmol/L, typically 4.0 mmol/L",
+            "input_type": "float"
+        },
+        {
+            "input_name": "measured_potassium",
+            "input_desc": "Patient's current measured potassium concentration in mmol/L",
+            "input_type": "float"
+        },
+        {
+            "input_name": "weight_kg",
+            "input_desc": "Patient's weight in kilograms",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "input_collection_and_validation",
+            "step_description": "Collect and validate input parameters; determine if the patient is hypokalemic.",
+            "step_inputs": [
+                {
+                    "input_name": "desired_potassium",
+                    "input_desc": "Target potassium concentration in mmol/L, typically 4.0 mmol/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.desired_potassium"
+                },
+                {
+                    "input_name": "measured_potassium",
+                    "input_desc": "Patient's current measured potassium concentration in mmol/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.measured_potassium"
+                },
+                {
+                    "input_name": "weight_kg",
+                    "input_desc": "Patient's weight in kilograms",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.weight_kg"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "is_hypokalemic",
+                    "output_desc": "Boolean indicating if measured potassium is less than desired potassium",
+                    "output_type": "bool"
+                },
+                {
+                    "output_name": "validated_desired_potassium",
+                    "output_desc": "Validated desired potassium concentration in mmol/L",
+                    "output_type": "float"
+                },
+                {
+                    "output_name": "validated_measured_potassium",
+                    "output_desc": "Validated measured potassium concentration in mmol/L",
+                    "output_type": "float"
+                },
+                {
+                    "output_name": "validated_weight_kg",
+                    "output_desc": "Validated weight in kilograms",
+                    "output_type": "float"
+                }
+            ],
+            "category": "data_validation",
+            "reason": "This step checks the logical condition for hypokalemia before proceeding with further calculations, ensuring data integrity.",
+            "detail": "Check if measured_potassium < desired_potassium. If true, set is_hypokalemic to true and pass the inputs forward; otherwise, set is_hypokalemic to false and stop the calculation flow."
+        },
+        {
+            "step_id": "2",
+            "step_name": "potassium_deficit_calculation",
+            "step_description": "Calculate the total potassium deficit in millimoles.",
+            "step_inputs": [
+                {
+                    "input_name": "desired_potassium",
+                    "input_desc": "Target potassium concentration in mmol/L",
+                    "input_type": "float",
+                    "input_source": "$|1|.validated_desired_potassium"
+                },
+                {
+                    "input_name": "measured_potassium",
+                    "input_desc": "Patient's current measured potassium concentration in mmol/L",
+                    "input_type": "float",
+                    "input_source": "$|1|.validated_measured_potassium"
+                },
+                {
+                    "input_name": "weight_kg",
+                    "input_desc": "Patient's weight in kilograms",
+                    "input_type": "float",
+                    "input_source": "$|1|.validated_weight_kg"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "potassium_deficit_mmol",
+                    "output_desc": "Total potassium deficit in millimoles",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step applies a standard medical formula to compute the potassium deficit based on concentration gradient and body weight.",
+            "detail": "Calculate potassium deficit using the formula: potassium_deficit_mmol = (desired_potassium - measured_potassium) * weight_kg * 0.3. The factor 0.3 accounts for extracellular fluid and partial intracellular deficit."
+        },
+        {
+            "step_id": "3",
+            "step_name": "convert_deficit_to_kcl_volume",
+            "step_description": "Convert the potassium deficit to the required volume of 10% KCl solution.",
+            "step_inputs": [
+                {
+                    "input_name": "potassium_deficit_mmol",
+                    "input_desc": "Total potassium deficit in millimoles",
+                    "input_type": "float",
+                    "input_source": "$|2|.potassium_deficit_mmol"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "required_volume_ml",
+                    "output_desc": "Required volume of 10% KCl solution in milliliters",
+                    "output_type": "float"
+                }
+            ],
+            "category": "unit_conversion",
+            "reason": "This step converts a chemical amount (mmol) to a pharmaceutical volume (mL) using the known concentration of the solution.",
+            "detail": "Calculate required volume using the formula: required_volume_ml = potassium_deficit_mmol / 1.34. Note: 1.34 is the millimoles of potassium per milliliter of 10% KCl solution."
+        }
+    ],
+    "output": {
+        "output_name": "required_volume_ml",
+        "output_desc": "Final required volume of 10% KCl solution in milliliters",
+        "output_type": "float"
+    },
+    "code": "def solve(desired_potassium, measured_potassium, weight_kg):\n    # Step 1: input_collection_and_validation - collect and validate input parameters; determine if the patient is hypokalemic\n    is_hypokalemic = measured_potassium < desired_potassium\n    if not is_hypokalemic:\n        yield {\n            \"step_name\": \"input_collection_and_validation\",\n            \"step_description\": \"Collect and validate input parameters; determine if the patient is hypokalemic. Measured potassium is not less than desired potassium, so calculation stops.\",\n            \"step_result\": is_hypokalemic,\n            \"unit\": None\n        }\n        return None\n    validated_desired_potassium = desired_potassium\n    validated_measured_potassium = measured_potassium\n    validated_weight_kg = weight_kg\n    yield {\n        \"step_name\": \"input_collection_and_validation\",\n        \"step_description\": \"Collect and validate input parameters; determine if the patient is hypokalemic. Hypokalemia confirmed, inputs validated.\",\n        \"step_result\": is_hypokalemic,\n        \"unit\": None\n    }\n\n    # Step 2: potassium_deficit_calculation - calculate the total potassium deficit in millimoles\n    potassium_deficit_mmol = (validated_desired_potassium - validated_measured_potassium) * validated_weight_kg * 0.3\n    yield {\n        \"step_name\": \"potassium_deficit_calculation\",\n        \"step_description\": \"Calculate the total potassium deficit using formula (desired - measured) * weight * 0.3, where 0.3 accounts for extracellular fluid and partial intracellular deficit.\",\n        \"step_result\": potassium_deficit_mmol,\n        \"unit\": \"mmol\"\n    }\n\n    # Step 3: convert_deficit_to_kcl_volume - convert the potassium deficit to the required volume of 10% KCl solution\n    required_volume_ml = potassium_deficit_mmol / 1.34\n    yield {\n        \"step_name\": \"convert_deficit_to_kcl_volume\",\n        \"step_description\": \"Convert potassium deficit to volume of 10% KCl solution using 1.34 mmol K per mL.\",\n        \"step_result\": required_volume_ml,\n        \"unit\": \"mL\"\n    }\n\n    return required_volume_ml"
+}

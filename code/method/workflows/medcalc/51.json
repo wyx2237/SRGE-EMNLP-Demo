@@ -1,0 +1,189 @@
+{
+    "name": "sirs_criteria_calculation_workflow",
+    "description": "Evaluate the four SIRS criteria for a patient and sum the scores to determine the total number of criteria met.",
+    "inputs": [
+        {
+            "input_name": "temperature_celsius",
+            "input_desc": "Patient's body temperature in degrees Celsius",
+            "input_type": "float"
+        },
+        {
+            "input_name": "heart_rate",
+            "input_desc": "Patient's heart rate in beats per minute",
+            "input_type": "int"
+        },
+        {
+            "input_name": "respiratory_rate",
+            "input_desc": "Patient's respiratory rate in breaths per minute",
+            "input_type": "int"
+        },
+        {
+            "input_name": "paco2",
+            "input_desc": "Patient's PaCO2 value in mm Hg (use null if not available)",
+            "input_type": "float"
+        },
+        {
+            "input_name": "wbc",
+            "input_desc": "Patient's white blood cell count per mm3",
+            "input_type": "int"
+        },
+        {
+            "input_name": "bands_percentage",
+            "input_desc": "Percentage of band cells (use null if not available)",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "evaluate_temperature_criterion",
+            "step_description": "Determine if the temperature criterion is met (>38°C or <36°C).",
+            "step_inputs": [
+                {
+                    "input_name": "temperature_celsius",
+                    "input_desc": "Patient's body temperature in degrees Celsius",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.temperature_celsius"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "temperature_met",
+                    "output_desc": "Whether the temperature criterion is met (1 for Yes, 0 for No)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "The temperature criterion requires evaluating a condition with two possible outcomes (1 or 0) based on threshold comparisons, which fits the ConditionEvaluation template.",
+            "detail": "If temperature_celsius > 38 or temperature_celsius < 36, output 1; otherwise output 0."
+        },
+        {
+            "step_id": "2",
+            "step_name": "evaluate_heart_rate_criterion",
+            "step_description": "Determine if the heart rate criterion is met (>90 bpm).",
+            "step_inputs": [
+                {
+                    "input_name": "heart_rate",
+                    "input_desc": "Patient's heart rate in beats per minute",
+                    "input_type": "int",
+                    "input_source": "$|raw input|.heart_rate"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "heart_rate_met",
+                    "output_desc": "Whether the heart rate criterion is met (1 for Yes, 0 for No)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "The heart rate criterion is a simple conditional evaluation with a threshold (>90), resulting in a binary outcome, matching the ConditionEvaluation template.",
+            "detail": "If heart_rate > 90, output 1; otherwise output 0."
+        },
+        {
+            "step_id": "3",
+            "step_name": "evaluate_respiratory_criterion",
+            "step_description": "Determine if the respiratory criterion is met (respiratory rate >20 or PaCO2 <32 mm Hg).",
+            "step_inputs": [
+                {
+                    "input_name": "respiratory_rate",
+                    "input_desc": "Patient's respiratory rate in breaths per minute",
+                    "input_type": "int",
+                    "input_source": "$|raw input|.respiratory_rate"
+                },
+                {
+                    "input_name": "paco2",
+                    "input_desc": "Patient's PaCO2 value in mm Hg (use null if not available)",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.paco2"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "respiratory_met",
+                    "output_desc": "Whether the respiratory criterion is met (1 for Yes, 0 for No)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This criterion involves a compound condition with OR logic, which can be evaluated within a single ConditionEvaluation step, as the condition expression handles multiple comparisons.",
+            "detail": "If respiratory_rate > 20 or (paco2 is not null and paco2 < 32), output 1; otherwise output 0."
+        },
+        {
+            "step_id": "4",
+            "step_name": "evaluate_wbc_criterion",
+            "step_description": "Determine if the WBC criterion is met (WBC >12,000/mm3, <4,000/mm3, or >10% bands).",
+            "step_inputs": [
+                {
+                    "input_name": "wbc",
+                    "input_desc": "Patient's white blood cell count per mm3",
+                    "input_type": "int",
+                    "input_source": "$|raw input|.wbc"
+                },
+                {
+                    "input_name": "bands_percentage",
+                    "input_desc": "Percentage of band cells (use null if not available)",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.bands_percentage"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "wbc_met",
+                    "output_desc": "Whether the WBC criterion is met (1 for Yes, 0 for No)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "The WBC criterion involves multiple threshold conditions with OR logic, suitable for a single ConditionEvaluation step.",
+            "detail": "If wbc > 12000 or wbc < 4000 or (bands_percentage is not null and bands_percentage > 10), output 1; otherwise output 0."
+        },
+        {
+            "step_id": "5",
+            "step_name": "sum_sirs_scores",
+            "step_description": "Sum the individual SIRS criterion scores to determine the total number of criteria met.",
+            "step_inputs": [
+                {
+                    "input_name": "temperature_met",
+                    "input_desc": "Temperature criterion score (0 or 1)",
+                    "input_type": "int",
+                    "input_source": "$|step1|.temperature_met"
+                },
+                {
+                    "input_name": "heart_rate_met",
+                    "input_desc": "Heart rate criterion score (0 or 1)",
+                    "input_type": "int",
+                    "input_source": "$|step2|.heart_rate_met"
+                },
+                {
+                    "input_name": "respiratory_met",
+                    "input_desc": "Respiratory criterion score (0 or 1)",
+                    "input_type": "int",
+                    "input_source": "$|step3|.respiratory_met"
+                },
+                {
+                    "input_name": "wbc_met",
+                    "input_desc": "WBC criterion score (0 or 1)",
+                    "input_type": "int",
+                    "input_source": "$|step4|.wbc_met"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_sirs",
+                    "output_desc": "Total number of SIRS criteria met (0 to 4)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "Summing four integer scores is a simple arithmetic formula, which fits the FormulaCalculation template.",
+            "detail": "Sum the four input scores: total_sirs = temperature_met + heart_rate_met + respiratory_met + wbc_met."
+        }
+    ],
+    "output": {
+        "output_name": "total_sirs",
+        "output_desc": "Total number of SIRS criteria met by the patient (0 to 4)",
+        "output_type": "int"
+    },
+    "code": "def solve(temperature_celsius, heart_rate, respiratory_rate, paco2, wbc, bands_percentage):\n    # Step 1: evaluate_temperature_criterion\n    # Determine if the temperature criterion is met (>38°C or <36°C)\n    if temperature_celsius > 38 or temperature_celsius < 36:\n        temperature_met = 1\n    else:\n        temperature_met = 0\n    yield {\n        \"step_name\": \"evaluate_temperature_criterion\",\n        \"step_description\": \"Determine if the temperature criterion is met (>38°C or <36°C) based on body temperature in Celsius\",\n        \"step_result\": temperature_met,\n        \"unit\": None\n    }\n\n    # Step 2: evaluate_heart_rate_criterion\n    # Determine if the heart rate criterion is met (>90 bpm)\n    if heart_rate > 90:\n        heart_rate_met = 1\n    else:\n        heart_rate_met = 0\n    yield {\n        \"step_name\": \"evaluate_heart_rate_criterion\",\n        \"step_description\": \"Determine if the heart rate criterion is met (>90 bpm) based on heart rate in beats per minute\",\n        \"step_result\": heart_rate_met,\n        \"unit\": None\n    }\n\n    # Step 3: evaluate_respiratory_criterion\n    # Determine if the respiratory criterion is met (respiratory rate >20 or PaCO2 <32 mm Hg)\n    if respiratory_rate > 20 or (paco2 is not None and paco2 < 32):\n        respiratory_met = 1\n    else:\n        respiratory_met = 0\n    yield {\n        \"step_name\": \"evaluate_respiratory_criterion\",\n        \"step_description\": \"Determine if the respiratory criterion is met (respiratory rate >20 or PaCO2 <32 mm Hg) based on respiratory rate and PaCO2\",\n        \"step_result\": respiratory_met,\n        \"unit\": None\n    }\n\n    # Step 4: evaluate_wbc_criterion\n    # Determine if the WBC criterion is met (WBC >12,000/mm3, <4,000/mm3, or >10% bands)\n    if wbc > 12000 or wbc < 4000 or (bands_percentage is not None and bands_percentage > 10):\n        wbc_met = 1\n    else:\n        wbc_met = 0\n    yield {\n        \"step_name\": \"evaluate_wbc_criterion\",\n        \"step_description\": \"Determine if the WBC criterion is met (WBC >12,000/mm3, <4,000/mm3, or >10% bands) based on WBC count and band percentage\",\n        \"step_result\": wbc_met,\n        \"unit\": None\n    }\n\n    # Step 5: sum_sirs_scores\n    # Sum the individual SIRS criterion scores to determine the total number of criteria met\n    total_sirs = temperature_met + heart_rate_met + respiratory_met + wbc_met\n    yield {\n        \"step_name\": \"sum_sirs_scores\",\n        \"step_description\": \"Sum the individual SIRS criterion scores (temperature, heart rate, respiratory, WBC) to determine total number of criteria met\",\n        \"step_result\": total_sirs,\n        \"unit\": None\n    }\n\n    return total_sirs"
+}

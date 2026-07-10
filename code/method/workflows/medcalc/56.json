@@ -1,0 +1,76 @@
+{
+    "name": "qtc_fridericia_calculation_workflow",
+    "description": "Calculate the corrected QT interval using the Fridericia formula based on heart rate and QT interval.",
+    "inputs": [
+        {
+            "input_name": "heart_rate",
+            "input_desc": "Heart rate in beats per minute",
+            "input_type": "float"
+        },
+        {
+            "input_name": "qt_interval",
+            "input_desc": "QT interval in milliseconds",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "calculate_rr_interval",
+            "step_description": "Calculate the RR interval in seconds using the heart rate.",
+            "step_inputs": [
+                {
+                    "input_name": "heart_rate",
+                    "input_desc": "Heart rate in beats per minute",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.heart_rate"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "rr_interval",
+                    "output_desc": "RR interval in seconds",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step involves a precise numerical calculation using a simple formula (60 / heart_rate), fitting the FormulaCalculation category.",
+            "detail": "RR Interval (s) = 60 / Heart Rate (beats/min)"
+        },
+        {
+            "step_id": "2",
+            "step_name": "calculate_corrected_qt_interval",
+            "step_description": "Calculate the corrected QT interval using the Fridericia formula.",
+            "step_inputs": [
+                {
+                    "input_name": "qt_interval",
+                    "input_desc": "QT interval in milliseconds",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.qt_interval"
+                },
+                {
+                    "input_name": "rr_interval",
+                    "input_desc": "RR interval in seconds",
+                    "input_type": "float",
+                    "input_source": "$|1|.rr_interval"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "qtc_interval",
+                    "output_desc": "Corrected QT interval in milliseconds",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step involves applying a precise mathematical formula (Fridericia formula) involving exponentiation, fitting the FormulaCalculation category.",
+            "detail": "QTc = QT_interval / (RR_interval)^(1/3). Round the result to 4 decimal places."
+        }
+    ],
+    "output": {
+        "output_name": "qtc_interval",
+        "output_desc": "The final corrected QT interval in milliseconds",
+        "output_type": "float"
+    },
+    "code": "import math\n\ndef solve(heart_rate, qt_interval):\n    # Step 1: calculate_rr_interval\n    # Calculate the RR interval in seconds using the heart rate.\n    # Formula: RR Interval (s) = 60 / Heart Rate (beats/min)\n    rr_interval = 60.0 / heart_rate\n    yield {\n        \"step_name\": \"calculate_rr_interval\",\n        \"step_description\": \"Calculate the RR interval in seconds using the heart rate. Formula: RR = 60 / Heart Rate.\",\n        \"step_result\": rr_interval,\n        \"unit\": \"s\"\n    }\n\n    # Step 2: calculate_corrected_qt_interval\n    # Calculate the corrected QT interval using the Fridericia formula.\n    # Formula: QTc = QT_interval / (RR_interval)^(1/3)\n    # Round the result to 4 decimal places.\n    qtc_interval = qt_interval / (rr_interval ** (1.0/3.0))\n    qtc_interval = round(qtc_interval, 4)\n    yield {\n        \"step_name\": \"calculate_corrected_qt_interval\",\n        \"step_description\": \"Calculate the corrected QT interval using the Fridericia formula: QTc = QT / RR^(1/3). Result rounded to 4 decimal places.\",\n        \"step_result\": qtc_interval,\n        \"unit\": \"ms\"\n    }\n\n    return qtc_interval"
+}

@@ -1,0 +1,75 @@
+{
+    "name": "ree_calculation_workflow",
+    "description": "Calculate resting energy expenditure (REE) in kcal/day using gender-specific Harris-Benedict equation with resting state coefficient.",
+    "inputs": [
+        {
+            "input_name": "gender",
+            "input_desc": "Patient gender, allowed values: male, female",
+            "input_type": "str"
+        },
+        {
+            "input_name": "weight_kg",
+            "input_desc": "Weight in kilograms",
+            "input_type": "float"
+        },
+        {
+            "input_name": "height_cm",
+            "input_desc": "Height in centimeters",
+            "input_type": "float"
+        },
+        {
+            "input_name": "age_years",
+            "input_desc": "Age in years",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "ree_calculation_by_gender",
+            "step_description": "Calculate REE using gender-specific Harris-Benedict equation with resting state coefficient.",
+            "step_inputs": [
+                {
+                    "input_name": "gender",
+                    "input_desc": "Patient gender, allowed values: male, female",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.gender"
+                },
+                {
+                    "input_name": "weight_kg",
+                    "input_desc": "Weight in kilograms",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.weight_kg"
+                },
+                {
+                    "input_name": "height_cm",
+                    "input_desc": "Height in centimeters",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.height_cm"
+                },
+                {
+                    "input_name": "age_years",
+                    "input_desc": "Age in years",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.age_years"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "ree_kcal_per_day",
+                    "output_desc": "Resting energy expenditure in kcal per day",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "This step applies a conditional gender-based formula to compute REE, which is a standard clinical formula calculation.",
+            "detail": "If gender is male: REE = (66 + (13.7 * weight_kg) + (5 * height_cm) - (6.8 * age_years)) * 1.1. If gender is female: REE = (655 + (9.6 * weight_kg) + (1.7 * height_cm) - (4.7 * age_years)) * 1.1."
+        }
+    ],
+    "output": {
+        "output_name": "ree_kcal_per_day",
+        "output_desc": "Resting energy expenditure in kcal per day",
+        "output_type": "float"
+    },
+    "code": "import math\n\ndef solve(gender, weight_kg, height_cm, age_years):\n    # Step 1: Calculate REE using gender-specific Harris-Benedict equation with resting state coefficient\n    # Determine the appropriate formula based on gender\n    if gender == \"male\":\n        # Male formula: (66 + (13.7 * weight) + (5 * height) - (6.8 * age)) * 1.1\n        base_ree = 66 + (13.7 * weight_kg) + (5 * height_cm) - (6.8 * age_years)\n    elif gender == \"female\":\n        # Female formula: (655 + (9.6 * weight) + (1.7 * height) - (4.7 * age)) * 1.1\n        base_ree = 655 + (9.6 * weight_kg) + (1.7 * height_cm) - (4.7 * age_years)\n    else:\n        raise ValueError(\"Invalid gender: must be 'male' or 'female'\")\n    \n    # Apply resting state coefficient of 1.1\n    ree = base_ree * 1.1\n    \n    # Yield the result of this step\n    yield {\n        \"step_name\": \"ree_calculation_by_gender\",\n        \"step_description\": \"Calculate REE using gender-specific Harris-Benedict equation with resting state coefficient. If male: (66 + 13.7*weight + 5*height - 6.8*age) * 1.1; if female: (655 + 9.6*weight + 1.7*height - 4.7*age) * 1.1\",\n        \"step_result\": round(ree, 2),\n        \"unit\": \"kcal/day\"\n    }\n    \n    # Final output\n    return round(ree, 2)"
+}

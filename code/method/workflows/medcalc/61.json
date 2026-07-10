@@ -1,0 +1,76 @@
+{
+    "name": "target_weight_calculation_workflow",
+    "description": "Calculate the patient's target weight in kilograms based on their height in centimeters and a target BMI value.",
+    "inputs": [
+        {
+            "input_name": "height_cm",
+            "input_desc": "Patient's height, in centimeters",
+            "input_type": "float"
+        },
+        {
+            "input_name": "target_bmi",
+            "input_desc": "Target Body Mass Index value",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "convert_height_to_meters",
+            "step_description": "Convert the patient's height from centimeters to meters.",
+            "step_inputs": [
+                {
+                    "input_name": "height_cm",
+                    "input_desc": "Patient's height in centimeters",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.height_cm"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "height_m",
+                    "output_desc": "Patient's height in meters, rounded to 4 decimal places",
+                    "output_type": "float"
+                }
+            ],
+            "category": "UnitConversion",
+            "reason": "The patient's height is typically provided in centimeters, but the subsequent calculation requires height in meters. This step performs the necessary unit conversion.",
+            "detail": "Height in meters = Height in centimeters / 100. Round the result to 4 decimal places."
+        },
+        {
+            "step_id": "2",
+            "step_name": "calculate_target_weight",
+            "step_description": "Calculate the target weight using the formula Target Weight (kg) = Target BMI * (Height in meters)^2.",
+            "step_inputs": [
+                {
+                    "input_name": "target_bmi",
+                    "input_desc": "Target BMI value",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.target_bmi"
+                },
+                {
+                    "input_name": "height_m",
+                    "input_desc": "Patient's height in meters",
+                    "input_type": "float",
+                    "input_source": "$|1|.height_m"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "target_weight_kg",
+                    "output_desc": "Patient's target weight in kilograms, rounded to 4 decimal places",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "This step directly applies the specified mathematical formula to compute the target weight based on target BMI and height in meters.",
+            "detail": "Target Weight (kg) = target_bmi * (height_m ** 2). Round the result to 4 decimal places."
+        }
+    ],
+    "output": {
+        "output_name": "target_weight_kg",
+        "output_desc": "Patient's target weight in kilograms",
+        "output_type": "float"
+    },
+    "code": "def solve(height_cm, target_bmi):\n    # Step 1: Convert the patient's height from centimeters to meters\n    # Height in meters = Height in centimeters / 100. Round the result to 4 decimal places.\n    height_m = round(height_cm / 100, 4)\n    yield {\n        \"step_name\": \"convert_height_to_meters\",\n        \"step_description\": \"Convert the patient's height from centimeters to meters, rounding to 4 decimal places\",\n        \"step_result\": height_m,\n        \"unit\": \"m\"\n    }\n\n    # Step 2: Calculate the target weight using the formula Target Weight (kg) = Target BMI * (Height in meters)^2\n    # Round the result to 4 decimal places.\n    target_weight_kg = round(target_bmi * (height_m ** 2), 4)\n    yield {\n        \"step_name\": \"calculate_target_weight\",\n        \"step_description\": \"Calculate the target weight using the formula Target Weight (kg) = Target BMI * (Height in meters)^2, rounding to 4 decimal places\",\n        \"step_result\": target_weight_kg,\n        \"unit\": \"kg\"\n    }\n\n    return target_weight_kg"
+}

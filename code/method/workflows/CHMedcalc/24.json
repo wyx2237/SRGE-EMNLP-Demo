@@ -1,0 +1,139 @@
+{
+    "name": "bmr_calculation_based_on_mifflin_st_jeor_formula",
+    "description": "Calculate the Basal Metabolic Rate (BMR) for a patient using the Mifflin-St Jeor formula based on gender.",
+    "inputs": [
+        {
+            "input_name": "weight_kg",
+            "input_desc": "The patient's weight in kilograms (kg).",
+            "input_type": "float"
+        },
+        {
+            "input_name": "height_cm",
+            "input_desc": "The patient's height in centimeters (cm).",
+            "input_type": "float"
+        },
+        {
+            "input_name": "age_years",
+            "input_desc": "The patient's age in years.",
+            "input_type": "integer"
+        },
+        {
+            "input_name": "gender",
+            "input_desc": "The patient's gender (Male or Female).",
+            "input_type": "str"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "calculate_bmr_for_male",
+            "step_description": "Calculate the Basal Metabolic Rate (BMR) for a male patient using the Mifflin-St Jeor formula.",
+            "step_inputs": [
+                {
+                    "input_name": "weight_kg",
+                    "input_desc": "The patient's weight in kilograms (kg).",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.weight_kg"
+                },
+                {
+                    "input_name": "height_cm",
+                    "input_desc": "The patient's height in centimeters (cm).",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.height_cm"
+                },
+                {
+                    "input_name": "age_years",
+                    "input_desc": "The patient's age in years.",
+                    "input_type": "integer",
+                    "input_source": "$|inputs|.age_years"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "bmr_male",
+                    "output_desc": "The calculated BMR for a male patient in kilocalories per day (kcal/day).",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "This step calculates the BMR for a male patient using the Mifflin-St Jeor formula.",
+            "detail": "BMR = 10 × weight_kg + 6.25 × height_cm - 5 × age_years + 5"
+        },
+        {
+            "step_id": "2",
+            "step_name": "calculate_bmr_for_female",
+            "step_description": "Calculate the Basal Metabolic Rate (BMR) for a female patient using the Mifflin-St Jeor formula.",
+            "step_inputs": [
+                {
+                    "input_name": "weight_kg",
+                    "input_desc": "The patient's weight in kilograms (kg).",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.weight_kg"
+                },
+                {
+                    "input_name": "height_cm",
+                    "input_desc": "The patient's height in centimeters (cm).",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.height_cm"
+                },
+                {
+                    "input_name": "age_years",
+                    "input_desc": "The patient's age in years.",
+                    "input_type": "integer",
+                    "input_source": "$|inputs|.age_years"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "bmr_female",
+                    "output_desc": "The calculated BMR for a female patient in kilocalories per day (kcal/day).",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "This step calculates the BMR for a female patient using the Mifflin-St Jeor formula.",
+            "detail": "BMR = 10 × weight_kg + 6.25 × height_cm - 5 × age_years - 161"
+        },
+        {
+            "step_id": "3",
+            "step_name": "select_bmr_based_on_gender",
+            "step_description": "Select the appropriate BMR value based on the patient's gender.",
+            "step_inputs": [
+                {
+                    "input_name": "gender",
+                    "input_desc": "The patient's gender (Male or Female).",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.gender"
+                },
+                {
+                    "input_name": "bmr_male",
+                    "input_desc": "The calculated BMR for a male patient in kilocalories per day (kcal/day).",
+                    "input_type": "float",
+                    "input_source": "$|step1|.bmr_male"
+                },
+                {
+                    "input_name": "bmr_female",
+                    "input_desc": "The calculated BMR for a female patient in kilocalories per day (kcal/day).",
+                    "input_type": "float",
+                    "input_source": "$|step2|.bmr_female"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "bmr_value",
+                    "output_desc": "The calculated BMR for the patient in kilocalories per day (kcal/day).",
+                    "output_type": "float"
+                }
+            ],
+            "category": "ConditionalSelection",
+            "reason": "This step selects the correct BMR calculation based on the patient's gender.",
+            "detail": "If the patient is male, use the BMR value from the male calculation. If the patient is female, use the BMR value from the female calculation."
+        }
+    ],
+    "output": {
+        "output_name": "bmr_value",
+        "output_desc": "The calculated BMR for the patient in kilocalories per day (kcal/day).",
+        "output_type": "float"
+    },
+    "code": "def solve(weight_kg, height_cm, age_years, gender):\n    # Step 1: Calculate the BMR for a male patient using the Mifflin-St Jeor formula\n    bmr_male = 10 * weight_kg + 6.25 * height_cm - 5 * age_years + 5\n    yield {\n        \"step_name\": \"calculate_bmr_for_male\",\n        \"step_description\": \"Calculate the Basal Metabolic Rate (BMR) for a male patient using the Mifflin-St Jeor formula.\",\n        \"step_result\": bmr_male,\n        \"unit\": \"kcal/day\"\n    }\n\n    # Step 2: Calculate the BMR for a female patient using the Mifflin-St Jeor formula\n    bmr_female = 10 * weight_kg + 6.25 * height_cm - 5 * age_years - 161\n    yield {\n        \"step_name\": \"calculate_bmr_for_female\",\n        \"step_description\": \"Calculate the Basal Metabolic Rate (BMR) for a female patient using the Mifflin-St Jeor formula.\",\n        \"step_result\": bmr_female,\n        \"unit\": \"kcal/day\"\n    }\n\n    # Step 3: Select the appropriate BMR value based on the patient's gender\n    if gender == \"Male\":\n        bmr_value = bmr_male\n    else:\n        bmr_value = bmr_female\n    yield {\n        \"step_name\": \"select_bmr_based_on_gender\",\n        \"step_description\": \"Select the appropriate BMR value based on the patient's gender.\",\n        \"step_result\": bmr_value,\n        \"unit\": \"kcal/day\"\n    }\n\n    return bmr_value"
+}

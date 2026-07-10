@@ -1,0 +1,165 @@
+{
+    "name": "cholesterol_unit_conversion_workflow",
+    "description": "Convert cholesterol indicator values from original units to target units based on the type of cholesterol (TC, HDL-C, LDL-C, or TG).",
+    "inputs": [
+        {
+            "input_name": "indicator_type",
+            "input_desc": "The type of cholesterol indicator to be calculated (tc, hdl_c, ldl_c, or tg).",
+            "input_type": "string"
+        },
+        {
+            "input_name": "indicator_value",
+            "input_desc": "The numerical value of the cholesterol indicator.",
+            "input_type": "float"
+        },
+        {
+            "input_name": "original_unit",
+            "input_desc": "The original unit of measurement for the cholesterol indicator (e.g., mmol_l or mg_dl).",
+            "input_type": "string"
+        },
+        {
+            "input_name": "target_unit",
+            "input_desc": "The target unit of measurement for the cholesterol indicator (e.g., mmol_l or mg_dl).",
+            "input_type": "string"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "identify_cholesterol_type",
+            "step_description": "Determine the type of cholesterol indicator (tc, hdl_c, ldl_c, or tg) based on the given context.",
+            "step_inputs": [
+                {
+                    "input_name": "indicator_type",
+                    "input_desc": "The type of cholesterol indicator to be calculated (tc, hdl_c, ldl_c, or tg).",
+                    "input_type": "string",
+                    "input_source": "$|inputs|.indicator_type"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "indicator_type",
+                    "output_desc": "The identified type of cholesterol indicator (tc, hdl_c, ldl_c, or tg).",
+                    "output_type": "string"
+                }
+            ],
+            "category": "discrete_value_mapping",
+            "reason": "This step maps the input string to one of the four predefined cholesterol types (tc, hdl_c, ldl_c, tg), which aligns with the discrete_value_mapping tool's purpose.",
+            "detail": "The step involves identifying the specific cholesterol type from the provided input. This is a straightforward categorization task where the input value directly determines the output."
+        },
+        {
+            "step_id": "2",
+            "step_name": "retrieve_indicator_value_and_units",
+            "step_description": "Extract the numerical value and original unit of the cholesterol indicator.",
+            "step_inputs": [
+                {
+                    "input_name": "indicator_value",
+                    "input_desc": "The numerical value of the cholesterol indicator.",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.indicator_value"
+                },
+                {
+                    "input_name": "original_unit",
+                    "input_desc": "The original unit of measurement for the cholesterol indicator (e.g., mmol_l or mg_dl).",
+                    "input_type": "string",
+                    "input_source": "$|inputs|.original_unit"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "indicator_value",
+                    "output_desc": "The numerical value of the cholesterol indicator.",
+                    "output_type": "float"
+                },
+                {
+                    "output_name": "original_unit",
+                    "output_desc": "The original unit of measurement for the cholesterol indicator.",
+                    "output_type": "string"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step simply collects the necessary inputs (value and unit) without performing any calculations, making it suitable for the formula_calculation category.",
+            "detail": "This step retrieves the numerical value and original unit of the cholesterol indicator, which are required for subsequent unit conversion."
+        },
+        {
+            "step_id": "3",
+            "step_name": "convert_unit_to_target_unit",
+            "step_description": "Convert the cholesterol indicator value from its original unit to the target unit.",
+            "step_inputs": [
+                {
+                    "input_name": "indicator_value",
+                    "input_desc": "The numerical value of the cholesterol indicator.",
+                    "input_type": "float",
+                    "input_source": "$|step2|.indicator_value"
+                },
+                {
+                    "input_name": "original_unit",
+                    "input_desc": "The original unit of measurement for the cholesterol indicator (e.g., mmol_l or mg_dl).",
+                    "input_type": "string",
+                    "input_source": "$|step2|.original_unit"
+                },
+                {
+                    "input_name": "target_unit",
+                    "input_desc": "The target unit of measurement for the cholesterol indicator (e.g., mmol_l or mg_dl).",
+                    "input_type": "string",
+                    "input_source": "$|inputs|.target_unit"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "converted_value",
+                    "output_desc": "The value of the cholesterol indicator in the target unit.",
+                    "output_type": "float"
+                },
+                {
+                    "output_name": "target_unit",
+                    "output_desc": "The target unit of measurement for the cholesterol indicator.",
+                    "output_type": "string"
+                }
+            ],
+            "category": "unit_conversion",
+            "reason": "This step performs a unit conversion using predefined formulas, which matches the unit_conversion tool's purpose.",
+            "detail": "Based on the cholesterol type and the units, this step applies the appropriate formula to convert the value from the original unit to the target unit. For example, if the original unit is mmol_l and the target unit is mg_dl, the formula used is: mg_dl = mmol_l × 38.67 (for tc, hdl_c, ldl_c) or mg_dl = mmol_l × 88.57 (for tg)."
+        },
+        {
+            "step_id": "4",
+            "step_name": "output_converted_value",
+            "step_description": "Provide the final converted value and the target unit.",
+            "step_inputs": [
+                {
+                    "input_name": "converted_value",
+                    "input_desc": "The value of the cholesterol indicator after conversion to the target unit.",
+                    "input_type": "float",
+                    "input_source": "$|step3|.converted_value"
+                },
+                {
+                    "input_name": "target_unit",
+                    "input_desc": "The target unit of measurement for the cholesterol indicator.",
+                    "input_type": "string",
+                    "input_source": "$|step3|.target_unit"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "converted_value",
+                    "output_desc": "The value of the cholesterol indicator in the target unit.",
+                    "output_type": "float"
+                },
+                {
+                    "output_name": "target_unit",
+                    "output_desc": "The target unit of measurement for the cholesterol indicator.",
+                    "output_type": "string"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step merely provides the final result without performing any new calculations, so it fits the formula_calculation category.",
+            "detail": "This step outputs the final result, including the converted value and the correct unit of measurement."
+        }
+    ],
+    "output": {
+        "output_name": "converted_value",
+        "output_desc": "The value of the cholesterol indicator in the target unit.",
+        "output_type": "float"
+    },
+    "code": "def solve(indicator_type, indicator_value, original_unit, target_unit):\n    # Step 1: Identify the type of cholesterol indicator\n    # This step determines the type of cholesterol (tc, hdl_c, ldl_c, or tg) based on the input\n    yield {\n        \"step_name\": \"identify_cholesterol_type\",\n        \"step_description\": \"Determine the type of cholesterol indicator (tc, hdl_c, ldl_c, or tg) based on the given context.\",\n        \"step_result\": indicator_type,\n        \"unit\": None\n    }\n\n    # Step 2: Retrieve the numerical value and original unit of the cholesterol indicator\n    # This step extracts the value and original unit from the inputs\n    yield {\n        \"step_name\": \"retrieve_indicator_value_and_units\",\n        \"step_description\": \"Extract the numerical value and original unit of the cholesterol indicator.\",\n        \"step_result\": {\n            \"indicator_value\": indicator_value,\n            \"original_unit\": original_unit\n        },\n        \"unit\": None\n    }\n\n    # Step 3: Convert the cholesterol indicator value from its original unit to the target unit\n    # This step applies the appropriate formula for conversion based on the cholesterol type and units\n    if original_unit == \"mmol_l\" and target_unit == \"mg_dl\":\n        if indicator_type in [\"tc\", \"hdl_c\", \"ldl_c\"]:\n            converted_value = indicator_value * 38.67\n        elif indicator_type == \"tg\":\n            converted_value = indicator_value * 88.57\n        else:\n            raise ValueError(\"Invalid cholesterol type provided.\")\n    elif original_unit == \"mg_dl\" and target_unit == \"mmol_l\":\n        if indicator_type in [\"tc\", \"hdl_c\", \"ldl_c\"]:\n            converted_value = indicator_value / 38.67\n        elif indicator_type == \"tg\":\n            converted_value = indicator_value / 88.57\n        else:\n            raise ValueError(\"Invalid cholesterol type provided.\")\n    else:\n        raise ValueError(\"Unsupported unit conversion.\")\n\n    yield {\n        \"step_name\": \"convert_unit_to_target_unit\",\n        \"step_description\": \"Convert the cholesterol indicator value from its original unit to the target unit.\",\n        \"step_result\": converted_value,\n        \"unit\": target_unit\n    }\n\n    # Step 4: Output the final converted value and the target unit\n    # This step provides the final result with the converted value and the correct unit\n    yield {\n        \"step_name\": \"output_converted_value\",\n        \"step_description\": \"Provide the final converted value and the target unit.\",\n        \"step_result\": converted_value,\n        \"unit\": target_unit\n    }\n\n    return converted_value"
+}

@@ -1,0 +1,53 @@
+{
+    "name": "bsa_calculation_mosteller",
+    "description": "Calculate adult body surface area in square meters using the Mosteller formula: BSA = sqrt(height_cm * weight_kg / 3600).",
+    "inputs": [
+        {
+            "input_name": "height_cm",
+            "input_desc": "Height in centimeters",
+            "input_type": "float"
+        },
+        {
+            "input_name": "weight_kg",
+            "input_desc": "Weight in kilograms",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "calculate_bsa_mosteller",
+            "step_description": "Calculate body surface area (BSA) in square meters using the Mosteller formula: BSA = sqrt(height_cm * weight_kg / 3600).",
+            "step_inputs": [
+                {
+                    "input_name": "height_cm",
+                    "input_desc": "Height in centimeters",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.height_cm"
+                },
+                {
+                    "input_name": "weight_kg",
+                    "input_desc": "Weight in kilograms",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.weight_kg"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "bsa_m2",
+                    "output_desc": "Body surface area in square meters",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step directly applies the Mosteller formula, which is a standard medical formula for estimating body surface area based on height and weight.",
+            "detail": "BSA (m²) = √(height_cm × weight_kg / 3600). Compute the product of height_cm and weight_kg, divide the result by 3600, then take the square root of this quotient."
+        }
+    ],
+    "output": {
+        "output_name": "bsa_m2",
+        "output_desc": "Final body surface area result in square meters",
+        "output_type": "float"
+    },
+    "code": "import math\n\ndef solve(height_cm, weight_kg):\n    # Step 1: calculate_bsa_mosteller\n    # Calculate body surface area (BSA) in square meters using the Mosteller formula: BSA = sqrt(height_cm * weight_kg / 3600)\n    bsa_m2 = math.sqrt((height_cm * weight_kg) / 3600.0)\n    yield {\n        \"step_name\": \"calculate_bsa_mosteller\",\n        \"step_description\": \"Calculate body surface area (BSA) in square meters using the Mosteller formula: BSA = sqrt(height_cm * weight_kg / 3600).\",\n        \"step_result\": bsa_m2,\n        \"unit\": \"m^2\"\n    }\n    return bsa_m2"
+}

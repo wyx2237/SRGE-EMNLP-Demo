@@ -1,0 +1,53 @@
+{
+    "name": "bmi_calculation_workflow",
+    "description": "Calculate the Body Mass Index (BMI) using the formula BMI = weight (kg) / height (m)^2.",
+    "inputs": [
+        {
+            "input_name": "weight_kg",
+            "input_desc": "Patient's weight in kilograms",
+            "input_type": "float"
+        },
+        {
+            "input_name": "height_m",
+            "input_desc": "Patient's height in meters",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "calculate_bmi",
+            "step_description": "Calculate the Body Mass Index (BMI) using the provided formula.",
+            "step_inputs": [
+                {
+                    "input_name": "weight_kg",
+                    "input_desc": "Patient's weight in kilograms",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.weight_kg"
+                },
+                {
+                    "input_name": "height_m",
+                    "input_desc": "Patient's height in meters",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.height_m"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "bmi_value",
+                    "output_desc": "Calculated BMI value",
+                    "output_type": "float"
+                }
+            ],
+            "category": "anthropometric",
+            "reason": "This step directly implements the BMI calculation formula provided, which is a standard anthropometric measurement.",
+            "detail": "The BMI is calculated by dividing the patient's weight in kilograms by the square of their height in meters."
+        }
+    ],
+    "output": {
+        "output_name": "bmi_value",
+        "output_desc": "Calculated BMI value",
+        "output_type": "float"
+    },
+    "code": "def solve(weight_kg, height_m):\n    # Step 1: Calculate the Body Mass Index (BMI) using the formula BMI = weight (kg) / height (m)^2\n    # This step calculates the BMI value based on the provided weight in kilograms and height in meters\n    bmi_value = weight_kg / (height_m ** 2)\n    \n    # Yield the result of the BMI calculation\n    yield {\n        \"step_name\": \"calculate_bmi\",\n        \"step_description\": \"Calculate the Body Mass Index (BMI) using the provided formula.\",\n        \"step_result\": bmi_value,\n        \"unit\": None\n    }\n    \n    # Return the final result\n    return bmi_value"
+}

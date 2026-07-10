@@ -1,0 +1,99 @@
+{
+    "name": "ideal_body_weight_calculation_workflow",
+    "description": "Calculate the ideal body weight (IBW) based on sex and height using the standard IBW formula.",
+    "inputs": [
+        {
+            "input_name": "height_cm",
+            "input_desc": "Patient's height in centimeters",
+            "input_type": "float"
+        },
+        {
+            "input_name": "sex",
+            "input_desc": "Patient's biological sex. Allowed values: 'male', 'female'",
+            "input_type": "str"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "height_unit_conversion",
+            "step_description": "Convert height from centimeters to inches",
+            "step_inputs": [
+                {
+                    "input_name": "height_cm",
+                    "input_desc": "Patient's height in centimeters",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.height_cm"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "height_in",
+                    "output_desc": "Patient's height in inches",
+                    "output_type": "float"
+                }
+            ],
+            "category": "unit_conversion",
+            "reason": "This step converts the height unit from centimeters to inches, which is required by the IBW formula. This fits the UnitConversion template perfectly.",
+            "detail": "Divide the height in centimeters by 2.54 to convert to inches: height_in = height_cm / 2.54. Round to 4 decimal places."
+        },
+        {
+            "step_id": "2",
+            "step_name": "sex_based_coefficient_selection",
+            "step_description": "Determine the base weight constant based on sex",
+            "step_inputs": [
+                {
+                    "input_name": "sex",
+                    "input_desc": "Patient's biological sex. Allowed values: 'male', 'female'",
+                    "input_type": "str",
+                    "input_source": "$|raw input|.sex"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "base_weight",
+                    "output_desc": "Base weight constant in kg (50.0 for male, 45.5 for female)",
+                    "output_type": "float"
+                }
+            ],
+            "category": "discrete_value_mapping",
+            "reason": "The sex input maps directly to one of two predefined base weight values. This is a classic discrete value mapping scenario.",
+            "detail": "If sex is 'male', base_weight = 50.0; if sex is 'female', base_weight = 45.5."
+        },
+        {
+            "step_id": "3",
+            "step_name": "ideal_body_weight_calculation",
+            "step_description": "Calculate IBW using the formula: base_weight + 2.3 * (height_in - 60)",
+            "step_inputs": [
+                {
+                    "input_name": "base_weight",
+                    "input_desc": "Base weight constant in kg (50.0 or 45.5)",
+                    "input_type": "float",
+                    "input_source": "$|step2|.base_weight"
+                },
+                {
+                    "input_name": "height_in",
+                    "input_desc": "Patient's height in inches",
+                    "input_type": "float",
+                    "input_source": "$|step1|.height_in"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "ibw",
+                    "output_desc": "Ideal body weight in kilograms",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step applies the given mathematical formula to compute the final IBW value. It is a straightforward formula calculation.",
+            "detail": "Calculate IBW using the formula: IBW = base_weight + 2.3 * (height_in - 60). Round to 4 decimal places."
+        }
+    ],
+    "output": {
+        "output_name": "ibw",
+        "output_desc": "Final calculated ideal body weight in kilograms",
+        "output_type": "float"
+    },
+    "code": "import math\n\ndef solve(height_cm, sex):\n    # Step 1: height_unit_conversion\n    # Convert height from centimeters to inches by dividing by 2.54, rounded to 4 decimal places\n    height_in = round(height_cm / 2.54, 4)\n    yield {\n        \"step_name\": \"height_unit_conversion\",\n        \"step_description\": \"Convert height from centimeters to inches using the formula height_in = height_cm / 2.54, rounded to 4 decimal places\",\n        \"step_result\": height_in,\n        \"unit\": \"inches\"\n    }\n\n    # Step 2: sex_based_coefficient_selection\n    # Determine the base weight constant based on sex: male -> 50.0, female -> 45.5\n    if sex.lower() == 'male':\n        base_weight = 50.0\n    elif sex.lower() == 'female':\n        base_weight = 45.5\n    else:\n        raise ValueError(\"sex must be 'male' or 'female'\")\n    yield {\n        \"step_name\": \"sex_based_coefficient_selection\",\n        \"step_description\": \"Determine the base weight constant based on sex: 50.0 kg for male, 45.5 kg for female\",\n        \"step_result\": base_weight,\n        \"unit\": \"kg\"\n    }\n\n    # Step 3: ideal_body_weight_calculation\n    # Calculate IBW using the formula: IBW = base_weight + 2.3 * (height_in - 60), rounded to 4 decimal places\n    ibw = round(base_weight + 2.3 * (height_in - 60), 4)\n    yield {\n        \"step_name\": \"ideal_body_weight_calculation\",\n        \"step_description\": \"Calculate ideal body weight using formula IBW = base_weight + 2.3 * (height_in - 60), rounded to 4 decimal places\",\n        \"step_result\": ibw,\n        \"unit\": \"kg\"\n    }\n\n    # Return the final IBW\n    return ibw"
+}

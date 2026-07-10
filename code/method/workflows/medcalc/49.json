@@ -1,0 +1,71 @@
+{
+    "name": "total_daily_mme_calculation_workflow",
+    "description": "Calculate the total daily Morphine Milligram Equivalents (MME) by mapping each opioid dose to its MME conversion factor, computing individual MME values, and summing them.",
+    "inputs": [
+        {
+            "input_name": "opioid_dose_records",
+            "input_desc": "List of opioid dose records, each containing opioid_type and dose_mg.",
+            "input_type": "array[object]"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "compute_individual_mme",
+            "step_description": "For each opioid dose record, map the opioid type to its MME conversion factor and multiply by the dose to obtain the individual MME.",
+            "step_inputs": [
+                {
+                    "input_name": "opioid_type",
+                    "input_desc": "Name of the opioid. Must be one of: 'Codeine', 'FentaNYL buccal', 'HYDROcodone', 'HYDROmorphone', 'Methadone', 'Morphine', 'OxyCODONE', 'OxyMORphone', 'Tapentadol', 'TraMADol', 'Buprenorphine'.",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.opioid_type"
+                },
+                {
+                    "input_name": "dose_mg",
+                    "input_desc": "Dose amount in milligrams (mg).",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.dose_mg"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "individual_mme",
+                    "output_desc": "Calculated MME for this specific opioid dose.",
+                    "output_type": "float"
+                }
+            ],
+            "category": "DiscreteValueMapping",
+            "reason": "The opioid_type is a discrete string that must be mapped to a specific numerical conversion factor from a predefined lookup table before performing the dose multiplication. The core operation involves retrieving a mapped value based on a categorical input.",
+            "detail": "Look up the MME conversion factor based on opioid_type: Codeine=0.15, FentaNYL buccal=0.13, HYDROcodone=1, HYDROmorphone=5, Methadone=4.7, Morphine=1, OxyCODONE=1.5, OxyMORphone=3, Tapentadol=0.4, TraMADol=0.2, Buprenorphine=10. If the type is unknown, use factor 0.0. Multiply the obtained factor by dose_mg to get the individual MME."
+        },
+        {
+            "step_id": "2",
+            "step_name": "aggregate_total_mme",
+            "step_description": "Sum all calculated individual MME values to compute the total daily Morphine Milligram Equivalents.",
+            "step_inputs": [
+                {
+                    "input_name": "mme_list",
+                    "input_desc": "List of individual MME values.",
+                    "input_type": "array[float]",
+                    "input_source": "$|1|.individual_mme"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_daily_mme",
+                    "output_desc": "Total daily Morphine Milligram Equivalents.",
+                    "output_type": "float"
+                }
+            ],
+            "category": "StatisticalAggregation",
+            "reason": "Computing the total daily MME requires summing all individual MME values, which is a classic statistical aggregation operation (sum).",
+            "detail": "Sum all numerical values in the input list mme_list. If the list is empty, the sum is 0.0. The resulting sum represents the total daily MME."
+        }
+    ],
+    "output": {
+        "output_name": "total_daily_mme",
+        "output_desc": "The final summed total daily Morphine Milligram Equivalents.",
+        "output_type": "float"
+    },
+    "code": "import math\nfrom typing import List, Dict, Union\n\ndef solve(opioid_dose_records: List[Dict[str, Union[str, float]]]):\n    \"\"\"\n    Calculate the total daily Morphine Milligram Equivalents (MME).\n    \n    Args:\n        opioid_dose_records: List of opioid dose records, each containing opioid_type and dose_mg.\n    \"\"\"\n    # MME conversion factor mapping based on opioid type\n    conversion_factors = {\n        'Codeine': 0.15,\n        'FentaNYL buccal': 0.13,\n        'HYDROcodone': 1,\n        'HYDROmorphone': 5,\n        'Methadone': 4.7,\n        'Morphine': 1,\n        'OxyCODONE': 1.5,\n        'OxyMORphone': 3,\n        'Tapentadol': 0.4,\n        'TraMADol': 0.2,\n        'Buprenorphine': 10\n    }\n\n    # Step 1: compute_individual_mme\n    # For each opioid dose record, map the opioid type to its MME conversion factor \n    # and multiply by the dose to obtain the individual MME.\n    individual_mme_list = []\n    step_results_step1 = []\n    \n    for record in opioid_dose_records:\n        opioid_type = record.get('opioid_type', '')\n        dose_mg = record.get('dose_mg', 0.0)\n        \n        # Look up conversion factor; default to 0.0 if type is unknown\n        factor = conversion_factors.get(opioid_type, 0.0)\n        individual_mme = factor * dose_mg\n        \n        individual_mme_list.append(individual_mme)\n        step_results_step1.append(individual_mme)\n    \n    # Yield Step 1 result (list of individual MME values)\n    yield {\n        \"step_name\": \"compute_individual_mme\",\n        \"step_description\": \"For each opioid dose record, mapped the opioid type to its MME conversion factor and multiplied by the dose to obtain the individual MME.\",\n        \"step_result\": step_results_step1,\n        \"unit\": \"mg\"\n    }\n\n    # Step 2: aggregate_total_mme\n    # Sum all calculated individual MME values to compute the total daily Morphine Milligram Equivalents.\n    if not individual_mme_list:\n        total_daily_mme = 0.0\n    else:\n        total_daily_mme = sum(individual_mme_list)\n    \n    # Yield Step 2 result (total sum)\n    yield {\n        \"step_name\": \"aggregate_total_mme\",\n        \"step_description\": \"Summed all calculated individual MME values to compute the total daily Morphine Milligram Equivalents.\",\n        \"step_result\": total_daily_mme,\n        \"unit\": \"mg\"\n    }\n\n    # Return final total\n    return total_daily_mme"
+}

@@ -1,0 +1,133 @@
+{
+    "name": "anca_renal_risk_score_calculation_workflow",
+    "description": "Calculate the total ANCA Renal Risk Score for a patient with ANCA-associated glomerulonephritis (AAGN) to predict the risk of progression to end-stage renal disease (ESRD). The score is the sum of the N score (based on the percentage of normal glomeruli), the T score (based on the percentage of tubular atrophy and interstitial fibrosis), and the G score (based on the eGFR at diagnosis).",
+    "inputs": [
+        {
+            "input_name": "normal_glomeruli_pct",
+            "input_desc": "Percentage of normal glomeruli (a float value between 0 and 100).",
+            "input_type": "float"
+        },
+        {
+            "input_name": "tubular_atrophy_fibrosis_pct",
+            "input_desc": "Percentage of tubular atrophy and interstitial fibrosis (a float value between 0 and 100).",
+            "input_type": "float"
+        },
+        {
+            "input_name": "egfr_ml_per_min_per_1_73m2",
+            "input_desc": "Estimated glomerular filtration rate at diagnosis, in mL/min/1.73 m².",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "assign_n_score",
+            "step_description": "Assign score based on the percentage of normal glomeruli",
+            "step_inputs": [
+                {
+                    "input_name": "normal_glomeruli_pct",
+                    "input_desc": "Percentage of normal glomeruli",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.normal_glomeruli_pct"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "n_score",
+                    "output_desc": "Score for the normal glomeruli component (0, 4, or 6)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "logical_rule_scoring",
+            "reason": "Applying a set of interval-based logical rules to map a continuous variable (percentage) to a discrete score.",
+            "detail": "Determine N score based on normal_glomeruli_pct: If > 25%, score is 0. If >= 10% and <= 25%, score is 4. If < 10%, score is 6."
+        },
+        {
+            "step_id": "2",
+            "step_name": "assign_t_score",
+            "step_description": "Assign score based on the percentage of tubular atrophy and interstitial fibrosis",
+            "step_inputs": [
+                {
+                    "input_name": "tubular_atrophy_fibrosis_pct",
+                    "input_desc": "Percentage of tubular atrophy and interstitial fibrosis",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.tubular_atrophy_fibrosis_pct"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "t_score",
+                    "output_desc": "Score for the tubular atrophy/interstitial fibrosis component (0 or 2)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "logical_rule_scoring",
+            "reason": "Applying a single-threshold logical rule to map a continuous variable (percentage) to a discrete score.",
+            "detail": "Determine T score based on tubular_atrophy_fibrosis_pct: If <= 25%, score is 0. If > 25%, score is 2."
+        },
+        {
+            "step_id": "3",
+            "step_name": "assign_g_score",
+            "step_description": "Assign score based on eGFR at diagnosis",
+            "step_inputs": [
+                {
+                    "input_name": "egfr_ml_per_min_per_1_73m2",
+                    "input_desc": "Estimated glomerular filtration rate at diagnosis, in mL/min/1.73 m²",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.egfr_ml_per_min_per_1_73m2"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "g_score",
+                    "output_desc": "Score for the eGFR component (0 or 3)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "logical_rule_scoring",
+            "reason": "Applying a single-threshold logical rule to map a continuous variable (eGFR) to a discrete score.",
+            "detail": "Determine G score based on eGFR: If > 15 mL/min/1.73 m², score is 0. If <= 15 mL/min/1.73 m², score is 3."
+        },
+        {
+            "step_id": "4",
+            "step_name": "calculate_total_risk_score",
+            "step_description": "Sum N, T, and G scores to get the total ANCA Renal Risk Score.",
+            "step_inputs": [
+                {
+                    "input_name": "n_score",
+                    "input_desc": "Score from the normal glomeruli component",
+                    "input_type": "int",
+                    "input_source": "$|step1|.n_score"
+                },
+                {
+                    "input_name": "t_score",
+                    "input_desc": "Score from the tubular atrophy/interstitial fibrosis component",
+                    "input_type": "int",
+                    "input_source": "$|step2|.t_score"
+                },
+                {
+                    "input_name": "g_score",
+                    "input_desc": "Score from the eGFR component",
+                    "input_type": "int",
+                    "input_source": "$|step3|.g_score"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_score",
+                    "output_desc": "Total ANCA renal risk score (an integer between 0 and 11)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "arithmetic_calculation",
+            "reason": "Performing a simple summation of three integer component scores.",
+            "detail": "total_score = n_score + t_score + g_score"
+        }
+    ],
+    "output": {
+        "output_name": "total_score",
+        "output_desc": "The final calculated ANCA Renal Risk Score, representing the risk of progression to ESRD.",
+        "output_type": "int"
+    },
+    "code": "def solve(normal_glomeruli_pct, tubular_atrophy_fibrosis_pct, egfr_ml_per_min_per_1_73m2):\n    # Step 1: assign_n_score - Assign score based on the percentage of normal glomeruli\n    if normal_glomeruli_pct > 25:\n        n_score = 0\n    elif normal_glomeruli_pct >= 10:\n        n_score = 4\n    else:\n        n_score = 6\n    yield {\n        \"step_name\": \"assign_n_score\",\n        \"step_description\": \"Assign score based on the percentage of normal glomeruli: >25% -> 0, 10-25% -> 4, <10% -> 6\",\n        \"step_result\": n_score,\n        \"unit\": None\n    }\n\n    # Step 2: assign_t_score - Assign score based on the percentage of tubular atrophy and interstitial fibrosis\n    if tubular_atrophy_fibrosis_pct <= 25:\n        t_score = 0\n    else:\n        t_score = 2\n    yield {\n        \"step_name\": \"assign_t_score\",\n        \"step_description\": \"Assign score based on the percentage of tubular atrophy and interstitial fibrosis: <=25% -> 0, >25% -> 2\",\n        \"step_result\": t_score,\n        \"unit\": None\n    }\n\n    # Step 3: assign_g_score - Assign score based on eGFR at diagnosis\n    if egfr_ml_per_min_per_1_73m2 > 15:\n        g_score = 0\n    else:\n        g_score = 3\n    yield {\n        \"step_name\": \"assign_g_score\",\n        \"step_description\": \"Assign score based on eGFR at diagnosis: >15 mL/min/1.73 m² -> 0, <=15 mL/min/1.73 m² -> 3\",\n        \"step_result\": g_score,\n        \"unit\": None\n    }\n\n    # Step 4: calculate_total_risk_score - Sum N, T, and G scores to get the total ANCA Renal Risk Score\n    total_score = n_score + t_score + g_score\n    yield {\n        \"step_name\": \"calculate_total_risk_score\",\n        \"step_description\": \"Sum N, T, and G scores to get the total ANCA Renal Risk Score\",\n        \"step_result\": total_score,\n        \"unit\": None\n    }\n\n    return total_score"
+}

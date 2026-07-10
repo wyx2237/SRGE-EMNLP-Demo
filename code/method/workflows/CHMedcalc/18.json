@@ -1,0 +1,87 @@
+{
+    "name": "serum_osmolarity_calculation_workflow",
+    "description": "Calculate serum osmolarity using the formula based on serum sodium, glucose, and BUN concentrations.",
+    "inputs": [
+        {
+            "input_name": "sodium_mmol_l",
+            "input_desc": "Serum sodium concentration in mmol/L",
+            "input_type": "float"
+        },
+        {
+            "input_name": "glucose_mmol_l",
+            "input_desc": "Glucose concentration in mmol/L (if provided). If not provided, use glucose in mg/dL directly.",
+            "input_type": "float"
+        },
+        {
+            "input_name": "bun_mg_dl",
+            "input_desc": "Blood urea nitrogen concentration in mg/dL",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "convert_glucose_to_mg_dL",
+            "step_description": "Convert glucose concentration from mmol/L to mg/dL if necessary.",
+            "step_inputs": [
+                {
+                    "input_name": "glucose_mmol_l",
+                    "input_desc": "Glucose concentration in mmol/L (if provided).",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.glucose_mmol_l"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "glucose_mg_dL",
+                    "output_desc": "Glucose concentration in mg/dL after conversion.",
+                    "output_type": "float"
+                }
+            ],
+            "category": "unit_conversion",
+            "reason": "The glucose value must be in mg/dL for the formula to work. If the input is in mmol/L, it requires unit conversion.",
+            "detail": "If the glucose concentration is given in mmol/L, it needs to be converted to mg/dL by multiplying with 18. If the input is already in mg/dL, no conversion is needed."
+        },
+        {
+            "step_id": "2",
+            "step_name": "calculate_osmolarity",
+            "step_description": "Calculate serum osmolarity using the given formula.",
+            "step_inputs": [
+                {
+                    "input_name": "sodium_mmol_l",
+                    "input_desc": "Serum sodium concentration in mmol/L.",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.sodium_mmol_l"
+                },
+                {
+                    "input_name": "glucose_mg_dL",
+                    "input_desc": "Glucose concentration in mg/dL (after conversion).",
+                    "input_type": "float",
+                    "input_source": "$|1|.glucose_mg_dL"
+                },
+                {
+                    "input_name": "bun_mg_dl",
+                    "input_desc": "Blood urea nitrogen concentration in mg/dL.",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.bun_mg_dl"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "osmolarity",
+                    "output_desc": "Calculated serum osmolarity in mOsm/kg.",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step directly applies the formula to calculate serum osmolarity based on the inputs.",
+            "detail": "OSMc (mOsm/kg) = 2 × Na (mmol/L) + Glucose (mg/dL)/18 + BUN (mg/dL)/2.8"
+        }
+    ],
+    "output": {
+        "output_name": "osmolarity",
+        "output_desc": "Calculated serum osmolarity in mOsm/kg.",
+        "output_type": "float"
+    },
+    "code": "import math\n\ndef solve(sodium_mmol_l, glucose_mmol_l, bun_mg_dl):\n    # Step 1: Convert glucose concentration from mmol/L to mg/dL if necessary\n    # If the input is in mmol/L, it needs to be converted to mg/dL by multiplying with 18\n    # If the input is already in mg/dL, no conversion is needed\n    if glucose_mmol_l is not None:\n        glucose_mg_dL = glucose_mmol_l * 18\n    else:\n        glucose_mg_dL = None  # No conversion needed if input is already in mg/dL\n    \n    yield {\n        \"step_name\": \"convert_glucose_to_mg_dL\",\n        \"step_description\": \"Convert glucose concentration from mmol/L to mg/dL if necessary.\",\n        \"step_result\": glucose_mg_dL,\n        \"unit\": \"mg/dL\"\n    }\n    \n    # Step 2: Calculate serum osmolarity using the given formula\n    # OSMc (mOsm/kg) = 2 × Na (mmol/L) + Glucose (mg/dL)/18 + BUN (mg/dL)/2.8\n    osmolarity = 2 * sodium_mmol_l + (glucose_mg_dL / 18) + (bun_mg_dl / 2.8)\n    \n    yield {\n        \"step_name\": \"calculate_osmolarity\",\n        \"step_description\": \"Calculate serum osmolarity using the given formula.\",\n        \"step_result\": osmolarity,\n        \"unit\": \"mOsm/kg\"\n    }\n    \n    return osmolarity"
+}

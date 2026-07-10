@@ -1,0 +1,551 @@
+{
+    "name": "apache_ii_calculation_workflow",
+    "description": "Calculate the total APACHE II score based on 14 physiological and clinical criteria including age, history, temperature, MAP, heart rate, respiratory rate, oxygenation, arterial pH, serum sodium, serum potassium, serum creatinine, hematocrit, white blood count, and Glasgow Coma Scale.",
+    "inputs": [
+        {
+            "input_name": "age_years",
+            "input_desc": "Patient's age in years",
+            "input_type": "int"
+        },
+        {
+            "input_name": "has_history",
+            "input_desc": "Whether the patient has a history of severe organ insufficiency or is immunocompromised",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "surgery_status",
+            "input_desc": "Surgical status, allowed values: 'nonoperative', 'emergency_postoperative', 'elective_postoperative', 'none'",
+            "input_type": "str"
+        },
+        {
+            "input_name": "temperature_celsius",
+            "input_desc": "Rectal temperature in degrees Celsius",
+            "input_type": "float"
+        },
+        {
+            "input_name": "map_mmHg",
+            "input_desc": "Mean arterial pressure in mmHg",
+            "input_type": "float"
+        },
+        {
+            "input_name": "heart_rate_bpm",
+            "input_desc": "Heart rate in beats per minute",
+            "input_type": "int"
+        },
+        {
+            "input_name": "respiratory_rate_bpm",
+            "input_desc": "Respiratory rate in breaths per minute",
+            "input_type": "int"
+        },
+        {
+            "input_name": "fio2_percent",
+            "input_desc": "Fraction of inspired oxygen in percent (e.g., 21, 50)",
+            "input_type": "float"
+        },
+        {
+            "input_name": "pao2_mmHg",
+            "input_desc": "Partial pressure of arterial oxygen in mmHg",
+            "input_type": "float"
+        },
+        {
+            "input_name": "aa_gradient_mmHg",
+            "input_desc": "Alveolar-arterial oxygen gradient in mmHg",
+            "input_type": "float"
+        },
+        {
+            "input_name": "arterial_ph",
+            "input_desc": "Arterial blood pH value",
+            "input_type": "float"
+        },
+        {
+            "input_name": "serum_sodium_mmol_per_l",
+            "input_desc": "Serum sodium concentration in mmol/L",
+            "input_type": "float"
+        },
+        {
+            "input_name": "serum_potassium_mmol_per_l",
+            "input_desc": "Serum potassium concentration in mmol/L",
+            "input_type": "float"
+        },
+        {
+            "input_name": "serum_creatinine_mg_per_100ml",
+            "input_desc": "Serum creatinine concentration in mg/100 mL",
+            "input_type": "float"
+        },
+        {
+            "input_name": "renal_failure_status",
+            "input_desc": "Type of renal failure if present, allowed values: 'acute', 'chronic', 'none'",
+            "input_type": "str"
+        },
+        {
+            "input_name": "hematocrit_percent",
+            "input_desc": "Hematocrit percentage",
+            "input_type": "float"
+        },
+        {
+            "input_name": "wbc_count_per_cubic_mm_10_3",
+            "input_desc": "White blood count in total/cubic mm in 10^3 (e.g., 8.5 means 8.5 x 10^3 per cubic mm)",
+            "input_type": "float"
+        },
+        {
+            "input_name": "gcs_score",
+            "input_desc": "Glasgow Coma Scale score (1-15)",
+            "input_type": "int"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "calculate_age_score",
+            "step_description": "Map age in years to APACHE II points",
+            "step_inputs": [
+                {
+                    "input_name": "age_years",
+                    "input_desc": "Patient's age in years",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.age_years"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "age_points",
+                    "output_desc": "APACHE II points for age",
+                    "output_type": "int"
+                }
+            ],
+            "category": "ThresholdMapping",
+            "reason": "Age scoring requires mapping a continuous numerical value (age) to discrete point values based on predefined thresholds.",
+            "detail": "Age points: <=44 = 0, 45-54 = 2, 55-64 = 3, 65-74 = 5, >=75 = 6"
+        },
+        {
+            "step_id": "2",
+            "step_name": "calculate_history_score",
+            "step_description": "Calculate points for history of severe organ insufficiency or immunocompromised status",
+            "step_inputs": [
+                {
+                    "input_name": "has_history",
+                    "input_desc": "Patient has history of severe organ insufficiency or is immunocompromised",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.has_history"
+                },
+                {
+                    "input_name": "surgery_status",
+                    "input_desc": "Surgical status: 'nonoperative', 'emergency_postoperative', 'elective_postoperative', or 'none'",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.surgery_status"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "history_points",
+                    "output_desc": "APACHE II points for history status",
+                    "output_type": "int"
+                }
+            ],
+            "category": "ConditionEvaluation",
+            "reason": "The history scoring involves conditional branching based on a boolean status and a surgery type category.",
+            "detail": "If has_history is true: if surgery_status is 'nonoperative' or 'emergency_postoperative' then 5 points; if 'elective_postoperative' then 2 points. If has_history is false: 0 points."
+        },
+        {
+            "step_id": "3",
+            "step_name": "calculate_temperature_score",
+            "step_description": "Map rectal temperature to APACHE II points",
+            "step_inputs": [
+                {
+                    "input_name": "temperature_celsius",
+                    "input_desc": "Rectal temperature in degrees Celsius",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.temperature_celsius"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "temp_points",
+                    "output_desc": "APACHE II points for temperature",
+                    "output_type": "int"
+                }
+            ],
+            "category": "ThresholdMapping",
+            "reason": "Temperature scoring maps a continuous value to discrete points based on predefined thresholds.",
+            "detail": "Temperature points: >=41 = 4, 39 to <41 = 3, 38.5 to <39 = 1, 36 to <38.5 = 0, 34 to <36 = 1, 32 to <34 = 2, 30 to <32 = 3, <30 = 4"
+        },
+        {
+            "step_id": "4",
+            "step_name": "calculate_map_score",
+            "step_description": "Map mean arterial pressure to APACHE II points",
+            "step_inputs": [
+                {
+                    "input_name": "map_mmHg",
+                    "input_desc": "Mean arterial pressure in mmHg",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.map_mmHg"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "map_points",
+                    "output_desc": "APACHE II points for mean arterial pressure",
+                    "output_type": "int"
+                }
+            ],
+            "category": "ThresholdMapping",
+            "reason": "MAP scoring maps a continuous value to discrete points based on predefined thresholds.",
+            "detail": "MAP points: >=160 = 4, 130-159 = 3, 110-129 = 2, 70-109 = 0, 50-69 = 2, 40-49 = 3, <40 = 4"
+        },
+        {
+            "step_id": "5",
+            "step_name": "calculate_heart_rate_score",
+            "step_description": "Map heart rate to APACHE II points",
+            "step_inputs": [
+                {
+                    "input_name": "heart_rate_bpm",
+                    "input_desc": "Heart rate in beats per minute",
+                    "input_type": "int",
+                    "input_source": "$|raw input|.heart_rate_bpm"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "hr_points",
+                    "output_desc": "APACHE II points for heart rate",
+                    "output_type": "int"
+                }
+            ],
+            "category": "ThresholdMapping",
+            "reason": "Heart rate scoring maps a continuous value to discrete points based on predefined thresholds.",
+            "detail": "Heart rate points: >=180 = 4, 140 to <180 = 3, 110 to <140 = 2, 70 to <110 = 0, 55 to <70 = 2, 40 to <55 = 3, <40 = 4"
+        },
+        {
+            "step_id": "6",
+            "step_name": "calculate_respiratory_rate_score",
+            "step_description": "Map respiratory rate to APACHE II points",
+            "step_inputs": [
+                {
+                    "input_name": "respiratory_rate_bpm",
+                    "input_desc": "Respiratory rate in breaths per minute",
+                    "input_type": "int",
+                    "input_source": "$|raw input|.respiratory_rate_bpm"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "rr_points",
+                    "output_desc": "APACHE II points for respiratory rate",
+                    "output_type": "int"
+                }
+            ],
+            "category": "ThresholdMapping",
+            "reason": "Respiratory rate scoring maps a continuous value to discrete points based on predefined thresholds.",
+            "detail": "Respiratory rate points: >=50 = 4, 35 to <50 = 3, 25 to <35 = 1, 12 to <25 = 0, 10 to <12 = 1, 6 to <10 = 2, <6 = 4"
+        },
+        {
+            "step_id": "7",
+            "step_name": "calculate_oxygenation_score",
+            "step_description": "Calculate oxygenation points based on FiO2 and either PaO2 or Aa gradient",
+            "step_inputs": [
+                {
+                    "input_name": "fio2_percent",
+                    "input_desc": "Fraction of inspired oxygen in percent",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.fio2_percent"
+                },
+                {
+                    "input_name": "pao2_mmHg",
+                    "input_desc": "Partial pressure of arterial oxygen in mmHg",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.pao2_mmHg"
+                },
+                {
+                    "input_name": "aa_gradient_mmHg",
+                    "input_desc": "Alveolar-arterial oxygen gradient in mmHg",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.aa_gradient_mmHg"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "oxygenation_points",
+                    "output_desc": "APACHE II points for oxygenation",
+                    "output_type": "int"
+                }
+            ],
+            "category": "ConditionEvaluation",
+            "reason": "Oxygenation scoring uses conditional logic to select the appropriate parameter (PaO2 or Aa gradient) based on FiO2 level, then maps values to points.",
+            "detail": "If FiO2 >= 50%: use Aa gradient. Aa gradient >349 = 4, 350-349 = 3 (note: based on original criteria 350-349 may be a typo, should be 300-349), 200-349 = 2, <200 = 1. If FiO2 < 50% (and if FiO2 over 45% use Aa gradient <200 = 1? standard criteria: use PaO2) use PaO2. PaO2 <55 = 4, 55-60 = 3, 61-70 = 1. If FiO2 < 50% and PaO2 >70 = 0. (Interpretation aligned with standard APACHE II: FiO2 >= 0.5 use AaDO2; FiO2 < 0.5 use PaO2)."
+        },
+        {
+            "step_id": "8",
+            "step_name": "calculate_ph_score",
+            "step_description": "Map arterial pH to APACHE II points",
+            "step_inputs": [
+                {
+                    "input_name": "arterial_ph",
+                    "input_desc": "Arterial blood pH value",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.arterial_ph"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "ph_points",
+                    "output_desc": "APACHE II points for arterial pH",
+                    "output_type": "int"
+                }
+            ],
+            "category": "ThresholdMapping",
+            "reason": "Arterial pH scoring maps a continuous value to discrete points based on predefined thresholds.",
+            "detail": "Arterial pH points: >=7.7 = 4, 7.60 to <7.70 = 3, 7.50 to <7.60 = 1, 7.33 to <7.50 = 0, 7.25 to <7.33 = 2, 7.15 to <7.25 = 3, <7.15 = 4"
+        },
+        {
+            "step_id": "9",
+            "step_name": "calculate_sodium_score",
+            "step_description": "Map serum sodium to APACHE II points",
+            "step_inputs": [
+                {
+                    "input_name": "serum_sodium_mmol_per_l",
+                    "input_desc": "Serum sodium concentration in mmol/L",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.serum_sodium_mmol_per_l"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "sodium_points",
+                    "output_desc": "APACHE II points for serum sodium",
+                    "output_type": "int"
+                }
+            ],
+            "category": "ThresholdMapping",
+            "reason": "Serum sodium scoring maps a continuous value to discrete points based on predefined thresholds.",
+            "detail": "Serum sodium points: >=180 = 4, 160 to <180 = 3, 155 to <160 = 2, 150 to <155 = 1, 130 to <150 = 0, 120 to <130 = 2, 111 to <120 = 3, <111 = 4"
+        },
+        {
+            "step_id": "10",
+            "step_name": "calculate_potassium_score",
+            "step_description": "Map serum potassium to APACHE II points",
+            "step_inputs": [
+                {
+                    "input_name": "serum_potassium_mmol_per_l",
+                    "input_desc": "Serum potassium concentration in mmol/L",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.serum_potassium_mmol_per_l"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "potassium_points",
+                    "output_desc": "APACHE II points for serum potassium",
+                    "output_type": "int"
+                }
+            ],
+            "category": "ThresholdMapping",
+            "reason": "Serum potassium scoring maps a continuous value to discrete points based on predefined thresholds.",
+            "detail": "Serum potassium points: >=7.0 = 4, 6.0 to <7.0 = 3, 5.5 to <6.0 = 1, 3.5 to <5.5 = 0, 3.0 to <3.5 = 1, 2.5 to <3.0 = 2, <2.5 = 4"
+        },
+        {
+            "step_id": "11",
+            "step_name": "calculate_creatinine_score",
+            "step_description": "Calculate serum creatinine points, considering renal failure status",
+            "step_inputs": [
+                {
+                    "input_name": "serum_creatinine_mg_per_100ml",
+                    "input_desc": "Serum creatinine concentration in mg/100 mL",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.serum_creatinine_mg_per_100ml"
+                },
+                {
+                    "input_name": "renal_failure_status",
+                    "input_desc": "Type of renal failure: 'acute', 'chronic', or 'none'",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.renal_failure_status"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "creatinine_points",
+                    "output_desc": "APACHE II points for serum creatinine",
+                    "output_type": "int"
+                }
+            ],
+            "category": "ConditionEvaluation",
+            "reason": "Serum creatinine scoring uses conditional logic based on both the creatinine value and the presence/type of renal failure.",
+            "detail": "If acute renal failure: >=3.5 = 8, 2.0 to <3.5 = 6, 1.5 to <2.0 = 4. If chronic renal failure: >=3.5 = 4, 2.0 to <3.5 = 3, 1.5 to <2.0 = 2. If no renal failure or normal: 0.6 to <1.5 = 0, <0.6 = 2. (Note: other ranges not specified for chronic/none will default to 0 according to standard APACHE II)."
+        },
+        {
+            "step_id": "12",
+            "step_name": "calculate_hematocrit_score",
+            "step_description": "Map hematocrit to APACHE II points",
+            "step_inputs": [
+                {
+                    "input_name": "hematocrit_percent",
+                    "input_desc": "Hematocrit percentage",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.hematocrit_percent"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "hematocrit_points",
+                    "output_desc": "APACHE II points for hematocrit",
+                    "output_type": "int"
+                }
+            ],
+            "category": "ThresholdMapping",
+            "reason": "Hematocrit scoring maps a continuous value to discrete points based on predefined thresholds.",
+            "detail": "Hematocrit points: >=60 = 4, 50 to <60 = 2, 46 to <50 = 1, 30 to <46 = 0, 20 to <30 = 2, <20 = 4"
+        },
+        {
+            "step_id": "13",
+            "step_name": "calculate_wbc_score",
+            "step_description": "Map white blood count to APACHE II points",
+            "step_inputs": [
+                {
+                    "input_name": "wbc_count_per_cubic_mm_10_3",
+                    "input_desc": "White blood count in total/cubic mm in 10^3",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.wbc_count_per_cubic_mm_10_3"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "wbc_points",
+                    "output_desc": "APACHE II points for white blood count",
+                    "output_type": "int"
+                }
+            ],
+            "category": "ThresholdMapping",
+            "reason": "White blood count scoring maps a continuous value to discrete points based on predefined thresholds.",
+            "detail": "WBC points: >=40 = 4, 20 to <40 = 2, 15 to <20 = 1, 3 to <15 = 0, 1 to <3 = 2, <1 = 4"
+        },
+        {
+            "step_id": "14",
+            "step_name": "calculate_gcs_score",
+            "step_description": "Calculate Glasgow Coma Scale points (15 - GCS score)",
+            "step_inputs": [
+                {
+                    "input_name": "gcs_score",
+                    "input_desc": "Glasgow Coma Scale score (1-15)",
+                    "input_type": "int",
+                    "input_source": "$|raw input|.gcs_score"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "gcs_points",
+                    "output_desc": "APACHE II points for Glasgow Coma Scale",
+                    "output_type": "int"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "GCS points are derived from a simple formula: 15 minus the GCS score.",
+            "detail": "GCS points = 15 - gcs_score"
+        },
+        {
+            "step_id": "15",
+            "step_name": "calculate_total_apache_ii",
+            "step_description": "Sum all component scores to obtain the total APACHE II score",
+            "step_inputs": [
+                {
+                    "input_name": "age_points",
+                    "input_desc": "Points from age criterion",
+                    "input_type": "int",
+                    "input_source": "$|1|.age_points"
+                },
+                {
+                    "input_name": "history_points",
+                    "input_desc": "Points from history criterion",
+                    "input_type": "int",
+                    "input_source": "$|2|.history_points"
+                },
+                {
+                    "input_name": "temp_points",
+                    "input_desc": "Points from temperature criterion",
+                    "input_type": "int",
+                    "input_source": "$|3|.temp_points"
+                },
+                {
+                    "input_name": "map_points",
+                    "input_desc": "Points from MAP criterion",
+                    "input_type": "int",
+                    "input_source": "$|4|.map_points"
+                },
+                {
+                    "input_name": "hr_points",
+                    "input_desc": "Points from heart rate criterion",
+                    "input_type": "int",
+                    "input_source": "$|5|.hr_points"
+                },
+                {
+                    "input_name": "rr_points",
+                    "input_desc": "Points from respiratory rate criterion",
+                    "input_type": "int",
+                    "input_source": "$|6|.rr_points"
+                },
+                {
+                    "input_name": "oxygenation_points",
+                    "input_desc": "Points from oxygenation criterion",
+                    "input_type": "int",
+                    "input_source": "$|7|.oxygenation_points"
+                },
+                {
+                    "input_name": "ph_points",
+                    "input_desc": "Points from arterial pH criterion",
+                    "input_type": "int",
+                    "input_source": "$|8|.ph_points"
+                },
+                {
+                    "input_name": "sodium_points",
+                    "input_desc": "Points from serum sodium criterion",
+                    "input_type": "int",
+                    "input_source": "$|9|.sodium_points"
+                },
+                {
+                    "input_name": "potassium_points",
+                    "input_desc": "Points from serum potassium criterion",
+                    "input_type": "int",
+                    "input_source": "$|10|.potassium_points"
+                },
+                {
+                    "input_name": "creatinine_points",
+                    "input_desc": "Points from serum creatinine criterion",
+                    "input_type": "int",
+                    "input_source": "$|11|.creatinine_points"
+                },
+                {
+                    "input_name": "hematocrit_points",
+                    "input_desc": "Points from hematocrit criterion",
+                    "input_type": "int",
+                    "input_source": "$|12|.hematocrit_points"
+                },
+                {
+                    "input_name": "wbc_points",
+                    "input_desc": "Points from white blood count criterion",
+                    "input_type": "int",
+                    "input_source": "$|13|.wbc_points"
+                },
+                {
+                    "input_name": "gcs_points",
+                    "input_desc": "Points from Glasgow Coma Scale criterion",
+                    "input_type": "int",
+                    "input_source": "$|14|.gcs_points"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "apache_total",
+                    "output_desc": "Total APACHE II score",
+                    "output_type": "int"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "The final step is a simple summation formula of all component scores.",
+            "detail": "Total APACHE II = age_points + history_points + temp_points + map_points + hr_points + rr_points + oxygenation_points + ph_points + sodium_points + potassium_points + creatinine_points + hematocrit_points + wbc_points + gcs_points"
+        }
+    ],
+    "output": {
+        "output_name": "apache_total",
+        "output_desc": "Total APACHE II score",
+        "output_type": "int"
+    },
+    "code": "def solve(age_years, has_history, surgery_status, temperature_celsius, map_mmHg, heart_rate_bpm, respiratory_rate_bpm, fio2_percent, pao2_mmHg, aa_gradient_mmHg, arterial_ph, serum_sodium_mmol_per_l, serum_potassium_mmol_per_l, serum_creatinine_mg_per_100ml, renal_failure_status, hematocrit_percent, wbc_count_per_cubic_mm_10_3, gcs_score):\n    # Step 1: calculate_age_score\n    if age_years <= 44:\n        age_points = 0\n    elif 45 <= age_years <= 54:\n        age_points = 2\n    elif 55 <= age_years <= 64:\n        age_points = 3\n    elif 65 <= age_years <= 74:\n        age_points = 5\n    else:  # age_years >= 75\n        age_points = 6\n    yield {\n        \"step_name\": \"calculate_age_score\",\n        \"step_description\": \"Map age in years to APACHE II points: <=44=0, 45-54=2, 55-64=3, 65-74=5, >=75=6\",\n        \"step_result\": age_points,\n        \"unit\": None\n    }\n\n    # Step 2: calculate_history_score\n    if has_history:\n        if surgery_status in ['nonoperative', 'emergency_postoperative']:\n            history_points = 5\n        elif surgery_status == 'elective_postoperative':\n            history_points = 2\n        else:\n            history_points = 0  # default if surgery_status is unexpected\n    else:\n        history_points = 0\n    yield {\n        \"step_name\": \"calculate_history_score\",\n        \"step_description\": \"Calculate points for history of severe organ insufficiency or immunocompromised status based on surgery status\",\n        \"step_result\": history_points,\n        \"unit\": None\n    }\n\n    # Step 3: calculate_temperature_score\n    if temperature_celsius >= 41:\n        temp_points = 4\n    elif 39 <= temperature_celsius < 41:\n        temp_points = 3\n    elif 38.5 <= temperature_celsius < 39:\n        temp_points = 1\n    elif 36 <= temperature_celsius < 38.5:\n        temp_points = 0\n    elif 34 <= temperature_celsius < 36:\n        temp_points = 1\n    elif 32 <= temperature_celsius < 34:\n        temp_points = 2\n    elif 30 <= temperature_celsius < 32:\n        temp_points = 3\n    else:  # temperature_celsius < 30\n        temp_points = 4\n    yield {\n        \"step_name\": \"calculate_temperature_score\",\n        \"step_description\": \"Map rectal temperature to APACHE II points\",\n        \"step_result\": temp_points,\n        \"unit\": None\n    }\n\n    # Step 4: calculate_map_score\n    if map_mmHg >= 160:\n        map_points = 4\n    elif 130 <= map_mmHg < 160:\n        map_points = 3\n    elif 110 <= map_mmHg < 130:\n        map_points = 2\n    elif 70 <= map_mmHg < 110:\n        map_points = 0\n    elif 50 <= map_mmHg < 70:\n        map_points = 2\n    elif 40 <= map_mmHg < 50:\n        map_points = 3\n    else:  # map_mmHg < 40\n        map_points = 4\n    yield {\n        \"step_name\": \"calculate_map_score\",\n        \"step_description\": \"Map mean arterial pressure to APACHE II points\",\n        \"step_result\": map_points,\n        \"unit\": None\n    }\n\n    # Step 5: calculate_heart_rate_score\n    if heart_rate_bpm >= 180:\n        hr_points = 4\n    elif 140 <= heart_rate_bpm < 180:\n        hr_points = 3\n    elif 110 <= heart_rate_bpm < 140:\n        hr_points = 2\n    elif 70 <= heart_rate_bpm < 110:\n        hr_points = 0\n    elif 55 <= heart_rate_bpm < 70:\n        hr_points = 2\n    elif 40 <= heart_rate_bpm < 55:\n        hr_points = 3\n    else:  # heart_rate_bpm < 40\n        hr_points = 4\n    yield {\n        \"step_name\": \"calculate_heart_rate_score\",\n        \"step_description\": \"Map heart rate to APACHE II points\",\n        \"step_result\": hr_points,\n        \"unit\": None\n    }\n\n    # Step 6: calculate_respiratory_rate_score\n    if respiratory_rate_bpm >= 50:\n        rr_points = 4\n    elif 35 <= respiratory_rate_bpm < 50:\n        rr_points = 3\n    elif 25 <= respiratory_rate_bpm < 35:\n        rr_points = 1\n    elif 12 <= respiratory_rate_bpm < 25:\n        rr_points = 0\n    elif 10 <= respiratory_rate_bpm < 12:\n        rr_points = 1\n    elif 6 <= respiratory_rate_bpm < 10:\n        rr_points = 2\n    else:  # respiratory_rate_bpm < 6\n        rr_points = 4\n    yield {\n        \"step_name\": \"calculate_respiratory_rate_score\",\n        \"step_description\": \"Map respiratory rate to APACHE II points\",\n        \"step_result\": rr_points,\n        \"unit\": None\n    }\n\n    # Step 7: calculate_oxygenation_score\n    if fio2_percent >= 50:\n        # Use Aa gradient\n        if aa_gradient_mmHg >= 350:\n            oxygenation_points = 4\n        elif 200 <= aa_gradient_mmHg < 350:\n            oxygenation_points = 2\n        elif aa_gradient_mmHg < 200:\n            oxygenation_points = 1\n        else:\n            oxygenation_points = 0  # fallback, should not reach\n    else:\n        # FiO2 < 50%, use PaO2\n        if pao2_mmHg < 55:\n            oxygenation_points = 4\n        elif 55 <= pao2_mmHg <= 60:\n            oxygenation_points = 3\n        elif 61 <= pao2_mmHg <= 70:\n            oxygenation_points = 1\n        else:  # pao2_mmHg > 70\n            oxygenation_points = 0\n    yield {\n        \"step_name\": \"calculate_oxygenation_score\",\n        \"step_description\": \"Calculate oxygenation points based on FiO2 and either PaO2 or Aa gradient\",\n        \"step_result\": oxygenation_points,\n        \"unit\": None\n    }\n\n    # Step 8: calculate_ph_score\n    if arterial_ph >= 7.7:\n        ph_points = 4\n    elif 7.60 <= arterial_ph < 7.70:\n        ph_points = 3\n    elif 7.50 <= arterial_ph < 7.60:\n        ph_points = 1\n    elif 7.33 <= arterial_ph < 7.50:\n        ph_points = 0\n    elif 7.25 <= arterial_ph < 7.33:\n        ph_points = 2\n    elif 7.15 <= arterial_ph < 7.25:\n        ph_points = 3\n    else:  # arterial_ph < 7.15\n        ph_points = 4\n    yield {\n        \"step_name\": \"calculate_ph_score\",\n        \"step_description\": \"Map arterial pH to APACHE II points\",\n        \"step_result\": ph_points,\n        \"unit\": None\n    }\n\n    # Step 9: calculate_sodium_score\n    if serum_sodium_mmol_per_l >= 180:\n        sodium_points = 4\n    elif 160 <= serum_sodium_mmol_per_l < 180:\n        sodium_points = 3\n    elif 155 <= serum_sodium_mmol_per_l < 160:\n        sodium_points = 2\n    elif 150 <= serum_sodium_mmol_per_l < 155:\n        sodium_points = 1\n    elif 130 <= serum_sodium_mmol_per_l < 150:\n        sodium_points = 0\n    elif 120 <= serum_sodium_mmol_per_l < 130:\n        sodium_points = 2\n    elif 111 <= serum_sodium_mmol_per_l < 120:\n        sodium_points = 3\n    else:  # serum_sodium_mmol_per_l < 111\n        sodium_points = 4\n    yield {\n        \"step_name\": \"calculate_sodium_score\",\n        \"step_description\": \"Map serum sodium to APACHE II points\",\n        \"step_result\": sodium_points,\n        \"unit\": None\n    }\n\n    # Step 10: calculate_potassium_score\n    if serum_potassium_mmol_per_l >= 7.0:\n        potassium_points = 4\n    elif 6.0 <= serum_potassium_mmol_per_l < 7.0:\n        potassium_points = 3\n    elif 5.5 <= serum_potassium_mmol_per_l < 6.0:\n        potassium_points = 1\n    elif 3.5 <= serum_potassium_mmol_per_l < 5.5:\n        potassium_points = 0\n    elif 3.0 <= serum_potassium_mmol_per_l < 3.5:\n        potassium_points = 1\n    elif 2.5 <= serum_potassium_mmol_per_l < 3.0:\n        potassium_points = 2\n    else:  # serum_potassium_mmol_per_l < 2.5\n        potassium_points = 4\n    yield {\n        \"step_name\": \"calculate_potassium_score\",\n        \"step_description\": \"Map serum potassium to APACHE II points\",\n        \"step_result\": potassium_points,\n        \"unit\": None\n    }\n\n    # Step 11: calculate_creatinine_score\n    if renal_failure_status == 'acute':\n        if serum_creatinine_mg_per_100ml >= 3.5:\n            creatinine_points = 8\n        elif 2.0 <= serum_creatinine_mg_per_100ml < 3.5:\n            creatinine_points = 6\n        elif 1.5 <= serum_creatinine_mg_per_100ml < 2.0:\n            creatinine_points = 4\n        else:\n            creatinine_points = 0\n    elif renal_failure_status == 'chronic':\n        if serum_creatinine_mg_per_100ml >= 3.5:\n            creatinine_points = 4\n        elif 2.0 <= serum_creatinine_mg_per_100ml < 3.5:\n            creatinine_points = 3\n        elif 1.5 <= serum_creatinine_mg_per_100ml < 2.0:\n            creatinine_points = 2\n        else:\n            creatinine_points = 0\n    else:  # 'none' or other\n        if 0.6 <= serum_creatinine_mg_per_100ml < 1.5:\n            creatinine_points = 0\n        elif serum_creatinine_mg_per_100ml < 0.6:\n            creatinine_points = 2\n        else:\n            creatinine_points = 0\n    yield {\n        \"step_name\": \"calculate_creatinine_score\",\n        \"step_description\": \"Calculate serum creatinine points, considering renal failure status\",\n        \"step_result\": creatinine_points,\n        \"unit\": None\n    }\n\n    # Step 12: calculate_hematocrit_score\n    if hematocrit_percent >= 60:\n        hematocrit_points = 4\n    elif 50 <= hematocrit_percent < 60:\n        hematocrit_points = 2\n    elif 46 <= hematocrit_percent < 50:\n        hematocrit_points = 1\n    elif 30 <= hematocrit_percent < 46:\n        hematocrit_points = 0\n    elif 20 <= hematocrit_percent < 30:\n        hematocrit_points = 2\n    else:  # hematocrit_percent < 20\n        hematocrit_points = 4\n    yield {\n        \"step_name\": \"calculate_hematocrit_score\",\n        \"step_description\": \"Map hematocrit to APACHE II points\",\n        \"step_result\": hematocrit_points,\n        \"unit\": None\n    }\n\n    # Step 13: calculate_wbc_score\n    if wbc_count_per_cubic_mm_10_3 >= 40:\n        wbc_points = 4\n    elif 20 <= wbc_count_per_cubic_mm_10_3 < 40:\n        wbc_points = 2\n    elif 15 <= wbc_count_per_cubic_mm_10_3 < 20:\n        wbc_points = 1\n    elif 3 <= wbc_count_per_cubic_mm_10_3 < 15:\n        wbc_points = 0\n    elif 1 <= wbc_count_per_cubic_mm_10_3 < 3:\n        wbc_points = 2\n    else:  # wbc_count_per_cubic_mm_10_3 < 1\n        wbc_points = 4\n    yield {\n        \"step_name\": \"calculate_wbc_score\",\n        \"step_description\": \"Map white blood count to APACHE II points\",\n        \"step_result\": wbc_points,\n        \"unit\": None\n    }\n\n    # Step 14: calculate_gcs_score\n    gcs_points = 15 - gcs_score\n    yield {\n        \"step_name\": \"calculate_gcs_score\",\n        \"step_description\": \"Calculate Glasgow Coma Scale points (15 - GCS score)\",\n        \"step_result\": gcs_points,\n        \"unit\": None\n    }\n\n    # Step 15: calculate_total_apache_ii\n    apache_total = (age_points + history_points + temp_points + map_points + hr_points + rr_points +\n                    oxygenation_points + ph_points + sodium_points + potassium_points + creatinine_points +\n                    hematocrit_points + wbc_points + gcs_points)\n    # No yield here as this is the final step; return directly\n    return apache_total"
+}

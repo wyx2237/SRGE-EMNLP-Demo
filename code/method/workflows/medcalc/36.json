@@ -1,0 +1,511 @@
+{
+    "name": "caprini_score_calculation_workflow",
+    "description": "Calculate the patient's total Caprini Score for Venous Thromboembolism risk assessment based on multiple clinical criteria including age, sex, surgery type, recent events, venous disease/clotting disorders, mobility, and other history.",
+    "inputs": [
+        {
+            "input_name": "age",
+            "input_desc": "Patient's age in years",
+            "input_type": "int"
+        },
+        {
+            "input_name": "sex",
+            "input_desc": "Patient's biological sex, allowed values: 'Male', 'Female'",
+            "input_type": "str"
+        },
+        {
+            "input_name": "surgery_type",
+            "input_desc": "Type of surgery performed, allowed values: 'None', 'Minor', 'Major >45 min laparoscopic/arthroscopic', 'Elective major lower extremity arthroplasty'",
+            "input_type": "str"
+        },
+        {
+            "input_name": "major_surgery",
+            "input_desc": "Recent (≤1 month) major surgery (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "chf",
+            "input_desc": "Recent (≤1 month) congestive heart failure (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "sepsis",
+            "input_desc": "Recent (≤1 month) sepsis (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "pneumonia",
+            "input_desc": "Recent (≤1 month) pneumonia (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "immobilizing_cast",
+            "input_desc": "Recent (≤1 month) immobilizing plaster cast (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "hip_pelvis_leg_fracture",
+            "input_desc": "Recent (≤1 month) hip, pelvis, or leg fracture (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "stroke",
+            "input_desc": "Recent (≤1 month) stroke (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "multiple_trauma",
+            "input_desc": "Recent (≤1 month) multiple trauma (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "acute_spinal_cord_injury",
+            "input_desc": "Recent (≤1 month) acute spinal cord injury causing paralysis (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "varicose_veins",
+            "input_desc": "Presence of varicose veins (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "swollen_legs",
+            "input_desc": "Current swollen legs (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "central_venous_access",
+            "input_desc": "Current central venous access (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "history_dvt_pe",
+            "input_desc": "History of deep vein thrombosis (DVT) or pulmonary embolism (PE) (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "family_thrombosis",
+            "input_desc": "Family history of thrombosis (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "factor_v_leiden",
+            "input_desc": "Positive Factor V Leiden (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "prothrombin_20210a",
+            "input_desc": "Positive prothrombin 20210A (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "elevated_homocysteine",
+            "input_desc": "Elevated serum homocysteine (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "lupus_anticoagulant",
+            "input_desc": "Positive lupus anticoagulant (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "anticardiolipin_antibody",
+            "input_desc": "Elevated anticardiolipin antibody (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "heparin_thrombocytopenia",
+            "input_desc": "Heparin-induced thrombocytopenia (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "mobility_status",
+            "input_desc": "Patient's mobility status, allowed values: 'Normal, out of bed', 'Medical patient currently on bed rest', 'Patient confined to bed >72 hours'",
+            "input_type": "str"
+        },
+        {
+            "input_name": "inflammatory_bowel_disease",
+            "input_desc": "History of inflammatory bowel disease (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "bmi_ge_25",
+            "input_desc": "Body Mass Index (BMI) greater than or equal to 25 (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "acute_mi",
+            "input_desc": "Acute myocardial infarction (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "copd",
+            "input_desc": "Chronic obstructive pulmonary disease (COPD) (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "malignancy",
+            "input_desc": "Present or previous malignancy (true/false)",
+            "input_type": "bool"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "age_score_evaluation",
+            "step_description": "Evaluate the points for age criterion based on the patient's age",
+            "step_inputs": [
+                {
+                    "input_name": "age",
+                    "input_desc": "Patient's age in years",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.age"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "age_score",
+                    "output_desc": "Points assigned for age criterion",
+                    "output_type": "int"
+                }
+            ],
+            "category": "ThresholdMapping",
+            "reason": "The age criterion maps a continuous numerical value (age) to discrete score points based on predefined age ranges, which fits the threshold mapping pattern.",
+            "detail": "If age <= 40, score = 0; if 41 <= age <= 60, score = 1; if 61 <= age <= 74, score = 2; if age >= 75, score = 3."
+        },
+        {
+            "step_id": "2",
+            "step_name": "sex_score_evaluation",
+            "step_description": "Determine the points for sex criterion",
+            "step_inputs": [
+                {
+                    "input_name": "sex",
+                    "input_desc": "Patient's biological sex, allowed values: 'Male', 'Female'",
+                    "input_type": "str",
+                    "input_source": "$|raw input|.sex"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "sex_score",
+                    "output_desc": "Points assigned for sex criterion",
+                    "output_type": "int"
+                }
+            ],
+            "category": "ConditionEvaluation",
+            "reason": "The sex criterion involves a simple conditional branch based on a categorical value, which is a condition evaluation.",
+            "detail": "If sex is 'Male', score = 0; if sex is 'Female', score = 1."
+        },
+        {
+            "step_id": "3",
+            "step_name": "surgery_score_evaluation",
+            "step_description": "Determine the points for type of surgery criterion",
+            "step_inputs": [
+                {
+                    "input_name": "surgery_type",
+                    "input_desc": "Type of surgery performed, allowed values: 'None', 'Minor', 'Major >45 min laparoscopic/arthroscopic', 'Elective major lower extremity arthroplasty'",
+                    "input_type": "str",
+                    "input_source": "$|raw input|.surgery_type"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "surgery_score",
+                    "output_desc": "Points assigned for surgery criterion",
+                    "output_type": "int"
+                }
+            ],
+            "category": "DiscreteValueMapping",
+            "reason": "The surgery type criterion maps specific discrete categories to predefined point values, which is a discrete value mapping.",
+            "detail": "If surgery_type is 'None', score = 0; if 'Minor', score = 1; if 'Major >45 min laparoscopic/arthroscopic', score = 2; if 'Elective major lower extremity arthroplasty', score = 5."
+        },
+        {
+            "step_id": "4",
+            "step_name": "recent_event_score_evaluation",
+            "step_description": "Calculate the points for recent (≤1 month) events",
+            "step_inputs": [
+                {
+                    "input_name": "major_surgery",
+                    "input_desc": "Recent major surgery (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.major_surgery"
+                },
+                {
+                    "input_name": "chf",
+                    "input_desc": "Recent congestive heart failure (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.chf"
+                },
+                {
+                    "input_name": "sepsis",
+                    "input_desc": "Recent sepsis (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.sepsis"
+                },
+                {
+                    "input_name": "pneumonia",
+                    "input_desc": "Recent pneumonia (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.pneumonia"
+                },
+                {
+                    "input_name": "immobilizing_cast",
+                    "input_desc": "Recent immobilizing plaster cast (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.immobilizing_cast"
+                },
+                {
+                    "input_name": "hip_pelvis_leg_fracture",
+                    "input_desc": "Recent hip, pelvis, or leg fracture (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.hip_pelvis_leg_fracture"
+                },
+                {
+                    "input_name": "stroke",
+                    "input_desc": "Recent stroke (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.stroke"
+                },
+                {
+                    "input_name": "multiple_trauma",
+                    "input_desc": "Recent multiple trauma (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.multiple_trauma"
+                },
+                {
+                    "input_name": "acute_spinal_cord_injury",
+                    "input_desc": "Recent acute spinal cord injury causing paralysis (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.acute_spinal_cord_injury"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "recent_event_score",
+                    "output_desc": "Total points for recent events",
+                    "output_type": "int"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "This step requires summing weighted values from multiple boolean conditions, which is a straightforward arithmetic formula calculation.",
+            "detail": "Sum of points: major_surgery=1, chf=1, sepsis=1, pneumonia=1, immobilizing_cast=1, hip_pelvis_leg_fracture=5, stroke=5, multiple_trauma=5, acute_spinal_cord_injury=5. Each true condition adds its respective points."
+        },
+        {
+            "step_id": "5",
+            "step_name": "venous_disease_clotting_score_evaluation",
+            "step_description": "Calculate the points for venous disease or clotting disorder criteria",
+            "step_inputs": [
+                {
+                    "input_name": "varicose_veins",
+                    "input_desc": "Presence of varicose veins (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.varicose_veins"
+                },
+                {
+                    "input_name": "swollen_legs",
+                    "input_desc": "Current swollen legs (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.swollen_legs"
+                },
+                {
+                    "input_name": "central_venous_access",
+                    "input_desc": "Current central venous access (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.central_venous_access"
+                },
+                {
+                    "input_name": "history_dvt_pe",
+                    "input_desc": "History of DVT or PE (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.history_dvt_pe"
+                },
+                {
+                    "input_name": "family_thrombosis",
+                    "input_desc": "Family history of thrombosis (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.family_thrombosis"
+                },
+                {
+                    "input_name": "factor_v_leiden",
+                    "input_desc": "Positive Factor V Leiden (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.factor_v_leiden"
+                },
+                {
+                    "input_name": "prothrombin_20210a",
+                    "input_desc": "Positive prothrombin 20210A (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.prothrombin_20210a"
+                },
+                {
+                    "input_name": "elevated_homocysteine",
+                    "input_desc": "Elevated serum homocysteine (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.elevated_homocysteine"
+                },
+                {
+                    "input_name": "lupus_anticoagulant",
+                    "input_desc": "Positive lupus anticoagulant (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.lupus_anticoagulant"
+                },
+                {
+                    "input_name": "anticardiolipin_antibody",
+                    "input_desc": "Elevated anticardiolipin antibody (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.anticardiolipin_antibody"
+                },
+                {
+                    "input_name": "heparin_thrombocytopenia",
+                    "input_desc": "Heparin-induced thrombocytopenia (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.heparin_thrombocytopenia"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "venous_clotting_score",
+                    "output_desc": "Total points for venous disease and clotting disorder criteria",
+                    "output_type": "int"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "This step involves summing weighted values from multiple boolean conditions, similar to a weighted score calculation, which is best handled as a formula calculation.",
+            "detail": "Sum of points: varicose_veins=1, swollen_legs=1, central_venous_access=2, history_dvt_pe=3, family_thrombosis=3, factor_v_leiden=3, prothrombin_20210A=3, elevated_homocysteine=3, lupus_anticoagulant=3, anticardiolipin_antibody=3, heparin_thrombocytopenia=3. Each true condition adds its respective points."
+        },
+        {
+            "step_id": "6",
+            "step_name": "mobility_score_evaluation",
+            "step_description": "Determine the points for mobility criterion",
+            "step_inputs": [
+                {
+                    "input_name": "mobility_status",
+                    "input_desc": "Patient's mobility status, allowed values: 'Normal, out of bed', 'Medical patient currently on bed rest', 'Patient confined to bed >72 hours'",
+                    "input_type": "str",
+                    "input_source": "$|raw input|.mobility_status"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "mobility_score",
+                    "output_desc": "Points assigned for mobility criterion",
+                    "output_type": "int"
+                }
+            ],
+            "category": "DiscreteValueMapping",
+            "reason": "The mobility criterion maps specific discrete categories to predefined point values, which is a discrete value mapping.",
+            "detail": "If mobility_status is 'Normal, out of bed', score = 0; if 'Medical patient currently on bed rest', score = 1; if 'Patient confined to bed >72 hours', score = 2."
+        },
+        {
+            "step_id": "7",
+            "step_name": "other_history_score_evaluation",
+            "step_description": "Calculate the points for other present and past history criteria",
+            "step_inputs": [
+                {
+                    "input_name": "inflammatory_bowel_disease",
+                    "input_desc": "History of inflammatory bowel disease (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.inflammatory_bowel_disease"
+                },
+                {
+                    "input_name": "bmi_ge_25",
+                    "input_desc": "BMI ≥25 (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.bmi_ge_25"
+                },
+                {
+                    "input_name": "acute_mi",
+                    "input_desc": "Acute myocardial infarction (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.acute_mi"
+                },
+                {
+                    "input_name": "copd",
+                    "input_desc": "Chronic obstructive pulmonary disease (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.copd"
+                },
+                {
+                    "input_name": "malignancy",
+                    "input_desc": "Present or previous malignancy (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.malignancy"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "other_history_score",
+                    "output_desc": "Total points for other present/past history criteria",
+                    "output_type": "int"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "This step involves summing weighted values from multiple boolean conditions, which is a straightforward arithmetic formula calculation.",
+            "detail": "Sum of points: inflammatory_bowel_disease=1, bmi_ge_25=1, acute_mi=1, copd=1, malignancy=2. Each true condition adds its respective points."
+        },
+        {
+            "step_id": "8",
+            "step_name": "total_caprini_score_calculation",
+            "step_description": "Sum all individual criterion scores to get the total Caprini Score",
+            "step_inputs": [
+                {
+                    "input_name": "age_score",
+                    "input_desc": "Age criterion score",
+                    "input_type": "int",
+                    "input_source": "$|step1|.age_score"
+                },
+                {
+                    "input_name": "sex_score",
+                    "input_desc": "Sex criterion score",
+                    "input_type": "int",
+                    "input_source": "$|step2|.sex_score"
+                },
+                {
+                    "input_name": "surgery_score",
+                    "input_desc": "Surgery type score",
+                    "input_type": "int",
+                    "input_source": "$|step3|.surgery_score"
+                },
+                {
+                    "input_name": "recent_event_score",
+                    "input_desc": "Recent event total score",
+                    "input_type": "int",
+                    "input_source": "$|step4|.recent_event_score"
+                },
+                {
+                    "input_name": "venous_clotting_score",
+                    "input_desc": "Venous disease and clotting disorder total score",
+                    "input_type": "int",
+                    "input_source": "$|step5|.venous_clotting_score"
+                },
+                {
+                    "input_name": "mobility_score",
+                    "input_desc": "Mobility score",
+                    "input_type": "int",
+                    "input_source": "$|step6|.mobility_score"
+                },
+                {
+                    "input_name": "other_history_score",
+                    "input_desc": "Other present/past history total score",
+                    "input_type": "int",
+                    "input_source": "$|step7|.other_history_score"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_caprini_score",
+                    "output_desc": "Total Caprini Score for Venous Thromboembolism",
+                    "output_type": "int"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "The final step is a simple summation of all criterion subscores, which is a basic arithmetic formula.",
+            "detail": "Sum all input scores: total_caprini_score = age_score + sex_score + surgery_score + recent_event_score + venous_clotting_score + mobility_score + other_history_score."
+        }
+    ],
+    "output": {
+        "output_name": "total_caprini_score",
+        "output_desc": "The patient's total Caprini Score for Venous Thromboembolism risk assessment",
+        "output_type": "int"
+    },
+    "code": "def solve(age, sex, surgery_type, major_surgery, chf, sepsis, pneumonia, immobilizing_cast, hip_pelvis_leg_fracture, stroke, multiple_trauma, acute_spinal_cord_injury, varicose_veins, swollen_legs, central_venous_access, history_dvt_pe, family_thrombosis, factor_v_leiden, prothrombin_20210a, elevated_homocysteine, lupus_anticoagulant, anticardiolipin_antibody, heparin_thrombocytopenia, mobility_status, inflammatory_bowel_disease, bmi_ge_25, acute_mi, copd, malignancy):\n    # Step 1: age_score_evaluation\n    # Evaluate points for age criterion based on age ranges\n    if age <= 40:\n        age_score = 0\n    elif age <= 60:\n        age_score = 1\n    elif age <= 74:\n        age_score = 2\n    else:\n        age_score = 3\n    yield {\n        \"step_name\": \"age_score_evaluation\",\n        \"step_description\": \"Evaluate the points for age criterion based on the patient's age\",\n        \"step_result\": age_score,\n        \"unit\": None\n    }\n\n    # Step 2: sex_score_evaluation\n    # Determine points for sex criterion\n    sex_score = 0 if sex == \"Male\" else 1 if sex == \"Female\" else 0\n    yield {\n        \"step_name\": \"sex_score_evaluation\",\n        \"step_description\": \"Determine the points for sex criterion\",\n        \"step_result\": sex_score,\n        \"unit\": None\n    }\n\n    # Step 3: surgery_score_evaluation\n    # Determine points for type of surgery criterion based on predefined mapping\n    surgery_mapping = {\n        \"None\": 0,\n        \"Minor\": 1,\n        \"Major >45 min laparoscopic/arthroscopic\": 2,\n        \"Elective major lower extremity arthroplasty\": 5\n    }\n    surgery_score = surgery_mapping.get(surgery_type, 0)\n    yield {\n        \"step_name\": \"surgery_score_evaluation\",\n        \"step_description\": \"Determine the points for type of surgery criterion\",\n        \"step_result\": surgery_score,\n        \"unit\": None\n    }\n\n    # Step 4: recent_event_score_evaluation\n    # Sum points for recent (≤1 month) events, each true condition adds its respective points\n    recent_event_score = 0\n    if major_surgery:\n        recent_event_score += 1\n    if chf:\n        recent_event_score += 1\n    if sepsis:\n        recent_event_score += 1\n    if pneumonia:\n        recent_event_score += 1\n    if immobilizing_cast:\n        recent_event_score += 1\n    if hip_pelvis_leg_fracture:\n        recent_event_score += 5\n    if stroke:\n        recent_event_score += 5\n    if multiple_trauma:\n        recent_event_score += 5\n    if acute_spinal_cord_injury:\n        recent_event_score += 5\n    yield {\n        \"step_name\": \"recent_event_score_evaluation\",\n        \"step_description\": \"Calculate the points for recent (≤1 month) events\",\n        \"step_result\": recent_event_score,\n        \"unit\": None\n    }\n\n    # Step 5: venous_disease_clotting_score_evaluation\n    # Sum points for venous disease or clotting disorder criteria, each true condition adds its respective points\n    venous_clotting_score = 0\n    if varicose_veins:\n        venous_clotting_score += 1\n    if swollen_legs:\n        venous_clotting_score += 1\n    if central_venous_access:\n        venous_clotting_score += 2\n    if history_dvt_pe:\n        venous_clotting_score += 3\n    if family_thrombosis:\n        venous_clotting_score += 3\n    if factor_v_leiden:\n        venous_clotting_score += 3\n    if prothrombin_20210a:\n        venous_clotting_score += 3\n    if elevated_homocysteine:\n        venous_clotting_score += 3\n    if lupus_anticoagulant:\n        venous_clotting_score += 3\n    if anticardiolipin_antibody:\n        venous_clotting_score += 3\n    if heparin_thrombocytopenia:\n        venous_clotting_score += 3\n    yield {\n        \"step_name\": \"venous_disease_clotting_score_evaluation\",\n        \"step_description\": \"Calculate the points for venous disease or clotting disorder criteria\",\n        \"step_result\": venous_clotting_score,\n        \"unit\": None\n    }\n\n    # Step 6: mobility_score_evaluation\n    # Determine points for mobility criterion based on predefined mapping\n    mobility_mapping = {\n        \"Normal, out of bed\": 0,\n        \"Medical patient currently on bed rest\": 1,\n        \"Patient confined to bed >72 hours\": 2\n    }\n    mobility_score = mobility_mapping.get(mobility_status, 0)\n    yield {\n        \"step_name\": \"mobility_score_evaluation\",\n        \"step_description\": \"Determine the points for mobility criterion\",\n        \"step_result\": mobility_score,\n        \"unit\": None\n    }\n\n    # Step 7: other_history_score_evaluation\n    # Sum points for other present and past history criteria, each true condition adds its respective points\n    other_history_score = 0\n    if inflammatory_bowel_disease:\n        other_history_score += 1\n    if bmi_ge_25:\n        other_history_score += 1\n    if acute_mi:\n        other_history_score += 1\n    if copd:\n        other_history_score += 1\n    if malignancy:\n        other_history_score += 2\n    yield {\n        \"step_name\": \"other_history_score_evaluation\",\n        \"step_description\": \"Calculate the points for other present and past history criteria\",\n        \"step_result\": other_history_score,\n        \"unit\": None\n    }\n\n    # Step 8: total_caprini_score_calculation\n    # Sum all individual criterion scores to get the total Caprini Score\n    total_caprini_score = age_score + sex_score + surgery_score + recent_event_score + venous_clotting_score + mobility_score + other_history_score\n    yield {\n        \"step_name\": \"total_caprini_score_calculation\",\n        \"step_description\": \"Sum all individual criterion scores to get the total Caprini Score\",\n        \"step_result\": total_caprini_score,\n        \"unit\": None\n    }\n\n    return total_caprini_score"
+}

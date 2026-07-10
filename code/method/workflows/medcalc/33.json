@@ -1,0 +1,201 @@
+{
+    "name": "feverpain_score_calculation_workflow",
+    "description": "Calculate the FeverPAIN score by evaluating five criteria and summing their points.",
+    "inputs": [
+        {
+            "input_name": "fever_past_24h",
+            "input_desc": "Whether the patient had fever in the past 24 hours. true or false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "absence_cough_coryza",
+            "input_desc": "Whether there is absence of cough or coryza. true or false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "onset_within_3days",
+            "input_desc": "Whether symptom onset is within 3 days. true or false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "purulent_tonsils",
+            "input_desc": "Whether purulent tonsils are present. true or false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "severe_inflammation",
+            "input_desc": "Whether severe tonsil inflammation is present. true or false.",
+            "input_type": "bool"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "fever_evaluation",
+            "step_description": "Assign FeverPAIN point for fever in past 24 hours.",
+            "step_inputs": [
+                {
+                    "input_name": "fever_past_24h",
+                    "input_desc": "Whether the patient had fever in past 24 hours. true or false.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.fever_past_24h"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "fever_point",
+                    "output_desc": "Point for fever criterion (0 or 1)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step evaluates a single condition (fever presence) to assign a binary score, which fits the condition_evaluation template for branching logic.",
+            "detail": "If fever_past_24h is true, assign 1 point; if false, assign 0 points."
+        },
+        {
+            "step_id": "2",
+            "step_name": "cough_coryza_evaluation",
+            "step_description": "Assign FeverPAIN point for absence of cough or coryza.",
+            "step_inputs": [
+                {
+                    "input_name": "absence_cough_coryza",
+                    "input_desc": "Whether there is absence of cough or coryza. true or false.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.absence_cough_coryza"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "cough_coryza_point",
+                    "output_desc": "Point for cough/coryza criterion (0 or 1)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "A binary scoring rule based on a single condition, suitable for condition_evaluation template.",
+            "detail": "If absence_cough_coryza is true, assign 1 point; if false, assign 0 points."
+        },
+        {
+            "step_id": "3",
+            "step_name": "symptom_onset_evaluation",
+            "step_description": "Assign FeverPAIN point for symptom onset within 3 days.",
+            "step_inputs": [
+                {
+                    "input_name": "onset_within_3days",
+                    "input_desc": "Whether symptom onset is within 3 days. true or false.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.onset_within_3days"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "onset_point",
+                    "output_desc": "Point for symptom onset criterion (0 or 1)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "Binary scoring based on a yes/no condition, matching condition_evaluation template.",
+            "detail": "If onset_within_3days is true, assign 1 point; if false, assign 0 points."
+        },
+        {
+            "step_id": "4",
+            "step_name": "purulent_tonsils_evaluation",
+            "step_description": "Assign FeverPAIN point for purulent tonsils.",
+            "step_inputs": [
+                {
+                    "input_name": "purulent_tonsils",
+                    "input_desc": "Whether purulent tonsils are present. true or false.",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.purulent_tonsils"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "tonsils_point",
+                    "output_desc": "Point for purulent tonsils criterion (0 or 1)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "Direct condition-to-score mapping, ideal for condition_evaluation.",
+            "detail": "If purulent_tonsils is true, assign 1 point; if false, assign 0 points."
+        },
+        {
+            "step_id": "5",
+            "step_name": "severe_inflammation_evaluation",
+            "step_description": "Assign FeverPAIN point for severe tonsil inflammation.",
+            "step_inputs": [
+                {
+                    "input_name": "severe_inflammation",
+                    "input_desc": "Whether severe tonsil inflammation is present. true or false.",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.severe_inflammation"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "inflammation_point",
+                    "output_desc": "Point for severe inflammation criterion (0 or 1)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "Binary condition evaluation for scoring, matching condition_evaluation template.",
+            "detail": "If severe_inflammation is true, assign 1 point; if false, assign 0 points."
+        },
+        {
+            "step_id": "6",
+            "step_name": "feverpain_summation",
+            "step_description": "Sum all five criterion points to compute total FeverPAIN score.",
+            "step_inputs": [
+                {
+                    "input_name": "fever_point",
+                    "input_desc": "Point for fever criterion (0 or 1)",
+                    "input_type": "int",
+                    "input_source": "$|step1|.fever_point"
+                },
+                {
+                    "input_name": "cough_coryza_point",
+                    "input_desc": "Point for cough/coryza criterion (0 or 1)",
+                    "input_type": "int",
+                    "input_source": "$|step2|.cough_coryza_point"
+                },
+                {
+                    "input_name": "onset_point",
+                    "input_desc": "Point for symptom onset criterion (0 or 1)",
+                    "input_type": "int",
+                    "input_source": "$|step3|.onset_point"
+                },
+                {
+                    "input_name": "tonsils_point",
+                    "input_desc": "Point for purulent tonsils criterion (0 or 1)",
+                    "input_type": "int",
+                    "input_source": "$|step4|.tonsils_point"
+                },
+                {
+                    "input_name": "inflammation_point",
+                    "input_desc": "Point for severe inflammation criterion (0 or 1)",
+                    "input_type": "int",
+                    "input_source": "$|step5|.inflammation_point"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "feverpain_score",
+                    "output_desc": "Total FeverPAIN score (0-5)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step performs a straightforward summation formula on five numeric inputs, which fits the formula_calculation template for arithmetic computation.",
+            "detail": "Sum all five input points: total = fever_point + cough_coryza_point + onset_point + tonsils_point + inflammation_point. Result is an integer between 0 and 5 inclusive."
+        }
+    ],
+    "output": {
+        "output_name": "feverpain_score",
+        "output_desc": "Final FeverPAIN score",
+        "output_type": "int"
+    },
+    "code": "def solve(fever_past_24h, absence_cough_coryza, onset_within_3days, purulent_tonsils, severe_inflammation):\n    # Step 1: fever_evaluation\n    # Assign FeverPAIN point for fever in past 24 hours.\n    # If fever_past_24h is true, assign 1 point; if false, assign 0 points.\n    if fever_past_24h:\n        fever_point = 1\n    else:\n        fever_point = 0\n    yield {\n        \"step_name\": \"fever_evaluation\",\n        \"step_description\": \"Assign FeverPAIN point for fever in past 24 hours. True = 1, False = 0.\",\n        \"step_result\": fever_point,\n        \"unit\": None\n    }\n\n    # Step 2: cough_coryza_evaluation\n    # Assign FeverPAIN point for absence of cough or coryza.\n    # If absence_cough_coryza is true, assign 1 point; if false, assign 0 points.\n    if absence_cough_coryza:\n        cough_coryza_point = 1\n    else:\n        cough_coryza_point = 0\n    yield {\n        \"step_name\": \"cough_coryza_evaluation\",\n        \"step_description\": \"Assign FeverPAIN point for absence of cough or coryza. True = 1, False = 0.\",\n        \"step_result\": cough_coryza_point,\n        \"unit\": None\n    }\n\n    # Step 3: symptom_onset_evaluation\n    # Assign FeverPAIN point for symptom onset within 3 days.\n    # If onset_within_3days is true, assign 1 point; if false, assign 0 points.\n    if onset_within_3days:\n        onset_point = 1\n    else:\n        onset_point = 0\n    yield {\n        \"step_name\": \"symptom_onset_evaluation\",\n        \"step_description\": \"Assign FeverPAIN point for symptom onset within 3 days. True = 1, False = 0.\",\n        \"step_result\": onset_point,\n        \"unit\": None\n    }\n\n    # Step 4: purulent_tonsils_evaluation\n    # Assign FeverPAIN point for purulent tonsils.\n    # If purulent_tonsils is true, assign 1 point; if false, assign 0 points.\n    if purulent_tonsils:\n        tonsils_point = 1\n    else:\n        tonsils_point = 0\n    yield {\n        \"step_name\": \"purulent_tonsils_evaluation\",\n        \"step_description\": \"Assign FeverPAIN point for purulent tonsils. True = 1, False = 0.\",\n        \"step_result\": tonsils_point,\n        \"unit\": None\n    }\n\n    # Step 5: severe_inflammation_evaluation\n    # Assign FeverPAIN point for severe tonsil inflammation.\n    # If severe_inflammation is true, assign 1 point; if false, assign 0 points.\n    if severe_inflammation:\n        inflammation_point = 1\n    else:\n        inflammation_point = 0\n    yield {\n        \"step_name\": \"severe_inflammation_evaluation\",\n        \"step_description\": \"Assign FeverPAIN point for severe tonsil inflammation. True = 1, False = 0.\",\n        \"step_result\": inflammation_point,\n        \"unit\": None\n    }\n\n    # Step 6: feverpain_summation\n    # Sum all five criterion points to compute total FeverPAIN score.\n    feverpain_score = fever_point + cough_coryza_point + onset_point + tonsils_point + inflammation_point\n    yield {\n        \"step_name\": \"feverpain_summation\",\n        \"step_description\": \"Sum all five criterion points to compute total FeverPAIN score (0-5).\",\n        \"step_result\": feverpain_score,\n        \"unit\": None\n    }\n\n    return feverpain_score"
+}

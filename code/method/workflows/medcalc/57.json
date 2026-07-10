@@ -1,0 +1,76 @@
+{
+    "name": "framingham_qtc_calculation_workflow",
+    "description": "Calculate the corrected QT interval (QTc) using the Framingham formula, based on heart rate and measured QT interval.",
+    "inputs": [
+        {
+            "input_name": "heart_rate",
+            "input_desc": "Heart rate in beats per minute (bpm)",
+            "input_type": "float"
+        },
+        {
+            "input_name": "qt_interval",
+            "input_desc": "Measured QT interval in milliseconds (ms)",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "compute_rr_interval",
+            "step_description": "Calculate the RR interval in seconds from the heart rate.",
+            "step_inputs": [
+                {
+                    "input_name": "heart_rate",
+                    "input_desc": "Heart rate in beats per minute (bpm)",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.heart_rate"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "rr_interval",
+                    "output_desc": "RR interval in seconds (s)",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step computes the RR interval from heart rate using a simple mathematical formula (60 / heart_rate), which fits the FormulaCalculation template.",
+            "detail": "RR interval (s) = 60 / heart_rate. Perform the division to obtain the RR interval in seconds."
+        },
+        {
+            "step_id": "2",
+            "step_name": "compute_framingham_qtc",
+            "step_description": "Compute the corrected QT interval using the Framingham formula.",
+            "step_inputs": [
+                {
+                    "input_name": "qt_interval",
+                    "input_desc": "Measured QT interval in milliseconds (ms)",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.qt_interval"
+                },
+                {
+                    "input_name": "rr_interval",
+                    "input_desc": "RR interval in seconds (s)",
+                    "input_type": "float",
+                    "input_source": "$|1|.rr_interval"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "qtc",
+                    "output_desc": "Corrected QT interval in milliseconds (ms)",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "The Framingham QTc formula is a precise mathematical computation requiring two numerical inputs to produce a single numerical output, fitting the FormulaCalculation template perfectly.",
+            "detail": "QTc = qt_interval + 154 * (1 - rr_interval). Compute the corrected QT interval using this formula."
+        }
+    ],
+    "output": {
+        "output_name": "qtc",
+        "output_desc": "Corrected QT interval in milliseconds (ms) computed using the Framingham formula",
+        "output_type": "float"
+    },
+    "code": "import math\n\ndef solve(heart_rate, qt_interval):\n    # Step 1: compute_rr_interval\n    # Calculate the RR interval in seconds from the heart rate.\n    rr_interval = 60.0 / heart_rate\n    yield {\n        \"step_name\": \"compute_rr_interval\",\n        \"step_description\": \"Calculate the RR interval in seconds from the heart rate. RR interval (s) = 60 / heart_rate.\",\n        \"step_result\": rr_interval,\n        \"unit\": \"s\"\n    }\n\n    # Step 2: compute_framingham_qtc\n    # Compute the corrected QT interval using the Framingham formula.\n    qtc = qt_interval + 154.0 * (1.0 - rr_interval)\n    yield {\n        \"step_name\": \"compute_framingham_qtc\",\n        \"step_description\": \"Compute the corrected QT interval using the Framingham formula: QTc = qt_interval + 154 * (1 - rr_interval).\",\n        \"step_result\": qtc,\n        \"unit\": \"ms\"\n    }\n\n    return qtc"
+}

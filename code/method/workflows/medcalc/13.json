@@ -1,0 +1,76 @@
+{
+    "name": "naegeles_rule_edd_calculation_workflow",
+    "description": "Calculate the estimated due date (EDD) using Naegele's Rule based on the last menstrual period (LMP) date and cycle length.",
+    "inputs": [
+        {
+            "input_name": "lmp_date",
+            "input_desc": "The first day of the last menstrual period in YYYY-MM-DD format (e.g., 2023-01-15)",
+            "input_type": "str"
+        },
+        {
+            "input_name": "cycle_length",
+            "input_desc": "The length of the patient's menstrual cycle in days",
+            "input_type": "int"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "calculate_adjusted_days",
+            "step_description": "Calculate the total number of days to add to the LMP by combining the standard 280 days with the cycle length adjustment.",
+            "step_inputs": [
+                {
+                    "input_name": "cycle_length",
+                    "input_desc": "The length of the patient's menstrual cycle in days",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.cycle_length"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_days",
+                    "output_desc": "Total number of days to add to the LMP date",
+                    "output_type": "int"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step computes a numerical value using the formula 280 + (cycle_length - 28). It involves arithmetic operations on numeric inputs, fitting the FormulaCalculation tool template perfectly.",
+            "detail": "total_days = 280 + (cycle_length - 28)"
+        },
+        {
+            "step_id": "2",
+            "step_name": "calculate_estimated_due_date",
+            "step_description": "Add the calculated total days to the LMP date to determine the estimated due date and format the result as M/D/Y.",
+            "step_inputs": [
+                {
+                    "input_name": "lmp_date",
+                    "input_desc": "The first day of the last menstrual period in YYYY-MM-DD format (e.g., 2023-01-15)",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.lmp_date"
+                },
+                {
+                    "input_name": "total_days",
+                    "input_desc": "Total number of days to add to the LMP date",
+                    "input_type": "int",
+                    "input_source": "$|1|.total_days"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "estimated_due_date",
+                    "output_desc": "The estimated due date formatted as M/D/Y (e.g., 08/31/2023)",
+                    "output_type": "str"
+                }
+            ],
+            "category": "time_series_processing",
+            "reason": "This step involves parsing a date string and performing date arithmetic (adding days), which falls under the TimeSeriesProcessing tool template. The output is a formatted date string.",
+            "detail": "Parse the lmp_date string (format YYYY-MM-DD) into a date object. Add total_days using a timedelta. Format the resulting date as M/D/Y (month/day/year) with leading zeros for month and day (e.g., 01/05/2023)."
+        }
+    ],
+    "output": {
+        "output_name": "estimated_due_date",
+        "output_desc": "The final estimated due date in M/D/Y format (e.g., 08/31/2023)",
+        "output_type": "str"
+    },
+    "code": "import datetime\n\ndef solve(lmp_date, cycle_length):\n    \"\"\"\n    Calculate the estimated due date (EDD) using Naegele's Rule based on the LMP date and cycle length.\n    \"\"\"\n    # Step 1: calculate_adjusted_days\n    # Calculate the total number of days to add to the LMP by combining the standard 280 days with the cycle length adjustment.\n    total_days = 280 + (cycle_length - 28)\n    yield {\n        \"step_name\": \"calculate_adjusted_days\",\n        \"step_description\": \"Calculate the total number of days to add to the LMP by combining the standard 280 days with the cycle length adjustment.\",\n        \"step_result\": total_days,\n        \"unit\": \"days\"\n    }\n\n    # Step 2: calculate_estimated_due_date\n    # Parse the lmp_date string (format YYYY-MM-DD) into a date object.\n    # Add total_days using a timedelta.\n    # Format the resulting date as M/D/Y (month/day/year) with leading zeros for month and day.\n    lmp_date_obj = datetime.datetime.strptime(lmp_date, \"%Y-%m-%d\").date()\n    edd_date_obj = lmp_date_obj + datetime.timedelta(days=total_days)\n    estimated_due_date = edd_date_obj.strftime(\"%m/%d/%Y\")\n    yield {\n        \"step_name\": \"calculate_estimated_due_date\",\n        \"step_description\": \"Add the calculated total days to the LMP date to determine the estimated due date and format the result as M/D/Y.\",\n        \"step_result\": estimated_due_date,\n        \"unit\": None\n    }\n\n    return estimated_due_date"
+}

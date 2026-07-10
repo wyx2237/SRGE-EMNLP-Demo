@@ -1,0 +1,64 @@
+{
+    "name": "calculate_glasgow_coma_scale",
+    "description": "Calculate the Glasgow Coma Scale (GCS) score based on eye opening (E), verbal response (V), and motor response (M) scores.",
+    "inputs": [
+        {
+            "input_name": "eye_opening_score",
+            "input_desc": "Score for eye opening reaction (E) based on predefined criteria: 4 (natural eye opening), 3 (eye opening to voice), 2 (eye opening to pain), 1 (no eye opening), C (eye cannot be assessed due to swelling or trauma).",
+            "input_type": "integer"
+        },
+        {
+            "input_name": "verbal_response_score",
+            "input_desc": "Score for verbal response (V) based on predefined criteria: 5 (oriented), 4 (confused), 3 (inappropriate words), 2 (incomprehensible sounds), 1 (no verbal response), 0 (T/E/A verbal response cannot be assessed due to intubation, tracheostomy, or aphasia).",
+            "input_type": "integer"
+        },
+        {
+            "input_name": "motor_response_score",
+            "input_desc": "Score for motor response (M) based on predefined criteria: 6 (obeys commands), 5 (localizes pain), 4 (withdraws from pain), 3 (abnormal flexion), 2 (abnormal extension), 1 (no motor response).",
+            "input_type": "integer"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "calculate_glasgow_coma_scale",
+            "step_description": "Calculate the total Glasgow Coma Scale (GCS) score by summing the scores from eye opening (E), verbal response (V), and motor response (M).",
+            "step_inputs": [
+                {
+                    "input_name": "eye_opening_score",
+                    "input_desc": "Score for eye opening reaction (E) based on predefined criteria: 4 (natural eye opening), 3 (eye opening to voice), 2 (eye opening to pain), 1 (no eye opening), C (eye cannot be assessed due to swelling or trauma).",
+                    "input_type": "integer",
+                    "input_source": "$|inputs|.eye_opening_score"
+                },
+                {
+                    "input_name": "verbal_response_score",
+                    "input_desc": "Score for verbal response (V) based on predefined criteria: 5 (oriented), 4 (confused), 3 (inappropriate words), 2 (incomprehensible sounds), 1 (no verbal response), 0 (T/E/A verbal response cannot be assessed due to intubation, tracheostomy, or aphasia).",
+                    "input_type": "integer",
+                    "input_source": "$|inputs|.verbal_response_score"
+                },
+                {
+                    "input_name": "motor_response_score",
+                    "input_desc": "Score for motor response (M) based on predefined criteria: 6 (obeys commands), 5 (localizes pain), 4 (withdraws from pain), 3 (abnormal flexion), 2 (abnormal extension), 1 (no motor response).",
+                    "input_type": "integer",
+                    "input_source": "$|inputs|.motor_response_score"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "glasgow_coma_scale_score",
+                    "output_desc": "Total GCS score calculated as the sum of E, V, and M scores.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "The calculation involves summing three numeric values (E, V, and M scores) to obtain the final GCS score. This is a straightforward mathematical operation that fits the FormulaCalculation category.",
+            "detail": "The Glasgow Coma Scale is calculated by summing the scores from three components: Eye Opening (E), Verbal Response (V), and Motor Response (M). Each component has a defined set of criteria with corresponding scores. The total score ranges from 3 to 15, with lower scores indicating more severe impairment."
+        }
+    ],
+    "output": {
+        "output_name": "glasgow_coma_scale_score",
+        "output_desc": "Total GCS score calculated as the sum of E, V, and M scores.",
+        "output_type": "integer"
+    },
+    "code": "def solve(eye_opening_score, verbal_response_score, motor_response_score):\n    # Step 1: Calculate the total Glasgow Coma Scale (GCS) score by summing the scores from eye opening (E), verbal response (V), and motor response (M).\n    gcs_score = eye_opening_score + verbal_response_score + motor_response_score\n    \n    # Yield the result of the calculation\n    yield {\n        \"step_name\": \"calculate_glasgow_coma_scale\",\n        \"step_description\": \"Calculate the total Glasgow Coma Scale (GCS) score by summing the scores from eye opening (E), verbal response (V), and motor response (M).\",\n        \"step_result\": gcs_score,\n        \"unit\": None\n    }\n    \n    # Return the final result\n    return gcs_score"
+}

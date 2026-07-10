@@ -1,0 +1,155 @@
+{
+    "name": "meld_na_calculation_workflow",
+    "description": "Calculate the MELD Na score based on serum sodium, creatinine, bilirubin, and INR values, with sodium level adjustment and score capping.",
+    "inputs": [
+        {
+            "input_name": "sodium",
+            "input_desc": "Patient's serum sodium concentration in mEq/L",
+            "input_type": "float"
+        },
+        {
+            "input_name": "creatinine",
+            "input_desc": "Serum creatinine in mg/dL",
+            "input_type": "float"
+        },
+        {
+            "input_name": "bilirubin",
+            "input_desc": "Serum bilirubin in mg/dL",
+            "input_type": "float"
+        },
+        {
+            "input_name": "inr",
+            "input_desc": "International normalized ratio (INR)",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "bound_sodium_level",
+            "step_description": "Adjust the patient's sodium level to be within the range [125, 137] mEq/L as per MELD Na calculation rules.",
+            "step_inputs": [
+                {
+                    "input_name": "sodium",
+                    "input_desc": "Patient's serum sodium concentration in mEq/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.sodium"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "adjusted_sodium",
+                    "output_desc": "Adjusted sodium level for MELD Na calculation",
+                    "output_type": "float"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step involves evaluating whether the sodium level falls below or above specified thresholds and conditionally assigning a clamped value, which fits the condition evaluation template.",
+            "detail": "If sodium < 125, set adjusted_sodium = 125. If sodium > 137, set adjusted_sodium = 137. Otherwise, adjusted_sodium = sodium."
+        },
+        {
+            "step_id": "2",
+            "step_name": "calculate_initial_meld_score",
+            "step_description": "Compute the initial MELD(i) score using the formula: 0.957 x ln(Cr) + 0.378 x ln(bilirubin) + 1.120 x ln(INR) + 0.643.",
+            "step_inputs": [
+                {
+                    "input_name": "creatinine",
+                    "input_desc": "Serum creatinine in mg/dL",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.creatinine"
+                },
+                {
+                    "input_name": "bilirubin",
+                    "input_desc": "Serum bilirubin in mg/dL",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.bilirubin"
+                },
+                {
+                    "input_name": "inr",
+                    "input_desc": "International normalized ratio (INR)",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.inr"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "meld_i",
+                    "output_desc": "Initial MELD score before sodium adjustment",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step involves precise numerical computation using a specific mathematical formula with natural logarithms, which fits the formula calculation template.",
+            "detail": "MELD(i) = 0.957 x ln(creatinine) + 0.378 x ln(bilirubin) + 1.120 x ln(inr) + 0.643. Use natural logarithm (ln). Round result to 4 decimal places."
+        },
+        {
+            "step_id": "3",
+            "step_name": "check_meld_score_threshold",
+            "step_description": "Round MELD(i) to the nearest tenth, multiply by 10, and determine if the result is greater than 11.",
+            "step_inputs": [
+                {
+                    "input_name": "meld_i",
+                    "input_desc": "Initial MELD score",
+                    "input_type": "float",
+                    "input_source": "$|2|.meld_i"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "exceeds_threshold",
+                    "output_desc": "Boolean indicating if MELD(i) exceeds threshold",
+                    "output_type": "bool"
+                },
+                {
+                    "output_name": "rounded_meld_i_times_10",
+                    "output_desc": "Rounded MELD(i) to nearest tenth multiplied by 10",
+                    "output_type": "float"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step evaluates a condition based on a threshold value to produce a boolean outcome and a derived value, matching the condition evaluation pattern.",
+            "detail": "Round meld_i to 1 decimal place (nearest tenth). Multiply by 10. If the result is > 11, set exceeds_threshold = true; else false."
+        },
+        {
+            "step_id": "4",
+            "step_name": "calculate_final_meld_na_score",
+            "step_description": "Compute the final MELD Na score based on whether MELD(i) exceeds threshold, applying the sodium adjustment formula if needed, and capping at 40.",
+            "step_inputs": [
+                {
+                    "input_name": "exceeds_threshold",
+                    "input_desc": "Whether MELD(i) exceeds threshold",
+                    "input_type": "bool",
+                    "input_source": "$|step3|.exceeds_threshold"
+                },
+                {
+                    "input_name": "meld_i",
+                    "input_desc": "Initial MELD score",
+                    "input_type": "float",
+                    "input_source": "$|step2|.meld_i"
+                },
+                {
+                    "input_name": "adjusted_sodium",
+                    "input_desc": "Adjusted sodium level",
+                    "input_type": "float",
+                    "input_source": "$|step1|.adjusted_sodium"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "meld_na",
+                    "output_desc": "Final MELD Na score capped at 40",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step requires evaluating a conditional formula and applying a capping rule, which involves precise mathematical calculations with variable substitution, fitting the formula calculation template.",
+            "detail": "If exceeds_threshold is true: MELD = meld_i + 1.32 x (137 - adjusted_sodium) - 0.033 x meld_i x (137 - adjusted_sodium). Else: MELD = meld_i. Then, cap the result: if MELD > 40, set meld_na = 40; else meld_na = MELD. Round final result to 4 decimal places."
+        }
+    ],
+    "output": {
+        "output_name": "meld_na",
+        "output_desc": "Final MELD Na score",
+        "output_type": "float"
+    },
+    "code": "import math\n\ndef solve(sodium, creatinine, bilirubin, inr):\n    # Step 1: bound_sodium_level - Adjust sodium level to be within [125, 137] mEq/L\n    if sodium < 125:\n        adjusted_sodium = 125.0\n    elif sodium > 137:\n        adjusted_sodium = 137.0\n    else:\n        adjusted_sodium = sodium\n    yield {\n        \"step_name\": \"bound_sodium_level\",\n        \"step_description\": \"Adjust the patient's sodium level to be within the range [125, 137] mEq/L as per MELD Na calculation rules.\",\n        \"step_result\": adjusted_sodium,\n        \"unit\": \"mEq/L\"\n    }\n\n    # Step 2: calculate_initial_meld_score - Compute initial MELD(i) score\n    meld_i = 0.957 * math.log(creatinine) + 0.378 * math.log(bilirubin) + 1.120 * math.log(inr) + 0.643\n    meld_i = round(meld_i, 4)\n    yield {\n        \"step_name\": \"calculate_initial_meld_score\",\n        \"step_description\": \"Compute the initial MELD(i) score using the formula: 0.957 x ln(Cr) + 0.378 x ln(bilirubin) + 1.120 x ln(INR) + 0.643.\",\n        \"step_result\": meld_i,\n        \"unit\": None\n    }\n\n    # Step 3: check_meld_score_threshold - Round MELD(i) to nearest tenth, multiply by 10, and check if > 11\n    rounded_meld_i_times_10 = round(meld_i, 1) * 10\n    exceeds_threshold = rounded_meld_i_times_10 > 11\n    yield {\n        \"step_name\": \"check_meld_score_threshold\",\n        \"step_description\": \"Round MELD(i) to the nearest tenth, multiply by 10, and determine if the result is greater than 11.\",\n        \"step_result\": exceeds_threshold,\n        \"unit\": None\n    }\n\n    # Step 4: calculate_final_meld_na_score - Compute final MELD Na score with sodium adjustment and capping\n    if exceeds_threshold:\n        meld = meld_i + 1.32 * (137 - adjusted_sodium) - 0.033 * meld_i * (137 - adjusted_sodium)\n    else:\n        meld = meld_i\n\n    if meld > 40:\n        meld_na = 40.0\n    else:\n        meld_na = meld\n    meld_na = round(meld_na, 4)\n    yield {\n        \"step_name\": \"calculate_final_meld_na_score\",\n        \"step_description\": \"Compute the final MELD Na score based on whether MELD(i) exceeds threshold, applying the sodium adjustment formula if needed, and capping at 40.\",\n        \"step_result\": meld_na,\n        \"unit\": None\n    }\n\n    return meld_na"
+}

@@ -1,0 +1,64 @@
+{
+    "name": "ldl_cholesterol_calculation_workflow",
+    "description": "Calculate LDL cholesterol concentration using the Friedewald formula: LDL = total cholesterol - HDL - (triglycerides / 5). All inputs and outputs are in mg/dL.",
+    "inputs": [
+        {
+            "input_name": "total_cholesterol",
+            "input_desc": "Total cholesterol concentration in mg/dL",
+            "input_type": "float"
+        },
+        {
+            "input_name": "hdl_cholesterol",
+            "input_desc": "HDL cholesterol concentration in mg/dL",
+            "input_type": "float"
+        },
+        {
+            "input_name": "triglycerides",
+            "input_desc": "Triglycerides concentration in mg/dL",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "compute_ldl_cholesterol",
+            "step_description": "LDL cholesterol = total cholesterol - HDL - (triglycerides / 5)",
+            "step_inputs": [
+                {
+                    "input_name": "total_cholesterol",
+                    "input_desc": "Total cholesterol concentration in mg/dL",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.total_cholesterol"
+                },
+                {
+                    "input_name": "hdl_cholesterol",
+                    "input_desc": "HDL cholesterol concentration in mg/dL",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.hdl_cholesterol"
+                },
+                {
+                    "input_name": "triglycerides",
+                    "input_desc": "Triglycerides concentration in mg/dL",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.triglycerides"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "ldl_cholesterol",
+                    "output_desc": "LDL cholesterol concentration in mg/dL",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step involves a precise mathematical formula with continuous numeric inputs to produce a single numeric output, which perfectly matches the FormulaCalculation template.",
+            "detail": "LDL cholesterol = total_cholesterol - hdl_cholesterol - (triglycerides / 5). All input values are in mg/dL. The result is rounded to 4 decimal places."
+        }
+    ],
+    "output": {
+        "output_name": "ldl_cholesterol",
+        "output_desc": "LDL cholesterol concentration in mg/dL",
+        "output_type": "float"
+    },
+    "code": "import math\n\ndef solve(total_cholesterol, hdl_cholesterol, triglycerides):\n    # Step 1: compute_ldl_cholesterol\n    # LDL cholesterol = total cholesterol - HDL - (triglycerides / 5)\n    ldl_value = total_cholesterol - hdl_cholesterol - (triglycerides / 5.0)\n    ldl_value = round(ldl_value, 4)\n    \n    yield {\n        \"step_name\": \"compute_ldl_cholesterol\",\n        \"step_description\": \"LDL cholesterol = total cholesterol - HDL - (triglycerides / 5)\",\n        \"step_result\": ldl_value,\n        \"unit\": \"mg/dL\"\n    }\n    \n    return ldl_value"
+}

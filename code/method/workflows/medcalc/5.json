@@ -1,0 +1,53 @@
+{
+    "name": "mean_arterial_pressure_calculation_workflow",
+    "description": "Calculate the mean arterial pressure (MAP) using systolic and diastolic blood pressure values.",
+    "inputs": [
+        {
+            "input_name": "systolic_bp",
+            "input_desc": "Systolic blood pressure value in mm Hg",
+            "input_type": "float"
+        },
+        {
+            "input_name": "diastolic_bp",
+            "input_desc": "Diastolic blood pressure value in mm Hg",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "mean_arterial_pressure_calculation",
+            "step_description": "Calculate the mean arterial pressure (MAP) using the formula: MAP = (1/3 * systolic blood pressure) + (2/3 * diastolic blood pressure).",
+            "step_inputs": [
+                {
+                    "input_name": "systolic_bp",
+                    "input_desc": "Systolic blood pressure value in mm Hg",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.systolic_bp"
+                },
+                {
+                    "input_name": "diastolic_bp",
+                    "input_desc": "Diastolic blood pressure value in mm Hg",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.diastolic_bp"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "mean_arterial_pressure",
+                    "output_desc": "Calculated mean arterial pressure in mm Hg",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "The problem requires applying a specific mathematical formula involving precise numerical computation with two input variables to produce a single numeric result. This fits the FormulaCalculation tool template exactly.",
+            "detail": "The mean arterial pressure (MAP) is calculated directly using the formula: MAP = (1/3 * systolic_bp) + (2/3 * diastolic_bp). The result is a single numerical value in mm Hg, rounded to 4 decimal places at most."
+        }
+    ],
+    "output": {
+        "output_name": "mean_arterial_pressure",
+        "output_desc": "The final calculated mean arterial pressure in mm Hg",
+        "output_type": "float"
+    },
+    "code": "def solve(systolic_bp, diastolic_bp):\n    # Step 1: Calculate the mean arterial pressure (MAP)\n    # Using the formula: MAP = (1/3 * systolic blood pressure) + (2/3 * diastolic blood pressure)\n    mean_arterial_pressure = (1/3) * systolic_bp + (2/3) * diastolic_bp\n    mean_arterial_pressure = round(mean_arterial_pressure, 4)\n    \n    yield {\n        \"step_name\": \"mean_arterial_pressure_calculation\",\n        \"step_description\": \"Calculate the mean arterial pressure (MAP) using the formula: MAP = (1/3 * systolic blood pressure) + (2/3 * diastolic blood pressure).\",\n        \"step_result\": mean_arterial_pressure,\n        \"unit\": \"mm Hg\"\n    }\n    \n    return mean_arterial_pressure"
+}

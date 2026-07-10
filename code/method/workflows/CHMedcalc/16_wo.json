@@ -1,0 +1,42 @@
+{
+    "name": "holliday_segar_fluid_calculation_workflow",
+    "description": "Calculate daily maintenance fluid requirement for a child using the Holliday-Segar formula based on body weight.",
+    "inputs": [
+        {
+            "input_name": "weight_kg",
+            "input_desc": "Weight of the child in kilograms",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "compute_daily_fluid_requirement",
+            "step_description": "Apply the Holliday-Segar formula to calculate daily maintenance fluid in mL based on weight.",
+            "step_inputs": [
+                {
+                    "input_name": "weight_kg",
+                    "input_desc": "Weight of the child in kilograms",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.weight_kg"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "daily_fluid_ml",
+                    "output_desc": "Daily maintenance fluid requirement in mL, capped at 2400 mL if applicable",
+                    "output_type": "float"
+                }
+            ],
+            "category": "weight_based_calculation",
+            "reason": "This step applies a segmented weight-based formula to determine fluid needs, a common pattern in pediatric maintenance fluid calculation.",
+            "detail": "Calculate daily fluid requirement (mL) using the Holliday-Segar formula: If weight <= 10 kg, daily_fluid = weight * 100. If weight is > 10 and <= 20 kg, daily_fluid = 1000 + (weight - 10) * 50. If weight > 20 kg, daily_fluid = 1500 + (weight - 20) * 20, with a maximum cap of 2400 mL."
+        }
+    ],
+    "output": {
+        "output_name": "daily_fluid_ml",
+        "output_desc": "Final calculated daily maintenance fluid requirement in mL",
+        "output_type": "float"
+    },
+    "code": "def solve(weight_kg: float):\n    # Step 1: compute_daily_fluid_requirement\n    # Apply the Holliday-Segar formula to calculate daily maintenance fluid in mL based on weight.\n    if weight_kg <= 10:\n        daily_fluid_ml = weight_kg * 100\n    elif weight_kg <= 20:\n        daily_fluid_ml = 1000 + (weight_kg - 10) * 50\n    else:\n        daily_fluid_ml = 1500 + (weight_kg - 20) * 20\n        if daily_fluid_ml > 2400:\n            daily_fluid_ml = 2400\n\n    yield {\n        \"step_name\": \"compute_daily_fluid_requirement\",\n        \"step_description\": \"Apply the Holliday-Segar formula to calculate daily maintenance fluid in mL based on weight.\",\n        \"step_result\": daily_fluid_ml,\n        \"unit\": \"mL\"\n    }\n\n    return daily_fluid_ml"
+}

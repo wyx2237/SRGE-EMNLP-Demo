@@ -1,0 +1,297 @@
+{
+    "name": "charlson_comorbidity_index_calculation_workflow",
+    "description": "Calculate the Charlson Comorbidity Index (CCI) score by summing the weights of present comorbid conditions and adding an age adjustment score.",
+    "inputs": [
+        {
+            "input_name": "age",
+            "input_desc": "Patient's age in years",
+            "input_type": "int"
+        },
+        {
+            "input_name": "mi",
+            "input_desc": "Myocardial infarction present (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "chf",
+            "input_desc": "Congestive heart failure present (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "pvd",
+            "input_desc": "Peripheral vascular disease present (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "cva",
+            "input_desc": "Cerebrovascular disease (stroke or TIA) present (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "dementia",
+            "input_desc": "Dementia present (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "copd",
+            "input_desc": "Chronic obstructive pulmonary disease present (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "ctd",
+            "input_desc": "Connective tissue disease present (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "pud",
+            "input_desc": "Peptic ulcer disease present (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "mild_liver",
+            "input_desc": "Mild liver disease present (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "diabetes_uncomplicated",
+            "input_desc": "Diabetes without end-organ damage present (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "diabetes_complicated",
+            "input_desc": "Diabetes with end-organ damage present (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "hemiplegia",
+            "input_desc": "Hemiplegia or paraplegia present (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "ckd",
+            "input_desc": "Moderate to severe chronic kidney disease present (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "leukemia",
+            "input_desc": "Leukemia present (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "lymphoma",
+            "input_desc": "Lymphoma present (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "solid_tumor_localized",
+            "input_desc": "Localized solid tumor present (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "moderate_severe_liver",
+            "input_desc": "Moderate to severe liver disease present (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "metastatic_solid_tumor",
+            "input_desc": "Metastatic solid tumor present (true/false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "aids",
+            "input_desc": "AIDS present (true/false)",
+            "input_type": "bool"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "calculate_age_adjustment_score",
+            "step_description": "Calculate the age adjustment score based on the patient's age.",
+            "step_inputs": [
+                {
+                    "input_name": "age",
+                    "input_desc": "Patient's age in years",
+                    "input_type": "int",
+                    "input_source": "$|raw input|.age"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "age_score",
+                    "output_desc": "Age adjustment score for Charlson Comorbidity Index",
+                    "output_type": "int"
+                }
+            ],
+            "category": "age_adjustment",
+            "reason": "The age adjustment score is a simple rule-based mapping that depends solely on the patient's age range.",
+            "detail": "If age < 50: 0 points; if age 50-59: 1 point; if age 60-69: 2 points; if age 70-79: 3 points; if age >= 80: 4 points."
+        },
+        {
+            "step_id": "2",
+            "step_name": "sum_disease_weights",
+            "step_description": "Sum the weights of all present comorbid conditions according to CCI definitions.",
+            "step_inputs": [
+                {
+                    "input_name": "mi",
+                    "input_desc": "Myocardial infarction present (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.mi"
+                },
+                {
+                    "input_name": "chf",
+                    "input_desc": "Congestive heart failure present (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.chf"
+                },
+                {
+                    "input_name": "pvd",
+                    "input_desc": "Peripheral vascular disease present (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.pvd"
+                },
+                {
+                    "input_name": "cva",
+                    "input_desc": "Cerebrovascular disease present (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.cva"
+                },
+                {
+                    "input_name": "dementia",
+                    "input_desc": "Dementia present (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.dementia"
+                },
+                {
+                    "input_name": "copd",
+                    "input_desc": "Chronic obstructive pulmonary disease present (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.copd"
+                },
+                {
+                    "input_name": "ctd",
+                    "input_desc": "Connective tissue disease present (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.ctd"
+                },
+                {
+                    "input_name": "pud",
+                    "input_desc": "Peptic ulcer disease present (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.pud"
+                },
+                {
+                    "input_name": "mild_liver",
+                    "input_desc": "Mild liver disease present (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.mild_liver"
+                },
+                {
+                    "input_name": "diabetes_uncomplicated",
+                    "input_desc": "Diabetes without end-organ damage present (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.diabetes_uncomplicated"
+                },
+                {
+                    "input_name": "diabetes_complicated",
+                    "input_desc": "Diabetes with end-organ damage present (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.diabetes_complicated"
+                },
+                {
+                    "input_name": "hemiplegia",
+                    "input_desc": "Hemiplegia or paraplegia present (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.hemiplegia"
+                },
+                {
+                    "input_name": "ckd",
+                    "input_desc": "Moderate to severe chronic kidney disease present (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.ckd"
+                },
+                {
+                    "input_name": "leukemia",
+                    "input_desc": "Leukemia present (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.leukemia"
+                },
+                {
+                    "input_name": "lymphoma",
+                    "input_desc": "Lymphoma present (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.lymphoma"
+                },
+                {
+                    "input_name": "solid_tumor_localized",
+                    "input_desc": "Localized solid tumor present (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.solid_tumor_localized"
+                },
+                {
+                    "input_name": "moderate_severe_liver",
+                    "input_desc": "Moderate to severe liver disease present (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.moderate_severe_liver"
+                },
+                {
+                    "input_name": "metastatic_solid_tumor",
+                    "input_desc": "Metastatic solid tumor present (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.metastatic_solid_tumor"
+                },
+                {
+                    "input_name": "aids",
+                    "input_desc": "AIDS present (true/false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.aids"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "disease_score",
+                    "output_desc": "Sum of disease weight points",
+                    "output_type": "int"
+                }
+            ],
+            "category": "weighted_sum",
+            "reason": "The disease score is calculated by assigning a predefined weight to each condition if it is present and summing them up, which is a standard weighted sum operation.",
+            "detail": "Initialize disease_score to 0. For each of the following conditions present, add the specified weight: MI (1), CHF (1), PVD (1), CVA (1), Dementia (1), COPD (1), CTD (1), PUD (1), Mild_Liver (1), Diabetes_Uncomplicated (1), Diabetes_Complicated (2), Hemiplegia (2), CKD (2), Leukemia (2), Lymphoma (2), Solid_Tumor_Localized (2), Moderate_Severe_Liver (3), Metastatic_Solid_Tumor (6), AIDS (6)."
+        },
+        {
+            "step_id": "3",
+            "step_name": "compute_total_cci_score",
+            "step_description": "Compute the final Charlson Comorbidity Index score by adding the disease score and age adjustment score.",
+            "step_inputs": [
+                {
+                    "input_name": "disease_score",
+                    "input_desc": "Sum of disease weight points from step 2",
+                    "input_type": "int",
+                    "input_source": "$|step2|.disease_score"
+                },
+                {
+                    "input_name": "age_score",
+                    "input_desc": "Age adjustment score from step 1",
+                    "input_type": "int",
+                    "input_source": "$|step1|.age_score"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_cci",
+                    "output_desc": "Total Charlson Comorbidity Index score",
+                    "output_type": "int"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "This step performs a simple addition of two scores to get the final result.",
+            "detail": "total_cci = disease_score + age_score"
+        }
+    ],
+    "output": {
+        "output_name": "total_cci",
+        "output_desc": "The final Charlson Comorbidity Index score",
+        "output_type": "int"
+    },
+    "code": "def solve(age, mi, chf, pvd, cva, dementia, copd, ctd, pud, mild_liver, diabetes_uncomplicated, diabetes_complicated, hemiplegia, ckd, leukemia, lymphoma, solid_tumor_localized, moderate_severe_liver, metastatic_solid_tumor, aids):\n    # Step 1: calculate_age_adjustment_score\n    age_score = 0\n    if age < 50:\n        age_score = 0\n    elif 50 <= age <= 59:\n        age_score = 1\n    elif 60 <= age <= 69:\n        age_score = 2\n    elif 70 <= age <= 79:\n        age_score = 3\n    else:  # age >= 80\n        age_score = 4\n    yield {\n        \"step_name\": \"calculate_age_adjustment_score\",\n        \"step_description\": \"Calculate the age adjustment score based on the patient's age (if age < 50: 0; 50-59: 1; 60-69: 2; 70-79: 3; >=80: 4).\",\n        \"step_result\": age_score,\n        \"unit\": None\n    }\n\n    # Step 2: sum_disease_weights\n    disease_score = 0\n    # Weight 1 conditions\n    if mi:\n        disease_score += 1\n    if chf:\n        disease_score += 1\n    if pvd:\n        disease_score += 1\n    if cva:\n        disease_score += 1\n    if dementia:\n        disease_score += 1\n    if copd:\n        disease_score += 1\n    if ctd:\n        disease_score += 1\n    if pud:\n        disease_score += 1\n    if mild_liver:\n        disease_score += 1\n    if diabetes_uncomplicated:\n        disease_score += 1\n    # Weight 2 conditions\n    if diabetes_complicated:\n        disease_score += 2\n    if hemiplegia:\n        disease_score += 2\n    if ckd:\n        disease_score += 2\n    if leukemia:\n        disease_score += 2\n    if lymphoma:\n        disease_score += 2\n    if solid_tumor_localized:\n        disease_score += 2\n    # Weight 3 conditions\n    if moderate_severe_liver:\n        disease_score += 3\n    # Weight 6 conditions\n    if metastatic_solid_tumor:\n        disease_score += 6\n    if aids:\n        disease_score += 6\n    yield {\n        \"step_name\": \"sum_disease_weights\",\n        \"step_description\": \"Sum the weights of all present comorbid conditions according to Charlson Comorbidity Index definitions.\",\n        \"step_result\": disease_score,\n        \"unit\": None\n    }\n\n    # Step 3: compute_total_cci_score\n    total_cci = disease_score + age_score\n    yield {\n        \"step_name\": \"compute_total_cci_score\",\n        \"step_description\": \"Compute the final Charlson Comorbidity Index score by adding the disease score and age adjustment score.\",\n        \"step_result\": total_cci,\n        \"unit\": None\n    }\n\n    return total_cci"
+}

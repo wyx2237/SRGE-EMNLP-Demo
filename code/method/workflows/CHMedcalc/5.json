@@ -1,0 +1,303 @@
+{
+    "name": "grace_2_0_risk_score_calculation_workflow",
+    "description": "Calculate the total GRACE 2.0 risk score for an acute coronary syndrome (ACS) patient.",
+    "inputs": [
+        {
+            "input_name": "age",
+            "input_desc": "The patient's age in years.",
+            "input_type": "integer"
+        },
+        {
+            "input_name": "heart_rate_bpm",
+            "input_desc": "The patient's heart rate in beats per minute.",
+            "input_type": "integer"
+        },
+        {
+            "input_name": "systolic_bp_mmHg",
+            "input_desc": "The patient's systolic blood pressure in millimeters of mercury (mmHg).",
+            "input_type": "integer"
+        },
+        {
+            "input_name": "serum_creatinine_mg_dl",
+            "input_desc": "The patient's serum creatinine level in milligrams per deciliter (mg/dL).",
+            "input_type": "float"
+        },
+        {
+            "input_name": "killip_class",
+            "input_desc": "The patient's Killip class (I, II, III, IV).",
+            "input_type": "string"
+        },
+        {
+            "input_name": "cardiac_arrest",
+            "input_desc": "Whether the patient had cardiac arrest upon admission (yes/no).",
+            "input_type": "string"
+        },
+        {
+            "input_name": "st_segment_shift",
+            "input_desc": "Whether the patient has ST segment shifts >0.5 mm (yes/no).",
+            "input_type": "string"
+        },
+        {
+            "input_name": "myocardial_marker_elevation",
+            "input_desc": "Whether the patient has elevated myocardial markers (yes/no).",
+            "input_type": "string"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "age_score_calculation",
+            "step_description": "Calculate the age score based on the patient's age range for the GRACE 2.0 risk assessment.",
+            "step_inputs": [
+                {
+                    "input_name": "age",
+                    "input_desc": "The patient's age in years.",
+                    "input_type": "integer",
+                    "input_source": "$|inputs|.age"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "age_score",
+                    "output_desc": "The score assigned based on the patient's age range.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step evaluates the patient's age and assigns a score based on predefined ranges.",
+            "detail": "If ≤30: 0 points; if 30-39: 8 points; if 40-49: 25 points; if 50-59: 41 points; if 60-69: 58 points; if 70-79: 75 points; if 80-89: 91 points; if ≥90: 100 points."
+        },
+        {
+            "step_id": "2",
+            "step_name": "heart_rate_score_calculation",
+            "step_description": "Calculate the heart rate score based on the patient's heart rate range for the GRACE 2.0 risk assessment.",
+            "step_inputs": [
+                {
+                    "input_name": "heart_rate_bpm",
+                    "input_desc": "The patient's heart rate in beats per minute.",
+                    "input_type": "integer",
+                    "input_source": "$|inputs|.heart_rate_bpm"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "heart_rate_score",
+                    "output_desc": "The score assigned based on the patient's heart rate range.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step evaluates the patient's heart rate and assigns a score based on predefined ranges.",
+            "detail": "If ≤49: 0 points; if 50-69: 3 points; if 70-89: 9 points; if 90-109: 15 points; if 110-149: 24 points; if 150-199: 38 points; if ≥200: 46 points."
+        },
+        {
+            "step_id": "3",
+            "step_name": "systolic_bp_score_calculation",
+            "step_description": "Calculate the systolic blood pressure score based on the patient's systolic blood pressure range for the GRACE 2.0 risk assessment.",
+            "step_inputs": [
+                {
+                    "input_name": "systolic_bp_mmHg",
+                    "input_desc": "The patient's systolic blood pressure in millimeters of mercury (mmHg).",
+                    "input_type": "integer",
+                    "input_source": "$|inputs|.systolic_bp_mmHg"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "systolic_bp_score",
+                    "output_desc": "The score assigned based on the patient's systolic blood pressure range.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step evaluates the patient's systolic blood pressure and assigns a score based on predefined ranges.",
+            "detail": "If ≤79: 58 points; if 80-99: 53 points; if 100-119: 43 points; if 120-139: 34 points; if 140-159: 24 points; if 160-199: 10 points; if ≥200: 0 points."
+        },
+        {
+            "step_id": "4",
+            "step_name": "creatinine_score_calculation",
+            "step_description": "Calculate the creatinine score based on the patient's serum creatinine level for the GRACE 2.0 risk assessment.",
+            "step_inputs": [
+                {
+                    "input_name": "serum_creatinine_mg_dl",
+                    "input_desc": "The patient's serum creatinine level in milligrams per deciliter (mg/dL).",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.serum_creatinine_mg_dl"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "creatinine_score",
+                    "output_desc": "The score assigned based on the patient's serum creatinine level.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step evaluates the patient's serum creatinine level and assigns a score based on predefined ranges.",
+            "detail": "If 0-0.39: 1 point; if 0.40-0.79: 4 points; if 0.80-1.19: 7 points; if 1.20-1.59: 10 points; if 1.60-1.99: 13 points; if 2.00-3.99: 21 points; if ≥4.0: 28 points."
+        },
+        {
+            "step_id": "5",
+            "step_name": "killip_class_score_calculation",
+            "step_description": "Calculate the Killip class score based on the patient's clinical classification for the GRACE 2.0 risk assessment.",
+            "step_inputs": [
+                {
+                    "input_name": "killip_class",
+                    "input_desc": "The patient's Killip class (I, II, III, IV).",
+                    "input_type": "string",
+                    "input_source": "$|inputs|.killip_class"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "killip_score",
+                    "output_desc": "The score assigned based on the patient's Killip class.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step evaluates the patient's Killip class and assigns a score based on predefined ranges.",
+            "detail": "If I: 0 points; if II: 20 points; if III: 39 points; if IV: 59 points."
+        },
+        {
+            "step_id": "6",
+            "step_name": "cardiac_arrest_score_calculation",
+            "step_description": "Calculate the cardiac arrest score based on whether the patient had cardiac arrest upon admission for the GRACE 2.0 risk assessment.",
+            "step_inputs": [
+                {
+                    "input_name": "cardiac_arrest",
+                    "input_desc": "Whether the patient had cardiac arrest upon admission (yes/no).",
+                    "input_type": "string",
+                    "input_source": "$|inputs|.cardiac_arrest"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "cardiac_arrest_score",
+                    "output_desc": "The score assigned based on whether the patient had cardiac arrest.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step evaluates whether the patient had cardiac arrest and assigns a score based on predefined conditions.",
+            "detail": "If no: 0 points; if yes: 39 points."
+        },
+        {
+            "step_id": "7",
+            "step_name": "st_segment_shift_score_calculation",
+            "step_description": "Calculate the ST segment shift score based on whether the patient has ST segment shifts >0.5 mm for the GRACE 2.0 risk assessment.",
+            "step_inputs": [
+                {
+                    "input_name": "st_segment_shift",
+                    "input_desc": "Whether the patient has ST segment shifts >0.5 mm (yes/no).",
+                    "input_type": "string",
+                    "input_source": "$|inputs|.st_segment_shift"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "st_segment_shift_score",
+                    "output_desc": "The score assigned based on whether the patient has ST segment shifts.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step evaluates whether the patient has ST segment shifts and assigns a score based on predefined conditions.",
+            "detail": "If no: 0 points; if yes: 28 points."
+        },
+        {
+            "step_id": "8",
+            "step_name": "myocardial_marker_elevation_score_calculation",
+            "step_description": "Calculate the myocardial marker elevation score based on whether the patient has elevated myocardial markers for the GRACE 2.0 risk assessment.",
+            "step_inputs": [
+                {
+                    "input_name": "myocardial_marker_elevation",
+                    "input_desc": "Whether the patient has elevated myocardial markers (yes/no).",
+                    "input_type": "string",
+                    "input_source": "$|inputs|.myocardial_marker_elevation"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "myocardial_marker_score",
+                    "output_desc": "The score assigned based on whether the patient has elevated myocardial markers.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step evaluates whether the patient has elevated myocardial markers and assigns a score based on predefined conditions.",
+            "detail": "If no: 0 points; if yes: 14 points."
+        },
+        {
+            "step_id": "9",
+            "step_name": "total_grace_2_0_score_calculation",
+            "step_description": "Calculate the total GRACE 2.0 score by summing all individual scores for the risk assessment.",
+            "step_inputs": [
+                {
+                    "input_name": "age_score",
+                    "input_desc": "The age score calculated based on the patient's age.",
+                    "input_type": "integer",
+                    "input_source": "$|step1|.age_score"
+                },
+                {
+                    "input_name": "heart_rate_score",
+                    "input_desc": "The heart rate score calculated based on the patient's heart rate.",
+                    "input_type": "integer",
+                    "input_source": "$|step2|.heart_rate_score"
+                },
+                {
+                    "input_name": "systolic_bp_score",
+                    "input_desc": "The systolic blood pressure score calculated based on the patient's systolic blood pressure.",
+                    "input_type": "integer",
+                    "input_source": "$|step3|.systolic_bp_score"
+                },
+                {
+                    "input_name": "creatinine_score",
+                    "input_desc": "The creatinine score calculated based on the patient's serum creatinine level.",
+                    "input_type": "integer",
+                    "input_source": "$|step4|.creatinine_score"
+                },
+                {
+                    "input_name": "killip_score",
+                    "input_desc": "The Killip class score calculated based on the patient's clinical classification.",
+                    "input_type": "integer",
+                    "input_source": "$|step5|.killip_score"
+                },
+                {
+                    "input_name": "cardiac_arrest_score",
+                    "input_desc": "The cardiac arrest score calculated based on whether the patient had cardiac arrest.",
+                    "input_type": "integer",
+                    "input_source": "$|step6|.cardiac_arrest_score"
+                },
+                {
+                    "input_name": "st_segment_shift_score",
+                    "input_desc": "The ST segment shift score calculated based on whether the patient has ST segment shifts.",
+                    "input_type": "integer",
+                    "input_source": "$|step7|.st_segment_shift_score"
+                },
+                {
+                    "input_name": "myocardial_marker_score",
+                    "input_desc": "The myocardial marker elevation score calculated based on whether the patient has elevated myocardial markers.",
+                    "input_type": "integer",
+                    "input_source": "$|step8|.myocardial_marker_score"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_grace_score",
+                    "output_desc": "The total GRACE 2.0 score calculated by summing all individual scores.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step sums all individual scores to calculate the total GRACE 2.0 score.",
+            "detail": "Total score = Age score + Heart rate score + Systolic blood pressure score + Creatinine score + Killip class score + Cardiac arrest score + ST segment shift score + Myocardial marker elevation score."
+        }
+    ],
+    "output": {
+        "output_name": "total_grace_score",
+        "output_desc": "The total GRACE 2.0 score calculated by summing all individual scores.",
+        "output_type": "integer"
+    },
+    "code": "def solve(age, heart_rate_bpm, systolic_bp_mmHg, serum_creatinine_mg_dl, killip_class, cardiac_arrest, st_segment_shift, myocardial_marker_elevation):\n    # Step 1: Calculate the age score based on the patient's age range for the GRACE 2.0 risk assessment\n    if age <= 30:\n        age_score = 0\n    elif 30 <= age <= 39:\n        age_score = 8\n    elif 40 <= age <= 49:\n        age_score = 25\n    elif 50 <= age <= 59:\n        age_score = 41\n    elif 60 <= age <= 69:\n        age_score = 58\n    elif 70 <= age <= 79:\n        age_score = 75\n    elif 80 <= age <= 89:\n        age_score = 91\n    elif age >= 90:\n        age_score = 100\n    else:\n        age_score = 0  # Default value for age outside specified ranges\n\n    yield {\n        \"step_name\": \"age_score_calculation\",\n        \"step_description\": \"Calculate the age score based on the patient's age range for the GRACE 2.0 risk assessment.\",\n        \"step_result\": age_score,\n        \"unit\": None\n    }\n\n    # Step 2: Calculate the heart rate score based on the patient's heart rate range for the GRACE 2.0 risk assessment\n    if heart_rate_bpm <= 49:\n        heart_rate_score = 0\n    elif 50 <= heart_rate_bpm <= 69:\n        heart_rate_score = 3\n    elif 70 <= heart_rate_bpm <= 89:\n        heart_rate_score = 9\n    elif 90 <= heart_rate_bpm <= 109:\n        heart_rate_score = 15\n    elif 110 <= heart_rate_bpm <= 149:\n        heart_rate_score = 24\n    elif 150 <= heart_rate_bpm <= 199:\n        heart_rate_score = 38\n    elif heart_rate_bpm >= 200:\n        heart_rate_score = 46\n    else:\n        heart_rate_score = 0  # Default value for heart rate outside specified ranges\n\n    yield {\n        \"step_name\": \"heart_rate_score_calculation\",\n        \"step_description\": \"Calculate the heart rate score based on the patient's heart rate range for the GRACE 2.0 risk assessment.\",\n        \"step_result\": heart_rate_score,\n        \"unit\": None\n    }\n\n    # Step 3: Calculate the systolic blood pressure score based on the patient's systolic blood pressure range for the GRACE 2.0 risk assessment\n    if systolic_bp_mmHg <= 79:\n        systolic_bp_score = 58\n    elif 80 <= systolic_bp_mmHg <= 99:\n        systolic_bp_score = 53\n    elif 100 <= systolic_bp_mmHg <= 119:\n        systolic_bp_score = 43\n    elif 120 <= systolic_bp_mmHg <= 139:\n        systolic_bp_score = 34\n    elif 140 <= systolic_bp_mmHg <= 159:\n        systolic_bp_score = 24\n    elif 160 <= systolic_bp_mmHg <= 199:\n        systolic_bp_score = 10\n    elif systolic_bp_mmHg >= 200:\n        systolic_bp_score = 0\n    else:\n        systolic_bp_score = 0  # Default value for systolic BP outside specified ranges\n\n    yield {\n        \"step_name\": \"systolic_bp_score_calculation\",\n        \"step_description\": \"Calculate the systolic blood pressure score based on the patient's systolic blood pressure range for the GRACE 2.0 risk assessment.\",\n        \"step_result\": systolic_bp_score,\n        \"unit\": None\n    }\n\n    # Step 4: Calculate the creatinine score based on the patient's serum creatinine level for the GRACE 2.0 risk assessment\n    if 0 <= serum_creatinine_mg_dl <= 0.39:\n        creatinine_score = 1\n    elif 0.40 <= serum_creatinine_mg_dl <= 0.79:\n        creatinine_score = 4\n    elif 0.80 <= serum_creatinine_mg_dl <= 1.19:\n        creatinine_score = 7\n    elif 1.20 <= serum_creatinine_mg_dl <= 1.59:\n        creatinine_score = 10\n    elif 1.60 <= serum_creatinine_mg_dl <= 1.99:\n        creatinine_score = 13\n    elif 2.00 <= serum_creatinine_mg_dl <= 3.99:\n        creatinine_score = 21\n    elif serum_creatinine_mg_dl >= 4.0:\n        creatinine_score = 28\n    else:\n        creatinine_score = 0  # Default value for creatinine level outside specified ranges\n\n    yield {\n        \"step_name\": \"creatinine_score_calculation\",\n        \"step_description\": \"Calculate the creatinine score based on the patient's serum creatinine level for the GRACE 2.0 risk assessment.\",\n        \"step_result\": creatinine_score,\n        \"unit\": None\n    }\n\n    # Step 5: Calculate the Killip class score based on the patient's clinical classification for the GRACE 2.0 risk assessment\n    if killip_class == \"I\":\n        killip_score = 0\n    elif killip_class == \"II\":\n        killip_score = 20\n    elif killip_class == \"III\":\n        killip_score = 39\n    elif killip_class == \"IV\":\n        killip_score = 59\n    else:\n        killip_score = 0  # Default value for invalid Killip class input\n\n    yield {\n        \"step_name\": \"killip_class_score_calculation\",\n        \"step_description\": \"Calculate the Killip class score based on the patient's clinical classification for the GRACE 2.0 risk assessment.\",\n        \"step_result\": killip_score,\n        \"unit\": None\n    }\n\n    # Step 6: Calculate the cardiac arrest score based on whether the patient had cardiac arrest upon admission for the GRACE 2.0 risk assessment\n    if cardiac_arrest == \"no\":\n        cardiac_arrest_score = 0\n    elif cardiac_arrest == \"yes\":\n        cardiac_arrest_score = 39\n    else:\n        cardiac_arrest_score = 0  # Default value for invalid cardiac arrest input\n\n    yield {\n        \"step_name\": \"cardiac_arrest_score_calculation\",\n        \"step_description\": \"Calculate the cardiac arrest score based on whether the patient had cardiac arrest upon admission for the GRACE 2.0 risk assessment.\",\n        \"step_result\": cardiac_arrest_score,\n        \"unit\": None\n    }\n\n    # Step 7: Calculate the ST segment shift score based on whether the patient has ST segment shifts >0.5 mm for the GRACE 2.0 risk assessment\n    if st_segment_shift == \"no\":\n        st_segment_shift_score = 0\n    elif st_segment_shift == \"yes\":\n        st_segment_shift_score = 28\n    else:\n        st_segment_shift_score = 0  # Default value for invalid ST segment shift input\n\n    yield {\n        \"step_name\": \"st_segment_shift_score_calculation\",\n        \"step_description\": \"Calculate the ST segment shift score based on whether the patient has ST segment shifts >0.5 mm for the GRACE 2.0 risk assessment.\",\n        \"step_result\": st_segment_shift_score,\n        \"unit\": None\n    }\n\n    # Step 8: Calculate the myocardial marker elevation score based on whether the patient has elevated myocardial markers for the GRACE 2.0 risk assessment\n    if myocardial_marker_elevation == \"no\":\n        myocardial_marker_score = 0\n    elif myocardial_marker_elevation == \"yes\":\n        myocardial_marker_score = 14\n    else:\n        myocardial_marker_score = 0  # Default value for invalid myocardial marker input\n\n    yield {\n        \"step_name\": \"myocardial_marker_elevation_score_calculation\",\n        \"step_description\": \"Calculate the myocardial marker elevation score based on whether the patient has elevated myocardial markers for the GRACE 2.0 risk assessment.\",\n        \"step_result\": myocardial_marker_score,\n        \"unit\": None\n    }\n\n    # Step 9: Calculate the total GRACE 2.0 score by summing all individual scores for the risk assessment\n    total_grace_score = (age_score + heart_rate_score + systolic_bp_score + creatinine_score + \n                         killip_score + cardiac_arrest_score + st_segment_shift_score + myocardial_marker_score)\n\n    yield {\n        \"step_name\": \"total_grace_2_0_score_calculation\",\n        \"step_description\": \"Calculate the total GRACE 2.0 score by summing all individual scores for the risk assessment.\",\n        \"step_result\": total_grace_score,\n        \"unit\": None\n    }\n\n    return total_grace_score"
+}

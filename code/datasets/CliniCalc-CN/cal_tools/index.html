@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>医学计算器平台 | 统一界面</title>
+    <style>
+        /* ========== 全局样式（所有计算器共用） ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #eef2f5;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .app-container {
+            display: flex;
+            height: 100%;
+        }
+        /* 左侧导航栏 */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #1f4e64 0%, #143e50 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+        .logo {
+            padding: 28px 20px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 20px;
+        }
+        .logo small {
+            font-size: 0.75rem;
+            font-weight: normal;
+            display: block;
+            opacity: 0.8;
+        }
+        .nav-menu {
+            list-style: none;
+            padding: 0 12px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        .nav-item {
+            margin-bottom: 8px;
+        }
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 32px;
+            color: #e0f0f5;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .nav-link:hover {
+            background: rgba(255,255,255,0.15);
+            color: white;
+        }
+        .nav-link.active {
+            background: #2c7a5e;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .nav-icon {
+            font-size: 1.3rem;
+        }
+        /* 右侧内容区 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: #f8fafc;
+        }
+        .content-header {
+            padding: 16px 28px;
+            background: white;
+            border-bottom: 1px solid #dce5ec;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        }
+        .content-header h2 {
+            color: #1f4e64;
+            font-weight: 600;
+        }
+        .content-view {
+            flex: 1;
+            overflow: auto;
+            padding: 20px;
+        }
+        /* ========== 计算器通用组件样式 ========== */
+        .mode-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #cfe1ea;
+            padding-bottom: 8px;
+        }
+        .mode-btn {
+            background: transparent;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 6px 18px;
+            border-radius: 40px;
+            cursor: pointer;
+            color: #3b6f84;
+            transition: 0.2s;
+        }
+        .mode-btn.active {
+            background: #2c7a5e;
+            color: white;
+        }
+        .input-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #1f4e64;
+        }
+        input, select {
+            background: white;
+            border: 1px solid #cbdbe2;
+            border-radius: 28px;
+            padding: 10px 16px;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.2s;
+        }
+        input:focus, select:focus {
+            border-color: #4797b9;
+            box-shadow: 0 0 0 3px rgba(71,151,185,0.2);
+        }
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            background: #f3f7fa;
+            padding: 8px 16px;
+            border-radius: 48px;
+        }
+        button {
+            background: #2c7a5e;
+            color: white;
+            border: none;
+            border-radius: 60px;
+            padding: 10px 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover {
+            background: #1f5e48;
+            transform: translateY(-1px);
+        }
+        .result-area {
+            background: #eef2f5;
+            border-radius: 28px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .result-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1a5d4c;
+            font-family: monospace;
+        }
+        .batch-table-wrapper {
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+        .batch-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        .batch-table th, .batch-table td {
+            border: 1px solid #d9e2ec;
+            padding: 10px 8px;
+            text-align: center;
+        }
+        .batch-table th {
+            background: #e4eff6;
+            color: #1f4e64;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin: 16px 0;
+            flex-wrap: wrap;
+        }
+        .result-batch {
+            background: #f8fbfd;
+            border-radius: 24px;
+            padding: 16px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            border: 1px solid #cfe1ea;
+        }
+        .warning {
+            background: #fff2e0;
+            border-radius: 20px;
+            padding: 8px 14px;
+            font-size: 0.75rem;
+            margin-top: 12px;
+            text-align: center;
+        }
+        .footnote {
+            font-size: 0.7rem;
+            text-align: center;
+            color: #6f8fa3;
+            margin-top: 20px;
+        }
+        .csv-section {
+            margin-bottom: 16px;
+            background: #f8fbfd;
+            border-radius: 16px;
+            padding: 12px;
+            border: 1px solid #cfe1ea;
+        }
+        .csv-paste-area {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid #cbdbe2;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            resize: vertical;
+            min-height: 80px;
+            background: white;
+        }
+        .csv-paste-area:focus {
+            border-color: #4797b9;
+            box-shadow: 0 0 0 3px rgba(71,151,185,0.2);
+            outline: none;
+        }
+        .btn-csv {
+            background: #6a8fa5 !important;
+        }
+        .copy-toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f4e64;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 40px;
+            opacity: 0;
+            transition: 0.2s;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        /* 介绍页面专用样式 */
+        .intro-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 32px;
+            padding: 32px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        .intro-container h2 {
+            color: #1f4e64;
+            margin-bottom: 16px;
+            border-left: 4px solid #2c7a5e;
+            padding-left: 16px;
+        }
+        .intro-container p {
+            margin: 16px 0;
+            line-height: 1.6;
+            color: #2c3e44;
+        }
+        .intro-container ul {
+            margin: 16px 0 16px 32px;
+            line-height: 1.6;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+        .feature-card {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 16px;
+            text-align: center;
+        }
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+        .feature-title {
+            font-weight: 600;
+            color: #1f4e64;
+        }
+        @media (max-width: 700px) {
+            .sidebar { width: 80px; }
+            .logo { padding: 20px 0; text-align: center; font-size: 1.2rem; }
+            .logo small { display: none; }
+            .nav-link span:last-child { display: none; }
+            .nav-link { justify-content: center; padding: 12px 0; }
+            .nav-icon { font-size: 1.6rem; margin: 0; }
+            .content-header { padding: 12px 16px; }
+            .content-header h2 { font-size: 1.2rem; }
+            .intro-container { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <aside class="sidebar">
+        <div class="logo">
+            📊 MedCalc
+            <small>临床工具集</small>
+        </div>
+        <ul id="navMenu" class="nav-menu">
+            <!-- 导航项会由 registry.js 动态生成 -->
+            <li style="padding: 20px; text-align: center; color: #aaa;">加载中...</li>
+        </ul>
+    </aside>
+    <main class="main-content">
+        <div class="content-header">
+            <h2 id="pageTitle">医学计算器平台</h2>
+        </div>
+        <div id="contentView" class="content-view">
+            <!-- 动态内容 -->
+        </div>
+    </main>
+</div>
+<div id="copyToast" class="copy-toast">✅ 已复制到剪贴板</div>
+
+<script>
+    // 全局变量
+    let currentConfig = null;
+    let currentMode = 'single';
+    let batchRowCounter = 0;
+    
+    const contentView = document.getElementById('contentView');
+    const pageTitle = document.getElementById('pageTitle');
+    const navMenu = document.getElementById('navMenu');
+    
+    // 工具函数
+    function showToast(msg) {
+        const toast = document.getElementById('copyToast');
+        toast.textContent = msg || '✅ 已复制到剪贴板';
+        toast.style.opacity = '1';
+        setTimeout(() => toast.style.opacity = '0', 1500);
+    }
+    
+    function showIntro() {
+        pageTitle.innerText = '医学计算器平台';
+        contentView.innerHTML = `
+            <div class="intro-container">
+                <h2>欢迎使用 MedCalc 医学计算器平台</h2>
+                <p>本平台提供临床常用的医学计算公式，界面统一、操作便捷。所有计算结果均保留4位小数，支持单例快速计算和批量数据导入/导出。</p>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">✨</div>
+                        <div class="feature-title">单例计算</div>
+                        <div style="font-size:0.8rem; margin-top:6px;">实时输入，即时得到结果</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <div class="feature-title">批量计算</div>
+                        <div style="font-size:0.8rem; margin-top:6px;">动态增删行，一键计算多组数据</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📋</div>
+                        <div class="feature-title">复制结果</div>
+                        <div style="font-size:0.8rem; margin-top:6px;">复制为表格格式，可直接粘贴到Excel</div>
+                    </div>
+                </div>
+
+                <h2>📌 使用说明</h2>
+                <ul>
+                    <li>点击左侧导航栏选择需要的计算器</li>
+                    <li>在“单例快速计算”模式下，修改任意参数即可自动计算结果</li>
+                    <li>切换到“批量计算 & 复制”模式，可添加多行数据，点击“批量计算”后显示结果，并支持一键复制全部数据</li>
+                    <li>所有结果均保留小数点后4位，复制内容为制表符分隔的纯文本，便于粘贴到Excel等表格软件</li>
+                </ul>
+
+                <h2>🔧 当前支持的计算器</h2>
+                <ul id="supportedList">
+                    <li>正在加载...</li>
+                </ul>
+
+                <div class="warning" style="margin-top: 24px;">
+                    ⚠️ 所有计算结果均为估算值，仅供临床参考。如需精确测量，建议采用间接测热法等金标准。
+                </div>
+            </div>
+        `;
+        // 稍后由 registry 填充支持列表
+    }
+    
+    // 渲染计算器（与之前相同，略作保持）
+    function renderSingleForm(config) {
+        let html = '';
+        for (let field of config.fields) {
+            if (field.type === 'radio') {
+                html += `
+                    <div class="input-group">
+                        <label>${field.label}</label>
+                        <div class="radio-group" id="radioGroup_${field.name}">
+                            ${field.options.map(opt => `<label><input type="radio" name="${field.name}" value="${opt.value}" ${opt.checked ? 'checked' : ''}> ${opt.label}</label>`).join('')}
+                        </div>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="input-group">
+                        <label>${field.label}</label>
+                        <input type="number" id="${field.name}" value="${field.default}" step="${field.step || 'any'}" placeholder="${field.placeholder || ''}">
+                    </div>
+                `;
+            }
+        }
+        return html;
+    }
+    
+    function bindSingleEvents(config) {
+        const inputs = [];
+        for (let field of config.fields) {
+            if (field.type === 'radio') {
+                const radios = document.querySelectorAll(`input[name="${field.name}"]`);
+                radios.forEach(r => inputs.push(r));
+            } else {
+                const el = document.getElementById(field.name);
+                if (el) inputs.push(el);
+            }
+        }
+        const update = () => {
+            const params = {};
+            for (let field of config.fields) {
+                if (field.type === 'radio') {
+                    const selected = document.querySelector(`input[name="${field.name}"]:checked`);
+                    if (selected) params[field.name] = selected.value;
+                } else {
+                    let val = parseFloat(document.getElementById(field.name).value);
+                    if (isNaN(val)) val = null;
+                    params[field.name] = val;
+                }
+            }
+            let valid = true;
+            for (let field of config.fields) {
+                if (field.type !== 'radio') {
+                    const val = params[field.name];
+                    if (val === null || val <= 0) {
+                        valid = false;
+                        break;
+                    }
+                }
+            }
+            if (!valid) {
+                document.getElementById('singleResult').innerText = '无效输入';
+                if (config.validateWarning) document.getElementById('warningMessage').innerHTML = config.validateWarning;
+                return;
+            }
+            try {
+                let result = config.calculateFn(params);
+                if (result === null || isNaN(result)) throw new Error();
+                document.getElementById('singleResult').innerText = result.toFixed(4);
+                let warnMsg = config.defaultWarning || '';
+                if (config.customWarning && typeof config.customWarning === 'function') {
+                    warnMsg = config.customWarning(params);
+                }
+                document.getElementById('warningMessage').innerHTML = warnMsg;
+            } catch(e) {
+                document.getElementById('singleResult').innerText = '计算错误';
+            }
+        };
+        inputs.forEach(inp => inp.addEventListener('input', update));
+        update();
+    }
+    
+    function addBatchRow(config) {
+        batchRowCounter++;
+        const tbody = document.getElementById('batchTbody');
+        const tr = document.createElement('tr');
+        tr.setAttribute('data-rowid', batchRowCounter);
+        
+        let html = `<td>${batchRowCounter}</td>`;
+        for (let col of config.batchColumns) {
+            if (col.type === 'select') {
+                let options = col.options.map(opt => `<option value="${opt.value}">${opt.label}</option>`).join('');
+                html += `<td><select class="batch-input" data-field="${col.field}">${options}</select></td>`;
+            } else {
+                html += `<td><input type="number" class="batch-input" data-field="${col.field}" value="${col.default || ''}" step="${col.step || 'any'}"></td>`;
+            }
+        }
+        html += `<td class="result-cell" style="font-weight:bold;">—</td>`;
+        html += `<td><button class="delete-row-btn" style="background:#b56a5c; padding:4px 12px;">✖️ 删除</button></td>`;
+        
+        tr.innerHTML = html;
+        tr.querySelector('.delete-row-btn').addEventListener('click', () => tr.remove());
+        tbody.appendChild(tr);
+    }
+    
+    function batchCompute(config) {
+        const tbody = document.getElementById('batchTbody');
+        const rows = tbody.querySelectorAll('tr');
+        let resultText = '';
+        const headers = ['序号', ...config.batchColumns.map(col => col.title), config.resultColumnTitle || '结果'];
+        resultText += headers.join('\t') + '\n';
+        
+        rows.forEach((row, idx) => {
+            const rowData = {};
+            const inputs = row.querySelectorAll('.batch-input');
+            inputs.forEach(inp => {
+                let val = inp.value;
+                if (inp.type === 'number') {
+                    val = parseFloat(val);
+                    if (isNaN(val)) val = null;
+                }
+                rowData[inp.getAttribute('data-field')] = val;
+            });
+            
+            let valid = true;
+            for (let col of config.batchColumns) {
+                if (col.type !== 'select') {
+                    const v = rowData[col.field];
+                    if (v === null || v <= 0) {
+                        valid = false;
+                        break;
+                    }
+                }
+            }
+            
+            let resultValue = null;
+            if (valid) {
+                try {
+                    resultValue = config.batchCalculateFn(rowData);
+                    if (resultValue !== null && !isNaN(resultValue)) {
+                        resultValue = resultValue.toFixed(4);
+                    } else {
+                        resultValue = '--';
+                    }
+                } catch(e) {
+                    resultValue = '错误';
+                }
+            } else {
+                resultValue = '参数无效';
+            }
+            
+            const resultCell = row.querySelector('.result-cell');
+            if (resultCell) resultCell.innerText = resultValue;
+            
+            const rowValues = [idx + 1];
+            for (let col of config.batchColumns) {
+                let val = rowData[col.field];
+                if (col.type === 'select') {
+                    const option = col.options.find(opt => opt.value === val);
+                    val = option ? option.label : val;
+                }
+                rowValues.push(val);
+            }
+            rowValues.push(resultValue);
+            resultText += rowValues.join('\t') + '\n';
+        });
+        
+        const resultDiv = document.getElementById('batchResultDisplay');
+        const pre = document.getElementById('batchResultPre');
+        if (pre) pre.innerText = resultText;
+        if (resultDiv) resultDiv.style.display = 'block';
+        return resultText;
+    }
+    
+    // ========== CSV 模板 & 粘贴功能 ==========
+    function generateCSVTemplate(config) {
+        const headers = config.batchColumns.map(col => col.title);
+        return '﻿' + headers.join(',') + '\n';
+    }
+    function downloadCSVTemplate(config) {
+        const csv = generateCSVTemplate(config);
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = (config.name || 'template') + '-批量模板.csv';
+        link.click();
+        URL.revokeObjectURL(link.href);
+        showToast('✅ 模板已下载');
+    }
+    function parseCSVAndFillTable(config) {
+        const textarea = document.getElementById('csvPasteArea');
+        const csvText = textarea.value.replace(/^﻿/, '').trim();
+        if (!csvText) { showToast('⚠️ 请先粘贴CSV数据'); return; }
+
+        // 按行分割
+        const lines = csvText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        if (lines.length < 2) { showToast('⚠️ CSV数据至少需要标题行 + 一行数据'); return; }
+
+        // 自动检测分隔符（tab 或逗号）
+        const commaCnt = (lines[0].match(/,/g) || []).length;
+        const tabCnt = (lines[0].match(/\t/g) || []).length;
+        const delim = tabCnt > commaCnt ? '\t' : ',';
+
+        const dataLines = lines.slice(1);
+
+        // 清空表格
+        const tbody = document.getElementById('batchTbody');
+        tbody.innerHTML = '';
+        batchRowCounter = 0;
+
+        for (const line of dataLines) {
+            const values = line.split(delim).map(v => v.trim());
+            batchRowCounter++;
+            const tr = document.createElement('tr');
+            tr.setAttribute('data-rowid', batchRowCounter);
+
+            let html = `<td>${batchRowCounter}</td>`;
+            for (let ci = 0; ci < config.batchColumns.length; ci++) {
+                const col = config.batchColumns[ci];
+                let val = ci < values.length ? values[ci] : '';
+
+                if (col.type === 'select') {
+                    const matched = col.options.find(opt => opt.label === val || opt.value === val);
+                    const selectedVal = matched ? matched.value : (col.default || col.options[0]?.value || '');
+                    const opts = col.options.map(opt =>
+                        `<option value="${opt.value}" ${opt.value === selectedVal ? 'selected' : ''}>${opt.label}</option>`
+                    ).join('');
+                    html += `<td><select class="batch-input" data-field="${col.field}">${opts}</select></td>`;
+                } else {
+                    html += `<td><input type="number" class="batch-input" data-field="${col.field}" value="${val || col.default || ''}" step="${col.step || 'any'}"></td>`;
+                }
+            }
+            html += `<td class="result-cell" style="font-weight:bold;">—</td>`;
+            html += `<td><button class="delete-row-btn" style="background:#b56a5c; padding:4px 12px;">✖️ 删除</button></td>`;
+
+            tr.innerHTML = html;
+            tr.querySelector('.delete-row-btn').addEventListener('click', () => tr.remove());
+            tbody.appendChild(tr);
+        }
+
+        showToast(`✅ 已填充 ${dataLines.length} 行数据`);
+        // 自动计算
+        batchCompute(config);
+    }
+
+    function renderCalculator(config) {
+        if (!config) return;
+        currentConfig = config;
+        
+        let html = `
+            <div class="mode-tabs">
+                <button class="mode-btn ${currentMode === 'single' ? 'active' : ''}" data-mode="single">✨ 单例快速计算</button>
+                <button class="mode-btn ${currentMode === 'batch' ? 'active' : ''}" data-mode="batch">📊 批量计算 & 复制</button>
+            </div>
+            
+            <div id="singlePanel" class="mode-panel" style="display: ${currentMode === 'single' ? 'block' : 'none'}">
+                ${renderSingleForm(config)}
+                <div class="result-area">
+                    <div>${config.resultLabel || '计算结果'}</div>
+                    <div class="result-value" id="singleResult">—</div>
+                    <div>${config.resultUnit || ''}</div>
+                </div>
+                <div class="warning" id="warningMessage">${config.defaultWarning || ''}</div>
+                <div class="footnote">${config.footnote || ''}</div>
+            </div>
+            
+            <div id="batchPanel" class="mode-panel" style="display: ${currentMode === 'batch' ? 'block' : 'none'}">
+                <div class="action-buttons">
+                    <div style="display:flex; gap:8px; margin-right:auto;">
+                        <button id="csvTemplateBtn" class="btn-csv">📄 CSV模板</button>
+                        <button id="csvPasteBtn" class="btn-csv">📋 粘贴CSV</button>
+                    </div>
+                    <button id="addRowBtn" style="background:#528aa5;">➕ 添加一行</button>
+                    <button id="batchCalcBtn">📐 批量计算</button>
+                    <button id="copyResultsBtn" style="background:#3a6b5b;">📋 复制全部结果</button>
+                </div>
+                <div id="csvSection" class="csv-section" style="display:none;">
+                    <div style="margin-bottom:6px; font-size:0.85rem; color:#1f4e64;">
+                        <strong>📥 粘贴CSV数据</strong> — 先点击「CSV模板」下载模板，填好数据后粘贴到下方
+                    </div>
+                    <textarea id="csvPasteArea" class="csv-paste-area" rows="4" placeholder="将CSV数据粘贴到这里，然后点击「填充表格」..."></textarea>
+                    <div style="display:flex; gap:8px; margin-top:8px; justify-content:flex-end;">
+                        <button id="csvFillBtn" style="background:#528aa5;">📥 填充表格</button>
+                        <button id="csvCancelBtn" style="background:#999;">取消</button>
+                    </div>
+                </div>
+                <div class="batch-table-wrapper">
+                    <table class="batch-table" id="batchTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                ${config.batchColumns.map(col => `<th>${col.title}</th>`).join('')}
+                                <th>${config.resultColumnTitle || '结果'}</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="batchTbody"></tbody>
+                    </table>
+                </div>
+                <div id="batchResultDisplay" class="result-batch" style="display:none;">
+                    <strong>📎 计算结果预览（含4位小数）</strong>
+                    <pre id="batchResultPre"></pre>
+                </div>
+                <div class="warning">${config.batchWarning || ''}</div>
+            </div>
+        `;
+        contentView.innerHTML = html;
+        
+        bindSingleEvents(config);
+        
+        batchRowCounter = 0;
+        const batchTbody = document.getElementById('batchTbody');
+        if (batchTbody) {
+            batchTbody.innerHTML = '';
+            for (let i = 0; i < 3; i++) addBatchRow(config);
+        }
+        
+        const addRowBtn = document.getElementById('addRowBtn');
+        const batchCalcBtn = document.getElementById('batchCalcBtn');
+        const copyResultsBtn = document.getElementById('copyResultsBtn');
+        const csvTemplateBtn = document.getElementById('csvTemplateBtn');
+        const csvPasteBtn = document.getElementById('csvPasteBtn');
+        const csvFillBtn = document.getElementById('csvFillBtn');
+        const csvCancelBtn = document.getElementById('csvCancelBtn');
+        const csvSection = document.getElementById('csvSection');
+        if (addRowBtn) addRowBtn.onclick = () => addBatchRow(config);
+        if (batchCalcBtn) batchCalcBtn.onclick = () => batchCompute(config);
+        if (copyResultsBtn) copyResultsBtn.onclick = async () => {
+            const text = batchCompute(config);
+            try {
+                await navigator.clipboard.writeText(text);
+                showToast('✅ 已复制到剪贴板');
+            } catch(e) { alert('复制失败'); }
+        };
+        if (csvTemplateBtn) csvTemplateBtn.onclick = () => downloadCSVTemplate(config);
+        if (csvPasteBtn) csvPasteBtn.onclick = () => {
+            csvSection.style.display = csvSection.style.display === 'none' ? 'block' : 'none';
+            if (csvSection.style.display === 'block') document.getElementById('csvPasteArea').focus();
+        };
+        if (csvFillBtn) csvFillBtn.onclick = () => parseCSVAndFillTable(config);
+        if (csvCancelBtn) csvCancelBtn.onclick = () => {
+            csvSection.style.display = 'none';
+            document.getElementById('csvPasteArea').value = '';
+        };
+        
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const mode = btn.getAttribute('data-mode');
+                if (mode === 'single') {
+                    currentMode = 'single';
+                    document.getElementById('singlePanel').style.display = 'block';
+                    document.getElementById('batchPanel').style.display = 'none';
+                } else {
+                    currentMode = 'batch';
+                    document.getElementById('singlePanel').style.display = 'none';
+                    document.getElementById('batchPanel').style.display = 'block';
+                    batchCompute(config);
+                }
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+    }
+    
+    // 加载单个计算器配置
+    async function loadCalculator(calcId, calcInfo) {
+        pageTitle.innerText = calcInfo.name;
+        return new Promise((resolve, reject) => {
+            // 移除之前加载的计算器配置脚本（避免冲突）
+            const oldScript = document.querySelector('script[data-calc-script]');
+            if (oldScript) oldScript.remove();
+            
+            const script = document.createElement('script');
+            script.setAttribute('data-calc-script', 'true');
+            script.src = calcInfo.configUrl;
+            script.onload = () => {
+                const config = window.__currentCalculatorConfig;
+                if (config) {
+                    renderCalculator(config);
+                    resolve();
+                } else {
+                    reject('配置加载失败');
+                }
+                delete window.__currentCalculatorConfig;
+            };
+            script.onerror = () => reject('加载脚本失败');
+            document.head.appendChild(script);
+        }).catch(err => {
+            console.error(err);
+            contentView.innerHTML = `<div class="warning" style="margin:20px;">❌ 加载计算器失败: ${err}</div>`;
+        });
+    }
+    
+    // 初始化导航栏：从 registry.js 获取计算器列表
+    async function initNavigation() {
+        try {
+            // 动态加载 registry.js，其中应定义 window.__calculatorRegistry 数组
+            await new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'js/registry.js';
+                script.onload = resolve;
+                script.onerror = () => reject(new Error('无法加载 registry.js'));
+                document.head.appendChild(script);
+            });
+            
+            const registry = window.__calculatorRegistry;
+            if (!registry || !registry.length) {
+                throw new Error('registry.js 未正确导出计算器列表');
+            }
+            
+            // 生成导航菜单
+            navMenu.innerHTML = '';
+            registry.forEach(calc => {
+                const li = document.createElement('li');
+                li.className = 'nav-item';
+                const div = document.createElement('div');
+                div.className = 'nav-link';
+                div.setAttribute('data-calc-id', calc.id);
+                div.innerHTML = `<span class="nav-icon">${calc.icon || '📐'}</span><span>${calc.name}</span>`;
+                div.addEventListener('click', () => {
+                    // 高亮当前选中
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    div.classList.add('active');
+                    loadCalculator(calc.id, calc);
+                });
+                li.appendChild(div);
+                navMenu.appendChild(li);
+            });
+            
+            // 更新介绍页面中的支持列表
+            const supportedUl = document.getElementById('supportedList');
+            if (supportedUl) {
+                supportedUl.innerHTML = registry.map(calc => `<li><strong>${calc.name}</strong> - ${calc.description || ''}</li>`).join('');
+            }
+            
+            // 可选：默认选中第一个计算器，但这里保持显示介绍页，不自动加载
+            // 如果希望默认加载第一个，取消下面注释
+            // if (registry.length) {
+            //     const firstCalc = registry[0];
+            //     document.querySelector('.nav-link').classList.add('active');
+            //     loadCalculator(firstCalc.id, firstCalc);
+            // }
+            
+        } catch (err) {
+            console.error(err);
+            navMenu.innerHTML = '<li style="padding:20px; text-align:center; color:#f88;">❌ 加载计算器列表失败</li>';
+            const supportedUl = document.getElementById('supportedList');
+            if (supportedUl) supportedUl.innerHTML = '<li>无法加载计算器列表，请检查 js/registry.js 文件是否存在且格式正确。</li>';
+        }
+    }
+    
+    // 启动
+    showIntro();
+    initNavigation();
+</script>
+</body>
+</html>

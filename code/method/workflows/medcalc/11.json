@@ -1,0 +1,76 @@
+{
+    "name": "bazett_qtc_calculation_workflow",
+    "description": "Calculate the corrected QT interval (QTc) using the Bazett formula, which requires heart rate and QT interval as inputs.",
+    "inputs": [
+        {
+            "input_name": "heart_rate",
+            "input_desc": "Heart rate in beats per minute",
+            "input_type": "float"
+        },
+        {
+            "input_name": "qt_interval",
+            "input_desc": "QT interval in milliseconds",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "rr_interval_calculation",
+            "step_description": "Calculate the RR interval in seconds from the heart rate.",
+            "step_inputs": [
+                {
+                    "input_name": "heart_rate",
+                    "input_desc": "Heart rate in beats per minute",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.heart_rate"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "rr_interval",
+                    "output_desc": "RR interval in seconds",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step computes the RR interval using a simple mathematical formula (60 divided by heart rate), which fits the FormulaCalculation category.",
+            "detail": "RR interval (sec) = 60 / heart_rate. Round the result to 4 decimal places."
+        },
+        {
+            "step_id": "2",
+            "step_name": "corrected_qt_calculation",
+            "step_description": "Calculate the corrected QT interval (QTc) using the Bazett formula.",
+            "step_inputs": [
+                {
+                    "input_name": "qt_interval",
+                    "input_desc": "QT interval in milliseconds",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.qt_interval"
+                },
+                {
+                    "input_name": "rr_interval",
+                    "input_desc": "RR interval in seconds",
+                    "input_type": "float",
+                    "input_source": "$|1|.rr_interval"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "qtc",
+                    "output_desc": "Corrected QT interval in milliseconds",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step applies the Bazett formula, which is a precise mathematical formula involving division and square root, making FormulaCalculation the appropriate category.",
+            "detail": "QTc = qt_interval / sqrt(rr_interval). Use the math.sqrt function for the square root. Round the result to 4 decimal places."
+        }
+    ],
+    "output": {
+        "output_name": "qtc",
+        "output_desc": "Corrected QT interval in milliseconds",
+        "output_type": "float"
+    },
+    "code": "import math\n\ndef solve(heart_rate, qt_interval):\n    \"\"\"\n    Calculate the corrected QT interval (QTc) using the Bazett formula.\n    \"\"\"\n    # Step 1: rr_interval_calculation\n    # Calculate the RR interval in seconds from the heart rate.\n    # Formula: RR interval (sec) = 60 / heart_rate\n    rr_interval = round(60 / heart_rate, 4)\n    yield {\n        \"step_name\": \"rr_interval_calculation\",\n        \"step_description\": \"Calculate the RR interval in seconds from the heart rate. RR interval (sec) = 60 / heart_rate, rounded to 4 decimal places.\",\n        \"step_result\": rr_interval,\n        \"unit\": \"sec\"\n    }\n\n    # Step 2: corrected_qt_calculation\n    # Calculate the corrected QT interval (QTc) using the Bazett formula.\n    # Formula: QTc = qt_interval / sqrt(rr_interval)\n    qtc = round(qt_interval / math.sqrt(rr_interval), 4)\n    yield {\n        \"step_name\": \"corrected_qt_calculation\",\n        \"step_description\": \"Calculate the corrected QT interval (QTc) using the Bazett formula: QTc = qt_interval / sqrt(rr_interval), rounded to 4 decimal places.\",\n        \"step_result\": qtc,\n        \"unit\": \"ms\"\n    }\n\n    return qtc"
+}

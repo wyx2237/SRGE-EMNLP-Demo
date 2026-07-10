@@ -1,0 +1,53 @@
+{
+    "name": "rautarharju_qtc_calculation_workflow",
+    "description": "Calculate the corrected QT interval using the Rautaharju formula: QTc = QT_interval * (120 + HR) / 180",
+    "inputs": [
+        {
+            "input_name": "qt_interval",
+            "input_desc": "Measured QT interval in milliseconds (msec)",
+            "input_type": "float"
+        },
+        {
+            "input_name": "hr",
+            "input_desc": "Heart rate in beats per minute (bpm)",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "rautarharju_qtc_calculation",
+            "step_description": "Calculate the corrected QT interval using the Rautaharju formula: QTc = QT_interval * (120 + HR) / 180",
+            "step_inputs": [
+                {
+                    "input_name": "qt_interval",
+                    "input_desc": "Measured QT interval in milliseconds (msec)",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.qt_interval"
+                },
+                {
+                    "input_name": "hr",
+                    "input_desc": "Heart rate in beats per minute (bpm)",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.hr"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "qtc",
+                    "output_desc": "Corrected QT interval in milliseconds (msec)",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "The Rautaharju formula is a precise mathematical expression involving multiplication, addition, and division of numerical variables. There are no conditional branches, discrete mappings, or unit conversions needed.",
+            "detail": "QTc = QT_interval * (120 + HR) / 180. All inputs are numerical. QT_interval is in msec, HR is in bpm. The result QTc is in msec, rounded to 4 decimal places."
+        }
+    ],
+    "output": {
+        "output_name": "qtc",
+        "output_desc": "Corrected QT interval in milliseconds (msec)",
+        "output_type": "float"
+    },
+    "code": "def solve(qt_interval, hr):\n    # Step 1: Calculate the corrected QT interval using the Rautaharju formula\n    qtc = round(qt_interval * (120 + hr) / 180, 4)\n    # yield current step result\n    yield {\n        \"step_name\": \"rautarharju_qtc_calculation\",\n        \"step_description\": \"Calculate the corrected QT interval using the Rautaharju formula: QTc = QT_interval * (120 + HR) / 180\",\n        \"step_result\": qtc,\n        \"unit\": \"msec\"\n    }\n    return qtc"
+}

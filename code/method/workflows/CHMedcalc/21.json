@@ -1,0 +1,303 @@
+{
+    "name": "risk_score_calculation_for_acs_major_bleeding",
+    "description": "Calculate the risk score for major bleeding in patients with acute coronary syndrome (ACS) based on various clinical parameters.",
+    "inputs": [
+        {
+            "input_name": "creatinine_clearance",
+            "input_desc": "Creatinine clearance value in mL/min.",
+            "input_type": "float"
+        },
+        {
+            "input_name": "hematocrit",
+            "input_desc": "Baseline hematocrit value in %.",
+            "input_type": "float"
+        },
+        {
+            "input_name": "heart_rate",
+            "input_desc": "Heart rate in beats per minute.",
+            "input_type": "float"
+        },
+        {
+            "input_name": "systolic_blood_pressure",
+            "input_desc": "Systolic blood pressure in mmHg.",
+            "input_type": "float"
+        },
+        {
+            "input_name": "gender",
+            "input_desc": "Patient's gender (Male or Female).",
+            "input_type": "str"
+        },
+        {
+            "input_name": "heart_failure_signs",
+            "input_desc": "Whether the patient has signs of heart failure (Yes or No).",
+            "input_type": "str"
+        },
+        {
+            "input_name": "diabetes",
+            "input_desc": "Whether the patient has diabetes (Yes or No).",
+            "input_type": "str"
+        },
+        {
+            "input_name": "vascular_disease_or_stroke_history",
+            "input_desc": "Whether the patient has a history of vascular disease or stroke (Yes or No).",
+            "input_type": "str"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "muscle_creatinine_clearance_score",
+            "step_description": "Calculate the score based on the patient's creatinine clearance value.",
+            "step_inputs": [
+                {
+                    "input_name": "creatinine_clearance",
+                    "input_desc": "The patient's creatinine clearance in mL/min.",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.creatinine_clearance"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "muscle_creatinine_score",
+                    "output_desc": "The score corresponding to the patient's creatinine clearance.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "DiscreteValueMapping",
+            "reason": "This step maps the creatinine clearance value to a specific score using predefined thresholds.",
+            "detail": "If creatinine clearance ≤15, score is 39. If 16-30, score is 35. If 31-60, score is 28. If 61-90, score is 17. If 91-120, score is 7. If >120, score is 0."
+        },
+        {
+            "step_id": "2",
+            "step_name": "hematocrit_score",
+            "step_description": "Calculate the score based on the patient's baseline hematocrit value.",
+            "step_inputs": [
+                {
+                    "input_name": "hematocrit",
+                    "input_desc": "The patient's baseline hematocrit in %.",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.hematocrit"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "hematocrit_score",
+                    "output_desc": "The score corresponding to the patient's hematocrit.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "DiscreteValueMapping",
+            "reason": "This step maps the hematocrit value to a specific score using predefined thresholds.",
+            "detail": "If hematocrit <31.0, score is 9. If 31.0-33.9, score is 7. If 34.0-36.9, score is 3. If 37.0-39.9, score is 2. If ≥40.0, score is 0."
+        },
+        {
+            "step_id": "3",
+            "step_name": "heart_rate_score",
+            "step_description": "Calculate the score based on the patient's heart rate.",
+            "step_inputs": [
+                {
+                    "input_name": "heart_rate",
+                    "input_desc": "The patient's heart rate in beats per minute.",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.heart_rate"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "heart_rate_score",
+                    "output_desc": "The score corresponding to the patient's heart rate.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "DiscreteValueMapping",
+            "reason": "This step maps the heart rate value to a specific score using predefined thresholds.",
+            "detail": "If heart rate ≤70, score is 0. If 71-80, score is 1. If 81-90, score is 3. If 91-100, score is 6. If 101-110, score is 8. If 111-120, score is 10. If ≥121, score is 11."
+        },
+        {
+            "step_id": "4",
+            "step_name": "systolic_blood_pressure_score",
+            "step_description": "Calculate the score based on the patient's systolic blood pressure.",
+            "step_inputs": [
+                {
+                    "input_name": "systolic_blood_pressure",
+                    "input_desc": "The patient's systolic blood pressure in mmHg.",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.systolic_blood_pressure"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "systolic_blood_pressure_score",
+                    "output_desc": "The score corresponding to the patient's systolic blood pressure.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "DiscreteValueMapping",
+            "reason": "This step maps the systolic blood pressure value to a specific score using predefined thresholds.",
+            "detail": "If systolic blood pressure ≤90, score is 10. If 91-100, score is 8. If 101-120, score is 5. If 121-180, score is 1. If 181-200, score is 3. If ≥201, score is 5."
+        },
+        {
+            "step_id": "5",
+            "step_name": "gender_score",
+            "step_description": "Calculate the score based on the patient's gender.",
+            "step_inputs": [
+                {
+                    "input_name": "gender",
+                    "input_desc": "The patient's gender (Male or Female).",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.gender"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "gender_score",
+                    "output_desc": "The score corresponding to the patient's gender.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "DiscreteValueMapping",
+            "reason": "This step maps the gender value to a specific score using predefined thresholds.",
+            "detail": "If the patient is male, score is 0. If female, score is 8."
+        },
+        {
+            "step_id": "6",
+            "step_name": "heart_failure_signs_score",
+            "step_description": "Calculate the score based on the presence of signs of heart failure.",
+            "step_inputs": [
+                {
+                    "input_name": "heart_failure_signs",
+                    "input_desc": "Whether the patient has signs of heart failure (Yes or No).",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.heart_failure_signs"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "heart_failure_signs_score",
+                    "output_desc": "The score corresponding to the presence of signs of heart failure.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "DiscreteValueMapping",
+            "reason": "This step maps the presence of heart failure signs to a specific score using predefined thresholds.",
+            "detail": "If there are no signs of heart failure, score is 0. If present, score is 7."
+        },
+        {
+            "step_id": "7",
+            "step_name": "diabetes_score",
+            "step_description": "Calculate the score based on the presence of diabetes.",
+            "step_inputs": [
+                {
+                    "input_name": "diabetes",
+                    "input_desc": "Whether the patient has diabetes (Yes or No).",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.diabetes"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "diabetes_score",
+                    "output_desc": "The score corresponding to the presence of diabetes.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "DiscreteValueMapping",
+            "reason": "This step maps the presence of diabetes to a specific score using predefined thresholds.",
+            "detail": "If the patient does not have diabetes, score is 0. If present, score is 6."
+        },
+        {
+            "step_id": "8",
+            "step_name": "vascular_disease_or_stroke_history_score",
+            "step_description": "Calculate the score based on the presence of vascular disease or stroke history.",
+            "step_inputs": [
+                {
+                    "input_name": "vascular_disease_or_stroke_history",
+                    "input_desc": "Whether the patient has a history of vascular disease or stroke (Yes or No).",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.vascular_disease_or_stroke_history"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "vascular_disease_or_stroke_history_score",
+                    "output_desc": "The score corresponding to the presence of vascular disease or stroke history.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "DiscreteValueMapping",
+            "reason": "This step maps the presence of vascular disease or stroke history to a specific score using predefined thresholds.",
+            "detail": "If the patient does not have a history of vascular disease or stroke, score is 0. If present, score is 6."
+        },
+        {
+            "step_id": "9",
+            "step_name": "total_risk_score",
+            "step_description": "Calculate the total risk score for major bleeding by summing all individual scores.",
+            "step_inputs": [
+                {
+                    "input_name": "muscle_creatinine_score",
+                    "input_desc": "The score from the creatinine clearance category.",
+                    "input_type": "integer",
+                    "input_source": "$|step1|.muscle_creatinine_score"
+                },
+                {
+                    "input_name": "hematocrit_score",
+                    "input_desc": "The score from the hematocrit category.",
+                    "input_type": "integer",
+                    "input_source": "$|step2|.hematocrit_score"
+                },
+                {
+                    "input_name": "heart_rate_score",
+                    "input_desc": "The score from the heart rate category.",
+                    "input_type": "integer",
+                    "input_source": "$|step3|.heart_rate_score"
+                },
+                {
+                    "input_name": "systolic_blood_pressure_score",
+                    "input_desc": "The score from the systolic blood pressure category.",
+                    "input_type": "integer",
+                    "input_source": "$|step4|.systolic_blood_pressure_score"
+                },
+                {
+                    "input_name": "gender_score",
+                    "input_desc": "The score from the gender category.",
+                    "input_type": "integer",
+                    "input_source": "$|step5|.gender_score"
+                },
+                {
+                    "input_name": "heart_failure_signs_score",
+                    "input_desc": "The score from the heart failure signs category.",
+                    "input_type": "integer",
+                    "input_source": "$|step6|.heart_failure_signs_score"
+                },
+                {
+                    "input_name": "diabetes_score",
+                    "input_desc": "The score from the diabetes category.",
+                    "input_type": "integer",
+                    "input_source": "$|step7|.diabetes_score"
+                },
+                {
+                    "input_name": "vascular_disease_or_stroke_history_score",
+                    "input_desc": "The score from the vascular disease or stroke history category.",
+                    "input_type": "integer",
+                    "input_source": "$|step8|.vascular_disease_or_stroke_history_score"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_risk_score",
+                    "output_desc": "The total risk score for major bleeding.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "This step calculates the final total risk score by summing up all the individual component scores.",
+            "detail": "Total risk score = muscle_creatinine_score + hematocrit_score + heart_rate_score + systolic_blood_pressure_score + gender_score + heart_failure_signs_score + diabetes_score + vascular_disease_or_stroke_history_score."
+        }
+    ],
+    "output": {
+        "output_name": "total_risk_score",
+        "output_desc": "The total risk score for major bleeding in the patient with acute coronary syndrome (ACS).",
+        "output_type": "integer"
+    },
+    "code": "def solve(creatinine_clearance, hematocrit, heart_rate, systolic_blood_pressure, gender, heart_failure_signs, diabetes, vascular_disease_or_stroke_history):\n    # Step 1: Calculate the score based on creatinine clearance\n    if creatinine_clearance <= 15:\n        muscle_creatinine_score = 39\n    elif 16 <= creatinine_clearance <= 30:\n        muscle_creatinine_score = 35\n    elif 31 <= creatinine_clearance <= 60:\n        muscle_creatinine_score = 28\n    elif 61 <= creatinine_clearance <= 90:\n        muscle_creatinine_score = 17\n    elif 91 <= creatinine_clearance <= 120:\n        muscle_creatinine_score = 7\n    else:\n        muscle_creatinine_score = 0\n    yield {\n        \"step_name\": \"muscle_creatinine_clearance_score\",\n        \"step_description\": \"Calculate the score based on the patient's creatinine clearance value.\",\n        \"step_result\": muscle_creatinine_score,\n        \"unit\": None\n    }\n\n    # Step 2: Calculate the score based on hematocrit\n    if hematocrit < 31.0:\n        hematocrit_score = 9\n    elif 31.0 <= hematocrit <= 33.9:\n        hematocrit_score = 7\n    elif 34.0 <= hematocrit <= 36.9:\n        hematocrit_score = 3\n    elif 37.0 <= hematocrit <= 39.9:\n        hematocrit_score = 2\n    else:\n        hematocrit_score = 0\n    yield {\n        \"step_name\": \"hematocrit_score\",\n        \"step_description\": \"Calculate the score based on the patient's baseline hematocrit value.\",\n        \"step_result\": hematocrit_score,\n        \"unit\": None\n    }\n\n    # Step 3: Calculate the score based on heart rate\n    if heart_rate <= 70:\n        heart_rate_score = 0\n    elif 71 <= heart_rate <= 80:\n        heart_rate_score = 1\n    elif 81 <= heart_rate <= 90:\n        heart_rate_score = 3\n    elif 91 <= heart_rate <= 100:\n        heart_rate_score = 6\n    elif 101 <= heart_rate <= 110:\n        heart_rate_score = 8\n    elif 111 <= heart_rate <= 120:\n        heart_rate_score = 10\n    else:\n        heart_rate_score = 11\n    yield {\n        \"step_name\": \"heart_rate_score\",\n        \"step_description\": \"Calculate the score based on the patient's heart rate.\",\n        \"step_result\": heart_rate_score,\n        \"unit\": None\n    }\n\n    # Step 4: Calculate the score based on systolic blood pressure\n    if systolic_blood_pressure <= 90:\n        systolic_blood_pressure_score = 10\n    elif 91 <= systolic_blood_pressure <= 100:\n        systolic_blood_pressure_score = 8\n    elif 101 <= systolic_blood_pressure <= 120:\n        systolic_blood_pressure_score = 5\n    elif 121 <= systolic_blood_pressure <= 180:\n        systolic_blood_pressure_score = 1\n    elif 181 <= systolic_blood_pressure <= 200:\n        systolic_blood_pressure_score = 3\n    else:\n        systolic_blood_pressure_score = 5\n    yield {\n        \"step_name\": \"systolic_blood_pressure_score\",\n        \"step_description\": \"Calculate the score based on the patient's systolic blood pressure.\",\n        \"step_result\": systolic_blood_pressure_score,\n        \"unit\": None\n    }\n\n    # Step 5: Calculate the score based on gender\n    if gender == \"Male\":\n        gender_score = 0\n    else:\n        gender_score = 8\n    yield {\n        \"step_name\": \"gender_score\",\n        \"step_description\": \"Calculate the score based on the patient's gender.\",\n        \"step_result\": gender_score,\n        \"unit\": None\n    }\n\n    # Step 6: Calculate the score based on presence of signs of heart failure\n    if heart_failure_signs == \"No\":\n        heart_failure_signs_score = 0\n    else:\n        heart_failure_signs_score = 7\n    yield {\n        \"step_name\": \"heart_failure_signs_score\",\n        \"step_description\": \"Calculate the score based on the presence of signs of heart failure.\",\n        \"step_result\": heart_failure_signs_score,\n        \"unit\": None\n    }\n\n    # Step 7: Calculate the score based on presence of diabetes\n    if diabetes == \"No\":\n        diabetes_score = 0\n    else:\n        diabetes_score = 6\n    yield {\n        \"step_name\": \"diabetes_score\",\n        \"step_description\": \"Calculate the score based on the presence of diabetes.\",\n        \"step_result\": diabetes_score,\n        \"unit\": None\n    }\n\n    # Step 8: Calculate the score based on presence of vascular disease or stroke history\n    if vascular_disease_or_stroke_history == \"No\":\n        vascular_disease_or_stroke_history_score = 0\n    else:\n        vascular_disease_or_stroke_history_score = 6\n    yield {\n        \"step_name\": \"vascular_disease_or_stroke_history_score\",\n        \"step_description\": \"Calculate the score based on the presence of vascular disease or stroke history.\",\n        \"step_result\": vascular_disease_or_stroke_history_score,\n        \"unit\": None\n    }\n\n    # Step 9: Calculate the total risk score by summing all individual scores\n    total_risk_score = (\n        muscle_creatinine_score +\n        hematocrit_score +\n        heart_rate_score +\n        systolic_blood_pressure_score +\n        gender_score +\n        heart_failure_signs_score +\n        diabetes_score +\n        vascular_disease_or_stroke_history_score\n    )\n    yield {\n        \"step_name\": \"total_risk_score\",\n        \"step_description\": \"Calculate the total risk score for major bleeding by summing all individual scores.\",\n        \"step_result\": total_risk_score,\n        \"unit\": None\n    }\n\n    return total_risk_score"
+}

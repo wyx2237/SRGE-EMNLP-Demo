@@ -1,0 +1,133 @@
+{
+    "name": "glasgow_coma_scale_calculation_workflow",
+    "description": "Calculate the total Glasgow Coma Scale (GCS) score by mapping each component's description to a score and summing them.",
+    "inputs": [
+        {
+            "input_name": "eye_response",
+            "input_desc": "Description of the patient's best eye response. Allowed values: 'spontaneously', 'to verbal command', 'to pain', 'no eye opening', or empty string if not testable.",
+            "input_type": "str"
+        },
+        {
+            "input_name": "verbal_response",
+            "input_desc": "Description of the patient's best verbal response. Allowed values: 'oriented', 'confused', 'inappropriate words', 'incomprehensible sounds', 'no verbal response', or empty string if not testable.",
+            "input_type": "str"
+        },
+        {
+            "input_name": "motor_response",
+            "input_desc": "Description of the patient's best motor response. Allowed values: 'obeys commands', 'localizes pain', 'withdrawal from pain', 'flexion to pain', 'extension to pain', 'no motor response', or empty string if not testable.",
+            "input_type": "str"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "evaluate_eye_response",
+            "step_description": "Map the eye response description to the corresponding GCS eye score.",
+            "step_inputs": [
+                {
+                    "input_name": "eye_response",
+                    "input_desc": "Description of the patient's best eye response. Allowed values: 'spontaneously', 'to verbal command', 'to pain', 'no eye opening', or empty string if not testable.",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.eye_response"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "eye_score",
+                    "output_desc": "The numerical score for the Best Eye Response component (4, 3, 2, or 1).",
+                    "output_type": "int"
+                }
+            ],
+            "category": "discrete_value_mapping",
+            "reason": "The input is a discrete description that needs to be mapped to a predefined numeric score. This perfectly matches a direct look-up mapping, with a default fallback to full score if the value is missing or unrecognized.",
+            "detail": "Evaluate the eye_response input: 'spontaneously' -> 4; 'to verbal command' -> 3; 'to pain' -> 2; 'no eye opening' -> 1; if empty, not testable, or unrecognized -> 4 (full score assumed)."
+        },
+        {
+            "step_id": "2",
+            "step_name": "evaluate_verbal_response",
+            "step_description": "Map the verbal response description to the corresponding GCS verbal score.",
+            "step_inputs": [
+                {
+                    "input_name": "verbal_response",
+                    "input_desc": "Description of the patient's best verbal response. Allowed values: 'oriented', 'confused', 'inappropriate words', 'incomprehensible sounds', 'no verbal response', or empty string if not testable.",
+                    "input_type": "str",
+                    "input_source": "$|raw input|.verbal_response"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "verbal_score",
+                    "output_desc": "The numerical score for the Best Verbal Response component (5, 4, 3, 2, or 1).",
+                    "output_type": "int"
+                }
+            ],
+            "category": "discrete_value_mapping",
+            "reason": "This step involves mapping a specific textual description to a predefined numeric value, characteristic of a discrete value mapping. A default rule is applied if the condition is not testable.",
+            "detail": "Evaluate the verbal_response input: 'oriented' -> 5; 'confused' -> 4; 'inappropriate words' -> 3; 'incomprehensible sounds' -> 2; 'no verbal response' -> 1; if empty, not testable, or unrecognized -> 5 (full score assumed)."
+        },
+        {
+            "step_id": "3",
+            "step_name": "evaluate_motor_response",
+            "step_description": "Map the motor response description to the corresponding GCS motor score.",
+            "step_inputs": [
+                {
+                    "input_name": "motor_response",
+                    "input_desc": "Description of the patient's best motor response. Allowed values: 'obeys commands', 'localizes pain', 'withdrawal from pain', 'flexion to pain', 'extension to pain', 'no motor response', or empty string if not testable.",
+                    "input_type": "str",
+                    "input_source": "$|raw input|.motor_response"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "motor_score",
+                    "output_desc": "The numerical score for the Best Motor Response component (6, 5, 4, 3, 2, or 1).",
+                    "output_type": "int"
+                }
+            ],
+            "category": "discrete_value_mapping",
+            "reason": "Like the other components, this requires converting a discrete state description to a specific numeric value from a predefined lookup table, making it a discrete value mapping operation.",
+            "detail": "Evaluate the motor_response input: 'obeys commands' -> 6; 'localizes pain' -> 5; 'withdrawal from pain' -> 4; 'flexion to pain' -> 3; 'extension to pain' -> 2; 'no motor response' -> 1; if empty, not testable, or unrecognized -> 6 (full score assumed)."
+        },
+        {
+            "step_id": "4",
+            "step_name": "sum_gcs_scores",
+            "step_description": "Sum the three individual component scores to produce the total Glasgow Coma Scale score.",
+            "step_inputs": [
+                {
+                    "input_name": "eye_score",
+                    "input_desc": "The score from the Best Eye Response component.",
+                    "input_type": "int",
+                    "input_source": "$|step1|.eye_score"
+                },
+                {
+                    "input_name": "verbal_score",
+                    "input_desc": "The score from the Best Verbal Response component.",
+                    "input_type": "int",
+                    "input_source": "$|step2|.verbal_score"
+                },
+                {
+                    "input_name": "motor_score",
+                    "input_desc": "The score from the Best Motor Response component.",
+                    "input_type": "int",
+                    "input_source": "$|step3|.motor_score"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_gcs_score",
+                    "output_desc": "The total Glasgow Coma Scale score, sum of the three components.",
+                    "output_type": "int"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "The final step requires summing three numerical values, a straightforward mathematical formula (addition) best handled by a formula calculation tool.",
+            "detail": "Calculate the sum: total_gcs_score = eye_score + verbal_score + motor_score."
+        }
+    ],
+    "output": {
+        "output_name": "total_gcs_score",
+        "output_desc": "The patient's total Glasgow Coma Scale score, an integer between 3 and 15.",
+        "output_type": "int"
+    },
+    "code": "def solve(eye_response, verbal_response, motor_response):\n    # Step 1: Evaluate Eye Response (Map description to GCS score)\n    eye_map = {\n        'spontaneously': 4,\n        'to verbal command': 3,\n        'to pain': 2,\n        'no eye opening': 1\n    }\n    eye_score = eye_map.get(eye_response, 4) if eye_response else 4\n    yield {\n        \"step_name\": \"evaluate_eye_response\",\n        \"step_description\": \"Map the eye response description to the corresponding GCS eye score.\",\n        \"step_result\": eye_score,\n        \"unit\": None\n    }\n\n    # Step 2: Evaluate Verbal Response (Map description to GCS score)\n    verbal_map = {\n        'oriented': 5,\n        'confused': 4,\n        'inappropriate words': 3,\n        'incomprehensible sounds': 2,\n        'no verbal response': 1\n    }\n    verbal_score = verbal_map.get(verbal_response, 5) if verbal_response else 5\n    yield {\n        \"step_name\": \"evaluate_verbal_response\",\n        \"step_description\": \"Map the verbal response description to the corresponding GCS verbal score.\",\n        \"step_result\": verbal_score,\n        \"unit\": None\n    }\n\n    # Step 3: Evaluate Motor Response (Map description to GCS score)\n    motor_map = {\n        'obeys commands': 6,\n        'localizes pain': 5,\n        'withdrawal from pain': 4,\n        'flexion to pain': 3,\n        'extension to pain': 2,\n        'no motor response': 1\n    }\n    motor_score = motor_map.get(motor_response, 6) if motor_response else 6\n    yield {\n        \"step_name\": \"evaluate_motor_response\",\n        \"step_description\": \"Map the motor response description to the corresponding GCS motor score.\",\n        \"step_result\": motor_score,\n        \"unit\": None\n    }\n\n    # Step 4: Sum GCS Scores (Calculate total)\n    total_gcs_score = eye_score + verbal_score + motor_score\n    yield {\n        \"step_name\": \"sum_gcs_scores\",\n        \"step_description\": \"Sum the three individual component scores to produce the total Glasgow Coma Scale score.\",\n        \"step_result\": total_gcs_score,\n        \"unit\": None\n    }\n\n    return total_gcs_score"
+}

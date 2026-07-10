@@ -1,0 +1,53 @@
+{
+    "name": "homa_ir_calculation_workflow",
+    "description": "Calculate the HOMA-IR score using fasting insulin and glucose levels.",
+    "inputs": [
+        {
+            "input_name": "insulin",
+            "input_desc": "Fasting insulin level, in µIU/mL",
+            "input_type": "float"
+        },
+        {
+            "input_name": "glucose",
+            "input_desc": "Fasting glucose level, in mg/dL",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "calculate_homa_ir",
+            "step_description": "HOMA-IR = (insulin (µIU/mL) * glucose (mg/dL)) / 405, rounded to 4 decimal places.",
+            "step_inputs": [
+                {
+                    "input_name": "insulin",
+                    "input_desc": "Fasting insulin level in µIU/mL",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.insulin"
+                },
+                {
+                    "input_name": "glucose",
+                    "input_desc": "Fasting glucose level in mg/dL",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.glucose"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "homa_ir_score",
+                    "output_desc": "Calculated HOMA-IR score",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "The HOMA-IR score is computed using a specific mathematical formula involving multiplication and division of two numerical inputs. This aligns with the FormulaCalculation category which handles precise numerical computations for explicit formulas.",
+            "detail": "Multiply the insulin value (µIU/mL) by the glucose value (mg/dL), then divide the product by 405. Round the result to 4 decimal places."
+        }
+    ],
+    "output": {
+        "output_name": "homa_ir_score",
+        "output_desc": "Calculated HOMA-IR score",
+        "output_type": "float"
+    },
+    "code": "def solve(insulin, glucose):\n    # Step 1: Calculate HOMA-IR score\n    # HOMA-IR = (insulin (µIU/mL) * glucose (mg/dL)) / 405, rounded to 4 decimal places.\n    homa_ir_score = round((insulin * glucose) / 405, 4)\n    yield {\n        \"step_name\": \"calculate_homa_ir\",\n        \"step_description\": \"Calculate HOMA-IR score using formula (insulin * glucose) / 405, rounded to 4 decimal places.\",\n        \"step_result\": homa_ir_score,\n        \"unit\": None\n    }\n    return homa_ir_score"
+}

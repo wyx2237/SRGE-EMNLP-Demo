@@ -1,0 +1,165 @@
+{
+    "name": "centor_score_calculation_workflow",
+    "description": "Calculate the Centor Score by evaluating five criteria: age, tonsillar exudate/swelling, tender/swollen anterior cervical lymph nodes, fever >38°C, and absence of cough.",
+    "inputs": [
+        {
+            "input_name": "age",
+            "input_desc": "Patient's age in years (integer)",
+            "input_type": "int"
+        },
+        {
+            "input_name": "tonsillar_exudate",
+            "input_desc": "Presence of exudate or swelling on tonsils (true or false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "tender_lymph_nodes",
+            "input_desc": "Tender or swollen anterior cervical lymph nodes (true or false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "fever",
+            "input_desc": "Temperature >38°C (100.4°F) (true or false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "cough_absent",
+            "input_desc": "Cough is absent (true or false)",
+            "input_type": "bool"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "age_scoring",
+            "step_description": "Assign points based on the patient's age according to Centor criteria.",
+            "step_inputs": [
+                {
+                    "input_name": "age",
+                    "input_desc": "Patient's age in years",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.age"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "age_score",
+                    "output_desc": "Points assigned for age criterion",
+                    "output_type": "int"
+                }
+            ],
+            "category": "threshold_mapping",
+            "reason": "This step involves mapping a continuous numerical value (age) to discrete point values based on specified thresholds.",
+            "detail": "If age is between 3 and 14 years (inclusive), assign +1 point. If age is between 15 and 44 years (inclusive), assign 0 points. If age is 45 years or older, assign -1 point."
+        },
+        {
+            "step_id": "2",
+            "step_name": "symptoms_scoring",
+            "step_description": "Assign points for the four boolean Centor criteria: tonsillar exudate/swelling, tender cervical lymph nodes, fever >38°C, and absence of cough.",
+            "step_inputs": [
+                {
+                    "input_name": "tonsillar_exudate",
+                    "input_desc": "Presence of exudate or swelling on tonsils (true or false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.tonsillar_exudate"
+                },
+                {
+                    "input_name": "tender_lymph_nodes",
+                    "input_desc": "Tender or swollen anterior cervical lymph nodes (true or false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.tender_lymph_nodes"
+                },
+                {
+                    "input_name": "fever",
+                    "input_desc": "Temperature >38°C (100.4°F) (true or false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.fever"
+                },
+                {
+                    "input_name": "cough_absent",
+                    "input_desc": "Cough is absent (true or false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.cough_absent"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "tonsillar_score",
+                    "output_desc": "Points for tonsillar criterion",
+                    "output_type": "int"
+                },
+                {
+                    "output_name": "lymph_node_score",
+                    "output_desc": "Points for lymph node criterion",
+                    "output_type": "int"
+                },
+                {
+                    "output_name": "fever_score",
+                    "output_desc": "Points for fever criterion",
+                    "output_type": "int"
+                },
+                {
+                    "output_name": "cough_score",
+                    "output_desc": "Points for cough criterion",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "Each symptom criterion involves a simple conditional evaluation (if-else logic) to map a boolean input to a numeric score.",
+            "detail": "For tonsillar exudate: if true, assign +1 point; if false, assign 0 points. For tender lymph nodes: if true, assign +1 point; if false, assign 0 points. For fever: if true, assign +1 point; if false, assign 0 points. For cough absence: if true (cough absent), assign +1 point; if false (cough present), assign 0 points."
+        },
+        {
+            "step_id": "3",
+            "step_name": "centor_score_summation",
+            "step_description": "Calculate the total Centor Score by summing the points from all five criteria.",
+            "step_inputs": [
+                {
+                    "input_name": "age_score",
+                    "input_desc": "Points from age criterion",
+                    "input_type": "int",
+                    "input_source": "$|step1|.age_score"
+                },
+                {
+                    "input_name": "tonsillar_score",
+                    "input_desc": "Points from tonsillar criterion",
+                    "input_type": "int",
+                    "input_source": "$|step2|.tonsillar_score"
+                },
+                {
+                    "input_name": "lymph_node_score",
+                    "input_desc": "Points from lymph node criterion",
+                    "input_type": "int",
+                    "input_source": "$|step2|.lymph_node_score"
+                },
+                {
+                    "input_name": "fever_score",
+                    "input_desc": "Points from fever criterion",
+                    "input_type": "int",
+                    "input_source": "$|step2|.fever_score"
+                },
+                {
+                    "input_name": "cough_score",
+                    "input_desc": "Points from cough criterion",
+                    "input_type": "int",
+                    "input_source": "$|step2|.cough_score"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "centor_score",
+                    "output_desc": "Total Centor Score",
+                    "output_type": "int"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This is a straight summation of numeric values using a simple arithmetic formula.",
+            "detail": "Sum all input scores: centor_score = age_score + tonsillar_score + lymph_node_score + fever_score + cough_score."
+        }
+    ],
+    "output": {
+        "output_name": "centor_score",
+        "output_desc": "The final calculated Centor Score",
+        "output_type": "int"
+    },
+    "code": "def solve(age, tonsillar_exudate, tender_lymph_nodes, fever, cough_absent):\n    # Step 1: age_scoring\n    # Assign points based on age: 3-14 -> +1, 15-44 -> 0, >=45 -> -1\n    if 3 <= age <= 14:\n        age_score = 1\n    elif 15 <= age <= 44:\n        age_score = 0\n    else:\n        age_score = -1\n    yield {\n        \"step_name\": \"age_scoring\",\n        \"step_description\": \"Assign points based on the patient's age according to Centor criteria: 3-14 years -> +1, 15-44 years -> 0, >=45 years -> -1\",\n        \"step_result\": age_score,\n        \"unit\": None\n    }\n\n    # Step 2: symptoms_scoring\n    # Evaluate four boolean criteria and assign points: true -> +1, false -> 0\n    tonsillar_score = 1 if tonsillar_exudate else 0\n    lymph_node_score = 1 if tender_lymph_nodes else 0\n    fever_score = 1 if fever else 0\n    cough_score = 1 if cough_absent else 0\n    yield {\n        \"step_name\": \"symptoms_scoring\",\n        \"step_description\": \"Assign points for tonsillar exudate/swelling, tender cervical lymph nodes, fever >38°C, and absence of cough (true -> 1, false -> 0). Individual scores: tonsillar={}, lymph_node={}, fever={}, cough={}\".format(tonsillar_score, lymph_node_score, fever_score, cough_score),\n        \"step_result\": {\n            \"tonsillar_score\": tonsillar_score,\n            \"lymph_node_score\": lymph_node_score,\n            \"fever_score\": fever_score,\n            \"cough_score\": cough_score\n        },\n        \"unit\": None\n    }\n\n    # Step 3: centor_score_summation\n    # Sum all individual scores to get the total Centor Score\n    centor_score = age_score + tonsillar_score + lymph_node_score + fever_score + cough_score\n    yield {\n        \"step_name\": \"centor_score_summation\",\n        \"step_description\": \"Calculate total Centor Score by summing age_score, tonsillar_score, lymph_node_score, fever_score, and cough_score\",\n        \"step_result\": centor_score,\n        \"unit\": None\n    }\n\n    return centor_score"
+}

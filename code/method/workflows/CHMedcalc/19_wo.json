@@ -1,0 +1,86 @@
+{
+    "name": "valve_area_calculation_gorlin",
+    "description": "Calculate the heart valve area using the Gorlin formula based on cardiac output, valve type, heart rate, flow time, and mean pressure gradient.",
+    "inputs": [
+        {
+            "input_name": "co",
+            "input_desc": "Cardiac output in mL/min",
+            "input_type": "float"
+        },
+        {
+            "input_name": "valve_type",
+            "input_desc": "Type of valve to determine the constant K. Allowed values: 'aortic', 'mitral', 'tricuspid', 'pulmonic'.",
+            "input_type": "str"
+        },
+        {
+            "input_name": "hr",
+            "input_desc": "Heart rate in beats per minute (bpm)",
+            "input_type": "float"
+        },
+        {
+            "input_name": "ft",
+            "input_desc": "Flow time during valve opening in seconds. For aortic, tricuspid, or pulmonic valves, it is the Systolic Ejection Period (SEP). For the mitral valve, it is the Diastolic Filling Period (DFP).",
+            "input_type": "float"
+        },
+        {
+            "input_name": "delta_p",
+            "input_desc": "Mean pressure gradient across the valve in mmHg",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "compute_valve_area",
+            "step_description": "Calculate the valve area using the Gorlin formula: VA = CO / (K * HR * FT * sqrt(delta_P)). The constant K depends on the valve type.",
+            "step_inputs": [
+                {
+                    "input_name": "co",
+                    "input_desc": "Cardiac output in mL/min",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.co"
+                },
+                {
+                    "input_name": "valve_type",
+                    "input_desc": "Type of valve. Allowed values: 'aortic', 'mitral', 'tricuspid', 'pulmonic'.",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.valve_type"
+                },
+                {
+                    "input_name": "hr",
+                    "input_desc": "Heart rate in beats per minute (bpm)",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.hr"
+                },
+                {
+                    "input_name": "ft",
+                    "input_desc": "Flow time during valve opening in seconds",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.ft"
+                },
+                {
+                    "input_name": "delta_p",
+                    "input_desc": "Mean pressure gradient across the valve in mmHg",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.delta_p"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "va",
+                    "output_desc": "Valve area in cm^2",
+                    "output_type": "float"
+                }
+            ],
+            "category": "closed_form_domain",
+            "reason": "This step uses the Gorlin formula, a specific clinical domain equation, to compute a physiological parameter from multiple inputs.",
+            "detail": "Determine the constant K based on valve_type: K=44.3 for 'aortic', 'tricuspid', or 'pulmonic'; K=37.7 for 'mitral'. Then compute VA = CO / (K * HR * FT * sqrt(delta_P))."
+        }
+    ],
+    "output": {
+        "output_name": "va",
+        "output_desc": "The calculated valve area in cm^2",
+        "output_type": "float"
+    },
+    "code": "import math\n\ndef solve(co, valve_type, hr, ft, delta_p):\n    # Step 1: compute_valve_area\n    # Determine the constant K based on valve_type\n    if valve_type in ['aortic', 'tricuspid', 'pulmonic']:\n        K = 44.3\n    elif valve_type == 'mitral':\n        K = 37.7\n    else:\n        raise ValueError(f\"Invalid valve_type: {valve_type}. Allowed: 'aortic', 'mitral', 'tricuspid', 'pulmonic'.\")\n    \n    # Calculate valve area using the Gorlin formula: VA = CO / (K * HR * FT * sqrt(delta_P))\n    va = co / (K * hr * ft * math.sqrt(delta_p))\n    \n    yield {\n        \"step_name\": \"compute_valve_area\",\n        \"step_description\": \"Calculate the valve area using the Gorlin formula: VA = CO / (K * HR * FT * sqrt(delta_P)). The constant K depends on the valve type.\",\n        \"step_result\": va,\n        \"unit\": \"cm^2\"\n    }\n    \n    return va"
+}

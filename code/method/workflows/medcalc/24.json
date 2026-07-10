@@ -1,0 +1,132 @@
+{
+    "name": "corticosteroid_equivalent_dose_conversion_workflow",
+    "description": "Convert a dose of a source corticosteroid to an equivalent dose of a target corticosteroid based on standard potency factors.",
+    "inputs": [
+        {
+            "input_name": "source_dose_mg",
+            "input_desc": "The administered dose of the source corticosteroid in milligrams (mg)",
+            "input_type": "float"
+        },
+        {
+            "input_name": "source_drug",
+            "input_desc": "The name of the source corticosteroid. Allowed values: Betamethasone, Cortisone, Dexamethasone, Hydrocortisone, MethylPrednisoLONE, PrednisoLONE, PredniSONE, Triamcinolone",
+            "input_type": "str"
+        },
+        {
+            "input_name": "source_route",
+            "input_desc": "The route of administration for the source drug. Allowed values: IV, PO",
+            "input_type": "str"
+        },
+        {
+            "input_name": "target_drug",
+            "input_desc": "The name of the target corticosteroid. Allowed values: Betamethasone, Cortisone, Dexamethasone, Hydrocortisone, MethylPrednisoLONE, PrednisoLONE, PredniSONE, Triamcinolone",
+            "input_type": "str"
+        },
+        {
+            "input_name": "target_route",
+            "input_desc": "The route of administration for the target drug. Allowed values: IV, PO",
+            "input_type": "str"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "determine_equivalent_potency_units",
+            "step_description": "Calculate the number of equivalent potency units administered, based on the source corticosteroid dose and its standard equivalent dose factor.",
+            "step_inputs": [
+                {
+                    "input_name": "source_dose_mg",
+                    "input_desc": "The administered dose of the source corticosteroid in milligrams (mg)",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.source_dose_mg"
+                },
+                {
+                    "input_name": "source_drug",
+                    "input_desc": "The name of the source corticosteroid (e.g., Hydrocortisone, MethylPrednisoLONE, etc.)",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.source_drug"
+                },
+                {
+                    "input_name": "source_route",
+                    "input_desc": "The route of administration for the source drug (IV or PO)",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.source_route"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "equivalent_units",
+                    "output_desc": "The number of equivalent potency units administered (source dose divided by its standard equivalent dose)",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "This step calculates the number of equivalent potency units using a simple mathematical formula (division). The core operation is a precise numerical computation, fitting the FormulaCalculation tool template.",
+            "detail": "1. Identify the standard equivalent dose (E_dose) for the given source_drug and source_route from the predefined table.\n2. Table of standard equivalent doses:\n   - Betamethasone (IV): 0.75 mg\n   - Cortisone (PO): 25 mg\n   - Dexamethasone (IV or PO): 0.75 mg\n   - Hydrocortisone (IV or PO): 20 mg\n   - MethylPrednisoLONE (IV or PO): 4 mg\n   - PrednisoLONE (PO): 5 mg\n   - PredniSONE (PO): 5 mg\n   - Triamcinolone (IV): 4 mg\n3. Calculate equivalent_units = source_dose_mg / E_dose.\n4. If the combination of source_drug and source_route is not found in the table, raise an error indicating unsupported drug or route."
+        },
+        {
+            "step_id": "2",
+            "step_name": "find_target_drug_equivalent_dose_factor",
+            "step_description": "Look up the standard equivalent dose in mg for the target corticosteroid and route.",
+            "step_inputs": [
+                {
+                    "input_name": "target_drug",
+                    "input_desc": "The name of the target corticosteroid (e.g., PredniSONE, Dexamethasone, etc.)",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.target_drug"
+                },
+                {
+                    "input_name": "target_route",
+                    "input_desc": "The route of administration for the target drug (IV or PO)",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.target_route"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "target_equivalent_dose_mg",
+                    "output_desc": "The standard equivalent dose for the target drug and route, in mg",
+                    "output_type": "float"
+                }
+            ],
+            "category": "DiscreteValueMapping",
+            "reason": "This step involves mapping a discrete combination of drug name and route to a predefined numeric value (the equivalent dose). There is no calculation, only a lookup from a finite table, which perfectly matches the DiscreteValueMapping tool template.",
+            "detail": "1. Identify the standard equivalent dose (T_dose) corresponding to target_drug and target_route using the predefined mapping table.\n2. Table of standard equivalent doses:\n   - Betamethasone: IV, 0.75 mg\n   - Cortisone: PO, 25 mg\n   - Dexamethasone: IV or PO, 0.75 mg\n   - Hydrocortisone: IV or PO, 20 mg\n   - MethylPrednisoLONE: IV or PO, 4 mg\n   - PrednisoLONE: PO, 5 mg\n   - PredniSONE: PO, 5 mg\n   - Triamcinolone: IV, 4 mg\n3. Return T_dose as the factor.\n4. If the combination of target_drug and target_route is not found in the table, raise an error indicating unsupported drug or route."
+        },
+        {
+            "step_id": "3",
+            "step_name": "calculate_target_corticosteroid_dose",
+            "step_description": "Multiply the number of equivalent potency units by the target drug's standard equivalent dose to find the target dose in mg.",
+            "step_inputs": [
+                {
+                    "input_name": "equivalent_units",
+                    "input_desc": "The number of equivalent potency units (from Step 1)",
+                    "input_type": "float",
+                    "input_source": "$|step1|.equivalent_units"
+                },
+                {
+                    "input_name": "target_equivalent_dose_mg",
+                    "input_desc": "The standard equivalent dose for the target drug in mg (from Step 2)",
+                    "input_type": "float",
+                    "input_source": "$|step2|.target_equivalent_dose_mg"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "target_dose_mg",
+                    "output_desc": "The calculated equivalent dosage of the target corticosteroid in mg",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "The final step uses a precise mathematical multiplication to convert potency units into the target drug dosage. This is a direct numerical calculation, fitting the FormulaCalculation template.",
+            "detail": "Calculate target_dose_mg = equivalent_units * target_equivalent_dose_mg. Round the result to 4 decimal places."
+        }
+    ],
+    "output": {
+        "output_name": "target_dose_mg",
+        "output_desc": "The calculated equivalent dosage of the target corticosteroid in mg",
+        "output_type": "float"
+    },
+    "code": "def solve(source_dose_mg, source_drug, source_route, target_drug, target_route):\n    # Step 1: determine_equivalent_potency_units\n    # Define the table of standard equivalent doses: (drug, route) -> equivalent_dose_mg\n    equivalent_dose_table = {\n        (\"Betamethasone\", \"IV\"): 0.75,\n        (\"Cortisone\", \"PO\"): 25.0,\n        (\"Dexamethasone\", \"IV\"): 0.75,\n        (\"Dexamethasone\", \"PO\"): 0.75,\n        (\"Hydrocortisone\", \"IV\"): 20.0,\n        (\"Hydrocortisone\", \"PO\"): 20.0,\n        (\"MethylPrednisoLONE\", \"IV\"): 4.0,\n        (\"MethylPrednisoLONE\", \"PO\"): 4.0,\n        (\"PrednisoLONE\", \"PO\"): 5.0,\n        (\"PredniSONE\", \"PO\"): 5.0,\n        (\"Triamcinolone\", \"IV\"): 4.0,\n    }\n    source_key = (source_drug, source_route)\n    if source_key not in equivalent_dose_table:\n        raise ValueError(f\"Unsupported source drug/route combination: {source_drug} ({source_route})\")\n    E_dose = equivalent_dose_table[source_key]\n    equivalent_units = source_dose_mg / E_dose\n    yield {\n        \"step_name\": \"determine_equivalent_potency_units\",\n        \"step_description\": f\"Calculate the number of equivalent potency units administered based on source dose {source_dose_mg} mg of {source_drug} ({source_route}) with standard equivalent dose {E_dose} mg\",\n        \"step_result\": equivalent_units,\n        \"unit\": None\n    }\n\n    # Step 2: find_target_drug_equivalent_dose_factor\n    target_key = (target_drug, target_route)\n    if target_key not in equivalent_dose_table:\n        raise ValueError(f\"Unsupported target drug/route combination: {target_drug} ({target_route})\")\n    target_equivalent_dose_mg = equivalent_dose_table[target_key]\n    yield {\n        \"step_name\": \"find_target_drug_equivalent_dose_factor\",\n        \"step_description\": f\"Look up the standard equivalent dose for {target_drug} ({target_route})\",\n        \"step_result\": target_equivalent_dose_mg,\n        \"unit\": \"mg\"\n    }\n\n    # Step 3: calculate_target_corticosteroid_dose\n    target_dose_mg = round(equivalent_units * target_equivalent_dose_mg, 4)\n    yield {\n        \"step_name\": \"calculate_target_corticosteroid_dose\",\n        \"step_description\": f\"Multiply equivalent_units ({equivalent_units}) by target_equivalent_dose_mg ({target_equivalent_dose_mg} mg) to obtain target dose in mg, rounded to 4 decimal places\",\n        \"step_result\": target_dose_mg,\n        \"unit\": \"mg\"\n    }\n\n    return target_dose_mg"
+}

@@ -1,0 +1,371 @@
+{
+    "name": "opt_cad_score_calculation_workflow",
+    "description": "Calculate the OPT-CAD score for a patient based on various clinical parameters.",
+    "inputs": [
+        {
+            "input_name": "age",
+            "input_desc": "The patient's age in years.",
+            "input_type": "integer"
+        },
+        {
+            "input_name": "heart_rate",
+            "input_desc": "The patient's heart rate in beats per minute.",
+            "input_type": "integer"
+        },
+        {
+            "input_name": "hypertension",
+            "input_desc": "Boolean indicating whether the patient has a history of hypertension (True/False).",
+            "input_type": "boolean"
+        },
+        {
+            "input_name": "myocardial_infarction",
+            "input_desc": "Boolean indicating whether the patient has a history of myocardial infarction (True/False).",
+            "input_type": "boolean"
+        },
+        {
+            "input_name": "stroke",
+            "input_desc": "Boolean indicating whether the patient has a history of stroke (True/False).",
+            "input_type": "boolean"
+        },
+        {
+            "input_name": "renal_insufficiency",
+            "input_desc": "Boolean indicating whether the patient has renal insufficiency (True/False).",
+            "input_type": "boolean"
+        },
+        {
+            "input_name": "anemia",
+            "input_desc": "Boolean indicating whether the patient has anemia (True/False).",
+            "input_type": "boolean"
+        },
+        {
+            "input_name": "lvef",
+            "input_desc": "Boolean indicating whether the patient has LVEF < 50% (True/False).",
+            "input_type": "boolean"
+        },
+        {
+            "input_name": "ctn_elevation",
+            "input_desc": "Boolean indicating whether the patient has cTn elevation (True/False).",
+            "input_type": "boolean"
+        },
+        {
+            "input_name": "ecg_change",
+            "input_desc": "Boolean indicating whether the patient has ECG changes (True/False).",
+            "input_type": "boolean"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "age_score_calculation",
+            "step_description": "Calculate the score based on the patient's age according to the OPT-CAD scoring rules.",
+            "step_inputs": [
+                {
+                    "input_name": "age",
+                    "input_desc": "The patient's age in years.",
+                    "input_type": "integer",
+                    "input_source": "$|inputs|.age"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "age_score",
+                    "output_desc": "The calculated score for the patient's age.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "The age score calculation involves checking the patient's age against predefined ranges and assigning a corresponding score. This fits the condition evaluation category.",
+            "detail": "The age score is determined as follows:\n- <40: 0\n- 40-49: 9\n- 50-59: 29\n- 60-64: 41\n- 65-69: 50\n- 70-74: 58\n- 75-79: 65\n- ≥80: 71"
+        },
+        {
+            "step_id": "2",
+            "step_name": "heart_rate_score_calculation",
+            "step_description": "Calculate the score based on the patient's heart rate according to the OPT-CAD scoring rules.",
+            "step_inputs": [
+                {
+                    "input_name": "heart_rate",
+                    "input_desc": "The patient's heart rate in beats per minute.",
+                    "input_type": "integer",
+                    "input_source": "$|inputs|.heart_rate"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "heart_rate_score",
+                    "output_desc": "The calculated score for the patient's heart rate.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "The heart rate score calculation involves checking the patient's heart rate against predefined ranges and assigning a corresponding score. This fits the condition evaluation category.",
+            "detail": "The heart rate score is determined as follows:\n- <60: 0\n- 60-69: 14\n- 70-79: 18\n- 80-89: 21\n- 90-99: 24\n- 100-110: 30\n- >110: 36"
+        },
+        {
+            "step_id": "3",
+            "step_name": "hypertension_score_calculation",
+            "step_description": "Calculate the score based on the presence of hypertension according to the OPT-CAD scoring rules.",
+            "step_inputs": [
+                {
+                    "input_name": "hypertension",
+                    "input_desc": "Boolean indicating whether the patient has a history of hypertension (True/False).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.hypertension"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "hypertension_score",
+                    "output_desc": "The calculated score for the presence of hypertension.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "The hypertension score calculation involves a simple conditional check (presence or absence) and assigning a score accordingly. This fits the condition evaluation category.",
+            "detail": "If the patient has a history of hypertension, the score is 20; otherwise, it is 0."
+        },
+        {
+            "step_id": "4",
+            "step_name": "myocardial_infarction_score_calculation",
+            "step_description": "Calculate the score based on the presence of a history of myocardial infarction according to the OPT-CAD scoring rules.",
+            "step_inputs": [
+                {
+                    "input_name": "myocardial_infarction",
+                    "input_desc": "Boolean indicating whether the patient has a history of myocardial infarction (True/False).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.myocardial_infarction"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "myocardial_infarction_score",
+                    "output_desc": "The calculated score for the presence of a history of myocardial infarction.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "The myocardial infarction score calculation involves a simple conditional check (presence or absence) and assigning a score accordingly. This fits the condition evaluation category.",
+            "detail": "If the patient has a history of myocardial infarction, the score is 16; otherwise, it is 0."
+        },
+        {
+            "step_id": "5",
+            "step_name": "stroke_score_calculation",
+            "step_description": "Calculate the score based on the presence of a history of stroke according to the OPT-CAD scoring rules.",
+            "step_inputs": [
+                {
+                    "input_name": "stroke",
+                    "input_desc": "Boolean indicating whether the patient has a history of stroke (True/False).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.stroke"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "stroke_score",
+                    "output_desc": "The calculated score for the presence of a history of stroke.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "The stroke score calculation involves a simple conditional check (presence or absence) and assigning a score accordingly. This fits the condition evaluation category.",
+            "detail": "If the patient has a history of stroke, the score is 16; otherwise, it is 0."
+        },
+        {
+            "step_id": "6",
+            "step_name": "renal_insufficiency_score_calculation",
+            "step_description": "Calculate the score based on the presence of renal insufficiency (eGFR < 60 ml/(min·1.73m²)) according to the OPT-CAD scoring rules.",
+            "step_inputs": [
+                {
+                    "input_name": "renal_insufficiency",
+                    "input_desc": "Boolean indicating whether the patient has renal insufficiency (True/False).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.renal_insufficiency"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "renal_insufficiency_score",
+                    "output_desc": "The calculated score for the presence of renal insufficiency.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "The renal insufficiency score calculation involves a simple conditional check (presence or absence) and assigning a score accordingly. This fits the condition evaluation category.",
+            "detail": "If the patient has renal insufficiency, the score is 21; otherwise, it is 0."
+        },
+        {
+            "step_id": "7",
+            "step_name": "anemia_score_calculation",
+            "step_description": "Calculate the score based on the presence of anemia according to the OPT-CAD scoring rules.",
+            "step_inputs": [
+                {
+                    "input_name": "anemia",
+                    "input_desc": "Boolean indicating whether the patient has anemia (True/False).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.anemia"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "anemia_score",
+                    "output_desc": "The calculated score for the presence of anemia.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "The anemia score calculation involves a simple conditional check (presence or absence) and assigning a score accordingly. This fits the condition evaluation category.",
+            "detail": "If the patient has anemia, the score is 19; otherwise, it is 0."
+        },
+        {
+            "step_id": "8",
+            "step_name": "lvef_score_calculation",
+            "step_description": "Calculate the score based on the presence of LVEF < 50% according to the OPT-CAD scoring rules.",
+            "step_inputs": [
+                {
+                    "input_name": "lvef",
+                    "input_desc": "Boolean indicating whether the patient has LVEF < 50% (True/False).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.lvef"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "lvef_score",
+                    "output_desc": "The calculated score for the presence of LVEF < 50%.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "The LVEF score calculation involves a simple conditional check (presence or absence) and assigning a score accordingly. This fits the condition evaluation category.",
+            "detail": "If the patient has LVEF < 50%, the score is 22; otherwise, it is 0."
+        },
+        {
+            "step_id": "9",
+            "step_name": "ctn_elevation_score_calculation",
+            "step_description": "Calculate the score based on the presence of cTn elevation according to the OPT-CAD scoring rules.",
+            "step_inputs": [
+                {
+                    "input_name": "ctn_elevation",
+                    "input_desc": "Boolean indicating whether the patient has cTn elevation (True/False).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.ctn_elevation"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "ctn_elevation_score",
+                    "output_desc": "The calculated score for the presence of cTn elevation.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "The cTn elevation score calculation involves a simple conditional check (presence or absence) and assigning a score accordingly. This fits the condition evaluation category.",
+            "detail": "If the patient has cTn elevation, the score is 23; otherwise, it is 0."
+        },
+        {
+            "step_id": "10",
+            "step_name": "ecg_change_score_calculation",
+            "step_description": "Calculate the score based on the presence of ECG changes according to the OPT-CAD scoring rules.",
+            "step_inputs": [
+                {
+                    "input_name": "ecg_change",
+                    "input_desc": "Boolean indicating whether the patient has ECG changes (True/False).",
+                    "input_type": "boolean",
+                    "input_source": "$|inputs|.ecg_change"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "ecg_change_score",
+                    "output_desc": "The calculated score for the presence of ECG changes.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "The ECG change score calculation involves a simple conditional check (presence or absence) and assigning a score accordingly. This fits the condition evaluation category.",
+            "detail": "If the patient has ECG changes, the score is 13; otherwise, it is 0."
+        },
+        {
+            "step_id": "11",
+            "step_name": "total_opt_cad_score_calculation",
+            "step_description": "Calculate the total OPT-CAD score by summing all individual component scores.",
+            "step_inputs": [
+                {
+                    "input_name": "age_score",
+                    "input_desc": "Score calculated from the patient's age.",
+                    "input_type": "integer",
+                    "input_source": "$|1|.age_score"
+                },
+                {
+                    "input_name": "heart_rate_score",
+                    "input_desc": "Score calculated from the patient's heart rate.",
+                    "input_type": "integer",
+                    "input_source": "$|2|.heart_rate_score"
+                },
+                {
+                    "input_name": "hypertension_score",
+                    "input_desc": "Score calculated from the presence of hypertension.",
+                    "input_type": "integer",
+                    "input_source": "$|3|.hypertension_score"
+                },
+                {
+                    "input_name": "myocardial_infarction_score",
+                    "input_desc": "Score calculated from the presence of a history of myocardial infarction.",
+                    "input_type": "integer",
+                    "input_source": "$|4|.myocardial_infarction_score"
+                },
+                {
+                    "input_name": "stroke_score",
+                    "input_desc": "Score calculated from the presence of a history of stroke.",
+                    "input_type": "integer",
+                    "input_source": "$|5|.stroke_score"
+                },
+                {
+                    "input_name": "renal_insufficiency_score",
+                    "input_desc": "Score calculated from the presence of renal insufficiency.",
+                    "input_type": "integer",
+                    "input_source": "$|6|.renal_insufficiency_score"
+                },
+                {
+                    "input_name": "anemia_score",
+                    "input_desc": "Score calculated from the presence of anemia.",
+                    "input_type": "integer",
+                    "input_source": "$|7|.anemia_score"
+                },
+                {
+                    "input_name": "lvef_score",
+                    "input_desc": "Score calculated from the presence of LVEF < 50%.",
+                    "input_type": "integer",
+                    "input_source": "$|8|.lvef_score"
+                },
+                {
+                    "input_name": "ctn_elevation_score",
+                    "input_desc": "Score calculated from the presence of cTn elevation.",
+                    "input_type": "integer",
+                    "input_source": "$|9|.ctn_elevation_score"
+                },
+                {
+                    "input_name": "ecg_change_score",
+                    "input_desc": "Score calculated from the presence of ECG changes.",
+                    "input_type": "integer",
+                    "input_source": "$|10|.ecg_change_score"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_opt_cad_score",
+                    "output_desc": "The total OPT-CAD score calculated by summing all individual component scores.",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "The total OPT-CAD score is derived by summing all the individual scores, which requires a formula-based calculation. This fits the formula calculation category.",
+            "detail": "The total OPT-CAD score is calculated by summing all the individual scores for each component (age, heart rate, hypertension, myocardial infarction, stroke, renal insufficiency, anemia, LVEF < 50%, cTn elevation, and ECG changes)."
+        }
+    ],
+    "output": {
+        "output_name": "total_opt_cad_score",
+        "output_desc": "The total OPT-CAD score calculated by summing all individual component scores.",
+        "output_type": "integer"
+    },
+    "code": "def solve(age, heart_rate, hypertension, myocardial_infarction, stroke, renal_insufficiency, anemia, lvef, ctn_elevation, ecg_change):\n    # Step 1: Calculate age score based on the patient's age\n    if age < 40:\n        age_score = 0\n    elif 40 <= age <= 49:\n        age_score = 9\n    elif 50 <= age <= 59:\n        age_score = 29\n    elif 60 <= age <= 64:\n        age_score = 41\n    elif 65 <= age <= 69:\n        age_score = 50\n    elif 70 <= age <= 74:\n        age_score = 58\n    elif 75 <= age <= 79:\n        age_score = 65\n    else:  # age >= 80\n        age_score = 71\n    yield {\n        \"step_name\": \"age_score_calculation\",\n        \"step_description\": \"Calculate the score based on the patient's age according to the OPT-CAD scoring rules.\",\n        \"step_result\": age_score,\n        \"unit\": None\n    }\n\n    # Step 2: Calculate heart rate score based on the patient's heart rate\n    if heart_rate < 60:\n        heart_rate_score = 0\n    elif 60 <= heart_rate <= 69:\n        heart_rate_score = 14\n    elif 70 <= heart_rate <= 79:\n        heart_rate_score = 18\n    elif 80 <= heart_rate <= 89:\n        heart_rate_score = 21\n    elif 90 <= heart_rate <= 99:\n        heart_rate_score = 24\n    elif 100 <= heart_rate <= 110:\n        heart_rate_score = 30\n    else:  # heart_rate > 110\n        heart_rate_score = 36\n    yield {\n        \"step_name\": \"heart_rate_score_calculation\",\n        \"step_description\": \"Calculate the score based on the patient's heart rate according to the OPT-CAD scoring rules.\",\n        \"step_result\": heart_rate_score,\n        \"unit\": None\n    }\n\n    # Step 3: Calculate hypertension score based on the presence of hypertension\n    if hypertension:\n        hypertension_score = 20\n    else:\n        hypertension_score = 0\n    yield {\n        \"step_name\": \"hypertension_score_calculation\",\n        \"step_description\": \"Calculate the score based on the presence of hypertension according to the OPT-CAD scoring rules.\",\n        \"step_result\": hypertension_score,\n        \"unit\": None\n    }\n\n    # Step 4: Calculate myocardial infarction score based on the presence of a history of myocardial infarction\n    if myocardial_infarction:\n        myocardial_infarction_score = 16\n    else:\n        myocardial_infarction_score = 0\n    yield {\n        \"step_name\": \"myocardial_infarction_score_calculation\",\n        \"step_description\": \"Calculate the score based on the presence of a history of myocardial infarction according to the OPT-CAD scoring rules.\",\n        \"step_result\": myocardial_infarction_score,\n        \"unit\": None\n    }\n\n    # Step 5: Calculate stroke score based on the presence of a history of stroke\n    if stroke:\n        stroke_score = 16\n    else:\n        stroke_score = 0\n    yield {\n        \"step_name\": \"stroke_score_calculation\",\n        \"step_description\": \"Calculate the score based on the presence of a history of stroke according to the OPT-CAD scoring rules.\",\n        \"step_result\": stroke_score,\n        \"unit\": None\n    }\n\n    # Step 6: Calculate renal insufficiency score based on the presence of renal insufficiency\n    if renal_insufficiency:\n        renal_insufficiency_score = 21\n    else:\n        renal_insufficiency_score = 0\n    yield {\n        \"step_name\": \"renal_insufficiency_score_calculation\",\n        \"step_description\": \"Calculate the score based on the presence of renal insufficiency (eGFR < 60 ml/(min·1.73m²)) according to the OPT-CAD scoring rules.\",\n        \"step_result\": renal_insufficiency_score,\n        \"unit\": None\n    }\n\n    # Step 7: Calculate anemia score based on the presence of anemia\n    if anemia:\n        anemia_score = 19\n    else:\n        anemia_score = 0\n    yield {\n        \"step_name\": \"anemia_score_calculation\",\n        \"step_description\": \"Calculate the score based on the presence of anemia according to the OPT-CAD scoring rules.\",\n        \"step_result\": anemia_score,\n        \"unit\": None\n    }\n\n    # Step 8: Calculate LVEF score based on the presence of LVEF < 50%\n    if lvef:\n        lvef_score = 22\n    else:\n        lvef_score = 0\n    yield {\n        \"step_name\": \"lvef_score_calculation\",\n        \"step_description\": \"Calculate the score based on the presence of LVEF < 50% according to the OPT-CAD scoring rules.\",\n        \"step_result\": lvef_score,\n        \"unit\": None\n    }\n\n    # Step 9: Calculate cTn elevation score based on the presence of cTn elevation\n    if ctn_elevation:\n        ctn_elevation_score = 23\n    else:\n        ctn_elevation_score = 0\n    yield {\n        \"step_name\": \"ctn_elevation_score_calculation\",\n        \"step_description\": \"Calculate the score based on the presence of cTn elevation according to the OPT-CAD scoring rules.\",\n        \"step_result\": ctn_elevation_score,\n        \"unit\": None\n    }\n\n    # Step 10: Calculate ECG change score based on the presence of ECG changes\n    if ecg_change:\n        ecg_change_score = 13\n    else:\n        ecg_change_score = 0\n    yield {\n        \"step_name\": \"ecg_change_score_calculation\",\n        \"step_description\": \"Calculate the score based on the presence of ECG changes according to the OPT-CAD scoring rules.\",\n        \"step_result\": ecg_change_score,\n        \"unit\": None\n    }\n\n    # Step 11: Calculate total OPT-CAD score by summing all individual component scores\n    total_opt_cad_score = (\n        age_score + heart_rate_score + hypertension_score +\n        myocardial_infarction_score + stroke_score + renal_insufficiency_score +\n        anemia_score + lvef_score + ctn_elevation_score + ecg_change_score\n    )\n    yield {\n        \"step_name\": \"total_opt_cad_score_calculation\",\n        \"step_description\": \"Calculate the total OPT-CAD score by summing all individual component scores.\",\n        \"step_result\": total_opt_cad_score,\n        \"unit\": None\n    }\n\n    return total_opt_cad_score"
+}

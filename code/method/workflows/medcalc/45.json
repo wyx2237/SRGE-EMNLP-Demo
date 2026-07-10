@@ -1,0 +1,212 @@
+{
+    "name": "curb65_score_calculation_workflow",
+    "description": "Calculate the CURB-65 score by evaluating five clinical criteria and summing their points.",
+    "inputs": [
+        {
+            "input_name": "confused",
+            "input_desc": "Whether the patient is confused; allowed values: true, false",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "bun",
+            "input_desc": "Blood urea nitrogen level in mg/dL",
+            "input_type": "float"
+        },
+        {
+            "input_name": "respiratory_rate",
+            "input_desc": "Patient's respiratory rate in breaths per minute",
+            "input_type": "int"
+        },
+        {
+            "input_name": "systolic_bp",
+            "input_desc": "Systolic blood pressure in mmHg",
+            "input_type": "int"
+        },
+        {
+            "input_name": "diastolic_bp",
+            "input_desc": "Diastolic blood pressure in mmHg",
+            "input_type": "int"
+        },
+        {
+            "input_name": "age",
+            "input_desc": "Patient's age in years",
+            "input_type": "int"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "confusion_assessment",
+            "step_description": "Evaluate the confusion criterion: if the patient is confused, assign 1 point; otherwise, assign 0 points.",
+            "step_inputs": [
+                {
+                    "input_name": "confused",
+                    "input_desc": "Whether the patient is confused; allowed values: true, false",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.confused"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "confusion_points",
+                    "output_desc": "Points for the confusion criterion (0 or 1)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step evaluates a boolean condition (confused or not) and outputs a predefined value based on the branch, which fits the ConditionEvaluation template.",
+            "detail": "If the input 'confused' is True, output 1. If False, output 0."
+        },
+        {
+            "step_id": "2",
+            "step_name": "bun_assessment",
+            "step_description": "Evaluate the BUN criterion: if BUN is greater than 19 mg/dL, assign 1 point; otherwise, assign 0 points.",
+            "step_inputs": [
+                {
+                    "input_name": "bun",
+                    "input_desc": "Blood urea nitrogen level in mg/dL",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.bun"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "bun_points",
+                    "output_desc": "Points for the BUN criterion (0 or 1)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step compares a numerical value against a threshold and outputs a discrete score, which is a simple condition evaluation.",
+            "detail": "If bun > 19, output 1. Else, output 0."
+        },
+        {
+            "step_id": "3",
+            "step_name": "respiratory_rate_assessment",
+            "step_description": "Evaluate the respiratory rate criterion: if respiratory rate is 30 or greater, assign 1 point; otherwise, assign 0 points.",
+            "step_inputs": [
+                {
+                    "input_name": "respiratory_rate",
+                    "input_desc": "Patient's respiratory rate in breaths per minute",
+                    "input_type": "int",
+                    "input_source": "$|raw input|.respiratory_rate"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "rr_points",
+                    "output_desc": "Points for the respiratory rate criterion (0 or 1)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step compares a numerical value against a threshold and outputs a discrete score, fitting the ConditionEvaluation template.",
+            "detail": "If respiratory_rate >= 30, output 1. Else, output 0."
+        },
+        {
+            "step_id": "4",
+            "step_name": "blood_pressure_assessment",
+            "step_description": "Evaluate the blood pressure criterion: if systolic BP < 90 mmHg or diastolic BP <= 60 mmHg, assign 1 point; otherwise, assign 0 points.",
+            "step_inputs": [
+                {
+                    "input_name": "systolic_bp",
+                    "input_desc": "Systolic blood pressure in mmHg",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.systolic_bp"
+                },
+                {
+                    "input_name": "diastolic_bp",
+                    "input_desc": "Diastolic blood pressure in mmHg",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.diastolic_bp"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "bp_points",
+                    "output_desc": "Points for the blood pressure criterion (0 or 1)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step evaluates a combined condition (using OR logic) on two numerical inputs and outputs a discrete score, which is a condition evaluation.",
+            "detail": "If systolic_bp < 90 OR diastolic_bp <= 60, output 1. Else, output 0."
+        },
+        {
+            "step_id": "5",
+            "step_name": "age_assessment",
+            "step_description": "Evaluate the age criterion: if age is 65 or greater, assign 1 point; otherwise, assign 0 points.",
+            "step_inputs": [
+                {
+                    "input_name": "age",
+                    "input_desc": "Patient's age in years",
+                    "input_type": "int",
+                    "input_source": "$|raw input|.age"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "age_points",
+                    "output_desc": "Points for the age criterion (0 or 1)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step compares a numerical value against a threshold and outputs a discrete score, fitting the ConditionEvaluation template.",
+            "detail": "If age >= 65, output 1. Else, output 0."
+        },
+        {
+            "step_id": "6",
+            "step_name": "total_curb65_score",
+            "step_description": "Sum the points from all five CURB-65 criteria to obtain the total score.",
+            "step_inputs": [
+                {
+                    "input_name": "confusion_points",
+                    "input_desc": "Points from confusion criterion",
+                    "input_type": "int",
+                    "input_source": "$|1|.confusion_points"
+                },
+                {
+                    "input_name": "bun_points",
+                    "input_desc": "Points from BUN criterion",
+                    "input_type": "int",
+                    "input_source": "$|2|.bun_points"
+                },
+                {
+                    "input_name": "rr_points",
+                    "input_desc": "Points from respiratory rate criterion",
+                    "input_type": "int",
+                    "input_source": "$|3|.rr_points"
+                },
+                {
+                    "input_name": "bp_points",
+                    "input_desc": "Points from blood pressure criterion",
+                    "input_type": "int",
+                    "input_source": "$|4|.bp_points"
+                },
+                {
+                    "input_name": "age_points",
+                    "input_desc": "Points from age criterion",
+                    "input_type": "int",
+                    "input_source": "$|5|.age_points"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "curb65_total",
+                    "output_desc": "Total CURB-65 score",
+                    "output_type": "int"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step performs a simple arithmetic sum of five discrete numeric scores, which is a straightforward formula calculation.",
+            "detail": "Sum the five integers: confusion_points + bun_points + rr_points + bp_points + age_points."
+        }
+    ],
+    "output": {
+        "output_name": "curb65_total",
+        "output_desc": "The patient's total CURB-65 score",
+        "output_type": "int"
+    },
+    "code": "def solve(confused, bun, respiratory_rate, systolic_bp, diastolic_bp, age):\n    # Step 1: Confusion Assessment\n    # Evaluate confusion criterion: assign 1 if confused else 0\n    confusion_points = 1 if confused else 0\n    yield {\n        \"step_name\": \"confusion_assessment\",\n        \"step_description\": \"Evaluate the confusion criterion: if the patient is confused, assign 1 point; otherwise, assign 0 points.\",\n        \"step_result\": confusion_points,\n        \"unit\": None\n    }\n    \n    # Step 2: BUN Assessment\n    # Evaluate BUN criterion: assign 1 if BUN > 19 mg/dL else 0\n    bun_points = 1 if bun > 19 else 0\n    yield {\n        \"step_name\": \"bun_assessment\",\n        \"step_description\": \"Evaluate the BUN criterion: if BUN is greater than 19 mg/dL, assign 1 point; otherwise, assign 0 points.\",\n        \"step_result\": bun_points,\n        \"unit\": None\n    }\n    \n    # Step 3: Respiratory Rate Assessment\n    # Evaluate respiratory rate criterion: assign 1 if rate >= 30 else 0\n    rr_points = 1 if respiratory_rate >= 30 else 0\n    yield {\n        \"step_name\": \"respiratory_rate_assessment\",\n        \"step_description\": \"Evaluate the respiratory rate criterion: if respiratory rate is 30 or greater, assign 1 point; otherwise, assign 0 points.\",\n        \"step_result\": rr_points,\n        \"unit\": None\n    }\n    \n    # Step 4: Blood Pressure Assessment\n    # Evaluate blood pressure criterion: assign 1 if systolic_bp < 90 or diastolic_bp <= 60 else 0\n    bp_points = 1 if (systolic_bp < 90 or diastolic_bp <= 60) else 0\n    yield {\n        \"step_name\": \"blood_pressure_assessment\",\n        \"step_description\": \"Evaluate the blood pressure criterion: if systolic BP < 90 mmHg or diastolic BP <= 60 mmHg, assign 1 point; otherwise, assign 0 points.\",\n        \"step_result\": bp_points,\n        \"unit\": None\n    }\n    \n    # Step 5: Age Assessment\n    # Evaluate age criterion: assign 1 if age >= 65 else 0\n    age_points = 1 if age >= 65 else 0\n    yield {\n        \"step_name\": \"age_assessment\",\n        \"step_description\": \"Evaluate the age criterion: if age is 65 or greater, assign 1 point; otherwise, assign 0 points.\",\n        \"step_result\": age_points,\n        \"unit\": None\n    }\n    \n    # Step 6: Total CURB-65 Score\n    # Sum all five criterion points to get total CURB-65 score\n    curb65_total = confusion_points + bun_points + rr_points + bp_points + age_points\n    yield {\n        \"step_name\": \"total_curb65_score\",\n        \"step_description\": \"Sum the points from all five CURB-65 criteria to obtain the total score.\",\n        \"step_result\": curb65_total,\n        \"unit\": None\n    }\n    \n    return curb65_total"
+}

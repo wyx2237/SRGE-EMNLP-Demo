@@ -1,0 +1,64 @@
+{
+    "name": "serum_osmolality_calculation_workflow",
+    "description": "Calculate serum osmolality in mOsm/kg using the formula: 2 * Na + (BUN / 2.8) + (glucose / 18).",
+    "inputs": [
+        {
+            "input_name": "na",
+            "input_desc": "Concentration of sodium in mmol/L",
+            "input_type": "float"
+        },
+        {
+            "input_name": "bun",
+            "input_desc": "Concentration of blood urea nitrogen in mg/dL",
+            "input_type": "float"
+        },
+        {
+            "input_name": "glucose",
+            "input_desc": "Concentration of glucose in mg/dL",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "calculate_serum_osmolality",
+            "step_description": "Calculate serum osmolality using the formula: osmolality = 2 * Na + (BUN / 2.8) + (glucose / 18).",
+            "step_inputs": [
+                {
+                    "input_name": "na",
+                    "input_desc": "Concentration of sodium in mmol/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.na"
+                },
+                {
+                    "input_name": "bun",
+                    "input_desc": "Concentration of blood urea nitrogen in mg/dL",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.bun"
+                },
+                {
+                    "input_name": "glucose",
+                    "input_desc": "Concentration of glucose in mg/dL",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.glucose"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "serum_osmolality",
+                    "output_desc": "Calculated serum osmolality in mOsm/kg",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "The task is to compute a numerical value using a precise mathematical formula with three input variables. This fits perfectly with the FormulaCalculation tool template, which handles complex numerical formulas and outputs a single numeric result.",
+            "detail": "Calculate serum osmolality using the formula: osmolality = 2 * Na + (BUN / 2.8) + (glucose / 18). All input values should be in the specified units. Round the final result to 4 decimal places."
+        }
+    ],
+    "output": {
+        "output_name": "serum_osmolality",
+        "output_desc": "Calculated serum osmolality in mOsm/kg",
+        "output_type": "float"
+    },
+    "code": "def solve(na, bun, glucose):\n    # Step 1: calculate_serum_osmolality\n    # Calculate serum osmolality using the formula: osmolality = 2 * Na + (BUN / 2.8) + (glucose / 18)\n    serum_osmolality = 2 * na + (bun / 2.8) + (glucose / 18)\n    serum_osmolality = round(serum_osmolality, 4)\n    \n    yield {\n        \"step_name\": \"calculate_serum_osmolality\",\n        \"step_description\": \"Calculate serum osmolality using the formula: osmolality = 2 * Na + (BUN / 2.8) + (glucose / 18). All input values should be in the specified units. Round the final result to 4 decimal places.\",\n        \"step_result\": serum_osmolality,\n        \"unit\": \"mOsm/kg\"\n    }\n    \n    return serum_osmolality"
+}

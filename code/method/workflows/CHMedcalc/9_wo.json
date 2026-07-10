@@ -1,0 +1,279 @@
+{
+    "name": "shireman_rule_bleeding_risk_calculation",
+    "description": "Calculate the Shireman Rule total score for predicting 90-day major bleeding risk in elderly atrial fibrillation patients taking warfarin. The total score is the sum of individual risk factor scores.",
+    "inputs": [
+        {
+            "input_name": "has_anemia",
+            "input_desc": "Whether the patient has anemia. Allowed values: true or false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "has_alcohol_drug_abuse",
+            "input_desc": "Whether the patient has alcohol or drug abuse. Allowed values: true or false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "has_recent_bleeding",
+            "input_desc": "Whether the patient had a bleeding event within 30 days before admission. Allowed values: true or false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "has_remote_bleeding",
+            "input_desc": "Whether the patient had a bleeding event between 30 days and 1 year before admission. Allowed values: true or false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "age",
+            "input_desc": "Patient's age in years",
+            "input_type": "int"
+        },
+        {
+            "input_name": "is_female",
+            "input_desc": "Whether the patient is female. Allowed values: true or false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "uses_antiplatelet",
+            "input_desc": "Whether the patient uses antiplatelet medication (e.g., aspirin, clopidogrel). Allowed values: true or false.",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "has_diabetes",
+            "input_desc": "Whether the patient has diabetes mellitus. Allowed values: true or false.",
+            "input_type": "bool"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "anemia_score",
+            "step_description": "Determine the score for anemia.",
+            "step_inputs": [
+                {
+                    "input_name": "has_anemia",
+                    "input_desc": "Whether the patient has anemia. Allowed values: true or false.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.has_anemia"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "anemia_score",
+                    "output_desc": "Score for anemia (86 if anemic, 0 otherwise)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "conditional_scoring",
+            "reason": "This step applies a conditional rule to assign a score based on a boolean input.",
+            "detail": "If has_anemia is true, score = 86; otherwise, score = 0."
+        },
+        {
+            "step_id": "2",
+            "step_name": "alcohol_drug_abuse_score",
+            "step_description": "Determine the score for alcohol or drug abuse.",
+            "step_inputs": [
+                {
+                    "input_name": "has_alcohol_drug_abuse",
+                    "input_desc": "Whether the patient has alcohol or drug abuse. Allowed values: true or false.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.has_alcohol_drug_abuse"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "alcohol_drug_abuse_score",
+                    "output_desc": "Score for alcohol or drug abuse (71 if present, 0 otherwise)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "conditional_scoring",
+            "reason": "This step applies a conditional rule to assign a score based on a boolean input.",
+            "detail": "If has_alcohol_drug_abuse is true, score = 71; otherwise, score = 0."
+        },
+        {
+            "step_id": "3",
+            "step_name": "recent_bleeding_score",
+            "step_description": "Determine the score for recent bleeding (within 30 days before admission).",
+            "step_inputs": [
+                {
+                    "input_name": "has_recent_bleeding",
+                    "input_desc": "Whether the patient had a bleeding event within 30 days before admission. Allowed values: true or false.",
+                    "input_type": "bool",
+                    "input_source": "$|inputs|.has_recent_bleeding"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "recent_bleeding_score",
+                    "output_desc": "Score for recent bleeding (62 if present, 0 otherwise)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "conditional_scoring",
+            "reason": "This step applies a conditional rule to assign a score based on a boolean input.",
+            "detail": "If has_recent_bleeding is true, score = 62; otherwise, score = 0."
+        },
+        {
+            "step_id": "4",
+            "step_name": "remote_bleeding_score",
+            "step_description": "Determine the score for remote bleeding (between 30 days and 1 year before admission).",
+            "step_inputs": [
+                {
+                    "input_name": "has_remote_bleeding",
+                    "input_desc": "Whether the patient had a bleeding event between 30 days and 1 year before admission. Allowed values: true or false.",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.has_remote_bleeding"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "remote_bleeding_score",
+                    "output_desc": "Score for remote bleeding (58 if present, 0 otherwise)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "conditional_scoring",
+            "reason": "This step applies a conditional rule to assign a score based on a boolean input.",
+            "detail": "If has_remote_bleeding is true, score = 58; otherwise, score = 0."
+        },
+        {
+            "step_id": "5",
+            "step_name": "advanced_age_score",
+            "step_description": "Determine the score for age 70 years or older.",
+            "step_inputs": [
+                {
+                    "input_name": "age",
+                    "input_desc": "Patient's age in years",
+                    "input_type": "int",
+                    "input_source": "$|raw input|.age"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "advanced_age_score",
+                    "output_desc": "Score for age 70 years or older (49 if age >= 70, 0 otherwise)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "conditional_scoring",
+            "reason": "This step applies a conditional rule to assign a score based on comparing an integer input to a threshold.",
+            "detail": "If age >= 70, score = 49; otherwise, score = 0."
+        },
+        {
+            "step_id": "6",
+            "step_name": "other_factor_scores",
+            "step_description": "Calculate combined scores for female sex, antiplatelet use, and diabetes mellitus.",
+            "step_inputs": [
+                {
+                    "input_name": "is_female",
+                    "input_desc": "Whether the patient is female. Allowed values: true or false.",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.is_female"
+                },
+                {
+                    "input_name": "uses_antiplatelet",
+                    "input_desc": "Whether the patient uses antiplatelet medication. Allowed values: true or false.",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.uses_antiplatelet"
+                },
+                {
+                    "input_name": "has_diabetes",
+                    "input_desc": "Whether the patient has diabetes mellitus. Allowed values: true or false.",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.has_diabetes"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "female_score",
+                    "output_desc": "Score for female sex (32 if female, 0 otherwise)",
+                    "output_type": "int"
+                },
+                {
+                    "output_name": "antiplatelet_score",
+                    "output_desc": "Score for antiplatelet use (32 if using, 0 otherwise)",
+                    "output_type": "int"
+                },
+                {
+                    "output_name": "diabetes_score",
+                    "output_desc": "Score for diabetes mellitus (27 if diabetic, 0 otherwise)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "conditional_scoring",
+            "reason": "This step applies conditional rules to multiple boolean inputs to generate multiple integer scores.",
+            "detail": "If is_female is true, female_score = 32, else 0. If uses_antiplatelet is true, antiplatelet_score = 32, else 0. If has_diabetes is true, diabetes_score = 27, else 0."
+        },
+        {
+            "step_id": "7",
+            "step_name": "calculate_total_score",
+            "step_description": "Sum all individual risk factor scores to obtain the total Shireman Rule score.",
+            "step_inputs": [
+                {
+                    "input_name": "anemia_score",
+                    "input_desc": "Score for anemia",
+                    "input_type": "int",
+                    "input_source": "$|step1|.anemia_score"
+                },
+                {
+                    "input_name": "alcohol_drug_abuse_score",
+                    "input_desc": "Score for alcohol or drug abuse",
+                    "input_type": "int",
+                    "input_source": "$|step2|.alcohol_drug_abuse_score"
+                },
+                {
+                    "input_name": "recent_bleeding_score",
+                    "input_desc": "Score for recent bleeding",
+                    "input_type": "int",
+                    "input_source": "$|step3|.recent_bleeding_score"
+                },
+                {
+                    "input_name": "remote_bleeding_score",
+                    "input_desc": "Score for remote bleeding",
+                    "input_type": "int",
+                    "input_source": "$|step4|.remote_bleeding_score"
+                },
+                {
+                    "input_name": "advanced_age_score",
+                    "input_desc": "Score for advanced age",
+                    "input_type": "int",
+                    "input_source": "$|step5|.advanced_age_score"
+                },
+                {
+                    "input_name": "female_score",
+                    "input_desc": "Score for female sex",
+                    "input_type": "int",
+                    "input_source": "$|step6|.female_score"
+                },
+                {
+                    "input_name": "antiplatelet_score",
+                    "input_desc": "Score for antiplatelet use",
+                    "input_type": "int",
+                    "input_source": "$|step6|.antiplatelet_score"
+                },
+                {
+                    "input_name": "diabetes_score",
+                    "input_desc": "Score for diabetes mellitus",
+                    "input_type": "int",
+                    "input_source": "$|step6|.diabetes_score"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "shireman_total_score",
+                    "output_desc": "Total Shireman Rule risk score for 90-day major bleeding",
+                    "output_type": "int"
+                }
+            ],
+            "category": "summation",
+            "reason": "The total Shireman Rule score is defined as the arithmetic sum of all individual factor scores.",
+            "detail": "total_score = anemia_score + alcohol_drug_abuse_score + recent_bleeding_score + remote_bleeding_score + advanced_age_score + female_score + antiplatelet_score + diabetes_score"
+        }
+    ],
+    "output": {
+        "output_name": "shireman_total_score",
+        "output_desc": "Total Shireman Rule risk score (integer) for predicting 90-day major bleeding risk in elderly atrial fibrillation patients on warfarin.",
+        "output_type": "int"
+    },
+    "code": "def solve(has_anemia, has_alcohol_drug_abuse, has_recent_bleeding, has_remote_bleeding, age, is_female, uses_antiplatelet, has_diabetes):\n    # Step 1: anemia_score - Determine the score for anemia.\n    # If has_anemia is true, score = 86; otherwise, score = 0.\n    anemia_score = 86 if has_anemia else 0\n    yield {\n        \"step_name\": \"anemia_score\",\n        \"step_description\": \"Determine the score for anemia. If has_anemia is true, score = 86; otherwise, score = 0.\",\n        \"step_result\": anemia_score,\n        \"unit\": None\n    }\n\n    # Step 2: alcohol_drug_abuse_score - Determine the score for alcohol or drug abuse.\n    # If has_alcohol_drug_abuse is true, score = 71; otherwise, score = 0.\n    alcohol_drug_abuse_score = 71 if has_alcohol_drug_abuse else 0\n    yield {\n        \"step_name\": \"alcohol_drug_abuse_score\",\n        \"step_description\": \"Determine the score for alcohol or drug abuse. If has_alcohol_drug_abuse is true, score = 71; otherwise, score = 0.\",\n        \"step_result\": alcohol_drug_abuse_score,\n        \"unit\": None\n    }\n\n    # Step 3: recent_bleeding_score - Determine the score for recent bleeding (within 30 days before admission).\n    # If has_recent_bleeding is true, score = 62; otherwise, score = 0.\n    recent_bleeding_score = 62 if has_recent_bleeding else 0\n    yield {\n        \"step_name\": \"recent_bleeding_score\",\n        \"step_description\": \"Determine the score for recent bleeding. If has_recent_bleeding is true, score = 62; otherwise, score = 0.\",\n        \"step_result\": recent_bleeding_score,\n        \"unit\": None\n    }\n\n    # Step 4: remote_bleeding_score - Determine the score for remote bleeding (between 30 days and 1 year before admission).\n    # If has_remote_bleeding is true, score = 58; otherwise, score = 0.\n    remote_bleeding_score = 58 if has_remote_bleeding else 0\n    yield {\n        \"step_name\": \"remote_bleeding_score\",\n        \"step_description\": \"Determine the score for remote bleeding. If has_remote_bleeding is true, score = 58; otherwise, score = 0.\",\n        \"step_result\": remote_bleeding_score,\n        \"unit\": None\n    }\n\n    # Step 5: advanced_age_score - Determine the score for age 70 years or older.\n    # If age >= 70, score = 49; otherwise, score = 0.\n    advanced_age_score = 49 if age >= 70 else 0\n    yield {\n        \"step_name\": \"advanced_age_score\",\n        \"step_description\": \"Determine the score for age 70 years or older. If age >= 70, score = 49; otherwise, score = 0.\",\n        \"step_result\": advanced_age_score,\n        \"unit\": None\n    }\n\n    # Step 6: other_factor_scores - Calculate combined scores for female sex, antiplatelet use, and diabetes mellitus.\n    # If is_female is true, female_score = 32, else 0.\n    # If uses_antiplatelet is true, antiplatelet_score = 32, else 0.\n    # If has_diabetes is true, diabetes_score = 27, else 0.\n    female_score = 32 if is_female else 0\n    antiplatelet_score = 32 if uses_antiplatelet else 0\n    diabetes_score = 27 if has_diabetes else 0\n    yield {\n        \"step_name\": \"other_factor_scores\",\n        \"step_description\": \"Calculate combined scores for female sex, antiplatelet use, and diabetes mellitus. If is_female, female_score=32; if uses_antiplatelet, antiplatelet_score=32; if has_diabetes, diabetes_score=27.\",\n        \"step_result\": {\n            \"female_score\": female_score,\n            \"antiplatelet_score\": antiplatelet_score,\n            \"diabetes_score\": diabetes_score\n        },\n        \"unit\": None\n    }\n\n    # Step 7: calculate_total_score - Sum all individual risk factor scores to obtain the total Shireman Rule score.\n    shireman_total_score = (anemia_score + alcohol_drug_abuse_score + recent_bleeding_score +\n                            remote_bleeding_score + advanced_age_score + female_score +\n                            antiplatelet_score + diabetes_score)\n    yield {\n        \"step_name\": \"calculate_total_score\",\n        \"step_description\": \"Sum all individual risk factor scores to obtain the total Shireman Rule score.\",\n        \"step_result\": shireman_total_score,\n        \"unit\": None\n    }\n\n    return shireman_total_score"
+}

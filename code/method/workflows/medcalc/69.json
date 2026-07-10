@@ -1,0 +1,53 @@
+{
+    "name": "gestational_age_calculation_workflow",
+    "description": "Calculate the estimated gestational age in weeks and days based on the last menstrual period date and the current date.",
+    "inputs": [
+        {
+            "input_name": "lmp_date",
+            "input_desc": "Date of the patient's last menstrual period in MM/DD/YYYY format",
+            "input_type": "str"
+        },
+        {
+            "input_name": "current_date",
+            "input_desc": "Current date or reference date in MM/DD/YYYY format",
+            "input_type": "str"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "calculate_gestational_age",
+            "step_description": "Parse dates, compute the difference in days, and convert the duration into weeks and days.",
+            "step_inputs": [
+                {
+                    "input_name": "lmp_date",
+                    "input_desc": "Date of the patient's last menstrual period in MM/DD/YYYY format",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.lmp_date"
+                },
+                {
+                    "input_name": "current_date",
+                    "input_desc": "Current date or reference date in MM/DD/YYYY format",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.current_date"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "gestational_age_tuple",
+                    "output_desc": "Estimated gestational age as a tuple (weeks, days), e.g., (4, 3) for 4 weeks and 3 days",
+                    "output_type": "tuple"
+                }
+            ],
+            "category": "time_series_processing",
+            "reason": "This step involves calculating the difference between two dates and converting the duration into weeks and days. This aligns with the TimeSeriesProcessing tool template, which supports date difference calculations and duration formatting.",
+            "detail": "Step 1: Parse the two input date strings (MM/DD/YYYY format) into date objects. Step 2: Compute the difference in days between current_date and lmp_date: total_days = (current_date - lmp_date).days. Step 3: Calculate the number of weeks: weeks = total_days // 7 (integer division). Step 4: Calculate the remaining days: days = total_days % 7. Step 5: Return the result as a tuple (weeks, days)."
+        }
+    ],
+    "output": {
+        "output_name": "gestational_age_tuple",
+        "output_desc": "Estimated gestational age as a tuple (weeks, days), e.g., (4, 3) for 4 weeks and 3 days",
+        "output_type": "tuple"
+    },
+    "code": "import datetime\n\ndef solve(lmp_date, current_date):\n    # Step 1: calculate_gestational_age - Parse dates, compute the difference in days, and convert the duration into weeks and days\n    date_format = \"%m/%d/%Y\"\n    lmp = datetime.datetime.strptime(lmp_date, date_format)\n    curr = datetime.datetime.strptime(current_date, date_format)\n    total_days = (curr - lmp).days\n    weeks = total_days // 7\n    days = total_days % 7\n    gestational_age_tuple = (f\"{weeks} weeks\", f\"{days} days\")\n\n    yield {\n        \"step_name\": \"calculate_gestational_age\",\n        \"step_description\": \"Parse dates, compute the difference in days, and convert the duration into weeks and days\",\n        \"step_result\": gestational_age_tuple,\n        \"unit\": None\n    }\n\n    return gestational_age_tuple"
+}

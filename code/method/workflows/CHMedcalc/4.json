@@ -1,0 +1,178 @@
+{
+    "name": "who_2024_diabetes_diagnosis_workflow",
+    "description": "Determine if a patient has diabetes based on the WHO 2024 diagnostic criteria.",
+    "inputs": [
+        {
+            "input_name": "has_typical_symptoms",
+            "input_desc": "Whether the patient has typical diabetes symptoms (yes/no).",
+            "input_type": "string"
+        },
+        {
+            "input_name": "plasma_glucose_mmol_l",
+            "input_desc": "The plasma glucose level in mmol/L.",
+            "input_type": "float"
+        },
+        {
+            "input_name": "fasting_plasma_glucose_mmol_l",
+            "input_desc": "The fasting plasma glucose level in mmol/L.",
+            "input_type": "float"
+        },
+        {
+            "input_name": "ogtt_2hour_glucose_mmol_l",
+            "input_desc": "The 2-hour glucose level after an OGTT in mmol/L.",
+            "input_type": "float"
+        },
+        {
+            "input_name": "hbA1c_percent",
+            "input_desc": "The hemoglobin A1c level in percentage.",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "symptoms_and_plasma_glucose_check",
+            "step_description": "Check if the patient has typical diabetes symptoms and a plasma glucose level of ≥ 11.1 mmol/L at any time.",
+            "step_inputs": [
+                {
+                    "input_name": "has_typical_symptoms",
+                    "input_desc": "Whether the patient has typical diabetes symptoms (yes/no).",
+                    "input_type": "string",
+                    "input_source": "$|inputs|.has_typical_symptoms"
+                },
+                {
+                    "input_name": "plasma_glucose_mmol_l",
+                    "input_desc": "The plasma glucose level in mmol/L.",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.plasma_glucose_mmol_l"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "symptoms_and_plasma_glucose_result",
+                    "output_desc": "Result indicating whether this criterion is met (true/false).",
+                    "output_type": "boolean"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step checks for the presence of typical diabetes symptoms and a high plasma glucose level.",
+            "detail": "If the patient has typical diabetes symptoms and their plasma glucose level is ≥ 11.1 mmol/L, then this condition is satisfied."
+        },
+        {
+            "step_id": "2",
+            "step_name": "fasting_plasma_glucose_check",
+            "step_description": "Check if the fasting plasma glucose (FPG) level is ≥ 7.0 mmol/L with an empty stomach for at least 8 hours.",
+            "step_inputs": [
+                {
+                    "input_name": "fasting_plasma_glucose_mmol_l",
+                    "input_desc": "The fasting plasma glucose level in mmol/L.",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.fasting_plasma_glucose_mmol_l"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "fasting_plasma_glucose_result",
+                    "output_desc": "Result indicating whether this criterion is met (true/false).",
+                    "output_type": "boolean"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step evaluates the fasting plasma glucose level to determine if it meets the diagnostic criteria.",
+            "detail": "If the fasting plasma glucose level is ≥ 7.0 mmol/L, then this condition is satisfied."
+        },
+        {
+            "step_id": "3",
+            "step_name": "ogtt_2hour_glucose_check",
+            "step_description": "Check if the 2-hour oral glucose tolerance test (OGTT) glucose level is ≥ 11.1 mmol/L.",
+            "step_inputs": [
+                {
+                    "input_name": "ogtt_2hour_glucose_mmol_l",
+                    "input_desc": "The 2-hour glucose level after an OGTT in mmol/L.",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.ogtt_2hour_glucose_mmol_l"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "ogtt_result",
+                    "output_desc": "Result indicating whether this criterion is met (true/false).",
+                    "output_type": "boolean"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step evaluates the 2-hour glucose level after an OGTT to determine if it meets the diagnostic criteria.",
+            "detail": "If the 2-hour glucose level after an OGTT is ≥ 11.1 mmol/L, then this condition is satisfied."
+        },
+        {
+            "step_id": "4",
+            "step_name": "hbA1c_check",
+            "step_description": "Check if the hemoglobin A1c (HbA1c) level is ≥ 6.5%.",
+            "step_inputs": [
+                {
+                    "input_name": "hbA1c_percent",
+                    "input_desc": "The hemoglobin A1c level in percentage.",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.hbA1c_percent"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "hbA1c_result",
+                    "output_desc": "Result indicating whether this criterion is met (true/false).",
+                    "output_type": "boolean"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step evaluates the HbA1c level to determine if it meets the diagnostic criteria.",
+            "detail": "If the HbA1c level is ≥ 6.5%, then this condition is satisfied."
+        },
+        {
+            "step_id": "5",
+            "step_name": "diabetes_diagnosis_check",
+            "step_description": "Determine if the patient meets the WHO 2024 diabetes diagnostic criteria based on the results from previous steps.",
+            "step_inputs": [
+                {
+                    "input_name": "symptoms_and_plasma_glucose_result",
+                    "input_desc": "Result from the first criterion check (typical symptoms + plasma glucose ≥ 11.1 mmol/L).",
+                    "input_type": "boolean",
+                    "input_source": "$|step1|.symptoms_and_plasma_glucose_result"
+                },
+                {
+                    "input_name": "fasting_plasma_glucose_result",
+                    "input_desc": "Result from the second criterion check (fasting plasma glucose ≥ 7.0 mmol/L).",
+                    "input_type": "boolean",
+                    "input_source": "$|step2|.fasting_plasma_glucose_result"
+                },
+                {
+                    "input_name": "ogtt_result",
+                    "input_desc": "Result from the third criterion check (OGTT 2-hour glucose ≥ 11.1 mmol/L).",
+                    "input_type": "boolean",
+                    "input_source": "$|step3|.ogtt_result"
+                },
+                {
+                    "input_name": "hbA1c_result",
+                    "input_desc": "Result from the fourth criterion check (HbA1c ≥ 6.5%).",
+                    "input_type": "boolean",
+                    "input_source": "$|step4|.hbA1c_result"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "diabetes_diagnosis",
+                    "output_desc": "Final diagnosis result indicating whether the patient has diabetes (1 for yes, 0 for no).",
+                    "output_type": "integer"
+                }
+            ],
+            "category": "logical_combination",
+            "reason": "This step combines the results from all four diagnostic criteria using logical OR to determine if the patient meets the WHO 2024 diabetes diagnostic criteria.",
+            "detail": "If any of the four conditions are met, the patient is diagnosed with diabetes. If not, they are not diagnosed with diabetes."
+        }
+    ],
+    "output": {
+        "output_name": "diabetes_diagnosis",
+        "output_desc": "Final diagnosis result indicating whether the patient has diabetes (1 for yes, 0 for no).",
+        "output_type": "integer"
+    },
+    "code": "def solve(has_typical_symptoms, plasma_glucose_mmol_l, fasting_plasma_glucose_mmol_l, ogtt_2hour_glucose_mmol_l, hbA1c_percent):\n    # Step 1: Check if the patient has typical diabetes symptoms and a plasma glucose level of ≥ 11.1 mmol/L at any time\n    symptoms_and_plasma_glucose_result = (has_typical_symptoms == \"yes\") and (plasma_glucose_mmol_l >= 11.1)\n    \n    yield {\n        \"step_name\": \"symptoms_and_plasma_glucose_check\",\n        \"step_description\": \"Check if the patient has typical diabetes symptoms and a plasma glucose level of ≥ 11.1 mmol/L at any time.\",\n        \"step_result\": symptoms_and_plasma_glucose_result,\n        \"unit\": None\n    }\n\n    # Step 2: Check if the fasting plasma glucose (FPG) level is ≥ 7.0 mmol/L with an empty stomach for at least 8 hours\n    fasting_plasma_glucose_result = (fasting_plasma_glucose_mmol_l >= 7.0)\n    \n    yield {\n        \"step_name\": \"fasting_plasma_glucose_check\",\n        \"step_description\": \"Check if the fasting plasma glucose (FPG) level is ≥ 7.0 mmol/L with an empty stomach for at least 8 hours.\",\n        \"step_result\": fasting_plasma_glucose_result,\n        \"unit\": None\n    }\n\n    # Step 3: Check if the 2-hour oral glucose tolerance test (OGTT) glucose level is ≥ 11.1 mmol/L\n    ogtt_result = (ogtt_2hour_glucose_mmol_l >= 11.1)\n    \n    yield {\n        \"step_name\": \"ogtt_2hour_glucose_check\",\n        \"step_description\": \"Check if the 2-hour oral glucose tolerance test (OGTT) glucose level is ≥ 11.1 mmol/L.\",\n        \"step_result\": ogtt_result,\n        \"unit\": None\n    }\n\n    # Step 4: Check if the hemoglobin A1c (HbA1c) level is ≥ 6.5%\n    hbA1c_result = (hbA1c_percent >= 6.5)\n    \n    yield {\n        \"step_name\": \"hbA1c_check\",\n        \"step_description\": \"Check if the hemoglobin A1c (HbA1c) level is ≥ 6.5%.\",\n        \"step_result\": hbA1c_result,\n        \"unit\": None\n    }\n\n    # Step 5: Determine if the patient meets the WHO 2024 diabetes diagnostic criteria based on the results from previous steps\n    diabetes_diagnosis = 1 if (symptoms_and_plasma_glucose_result or fasting_plasma_glucose_result or ogtt_result or hbA1c_result) else 0\n    \n    yield {\n        \"step_name\": \"diabetes_diagnosis_check\",\n        \"step_description\": \"Determine if the patient meets the WHO 2024 diabetes diagnostic criteria based on the results from previous steps.\",\n        \"step_result\": diabetes_diagnosis,\n        \"unit\": None\n    }\n\n    return diabetes_diagnosis"
+}

@@ -1,0 +1,98 @@
+{
+    "name": "body_fat_percentage_estimation_workflow",
+    "description": "根据身高、体重、年龄和性别，估算体脂率（%）",
+    "inputs": [
+        {
+            "input_name": "weight_kg",
+            "input_desc": "体重，单位为千克",
+            "input_type": "float"
+        },
+        {
+            "input_name": "height_m",
+            "input_desc": "身高，单位为米",
+            "input_type": "float"
+        },
+        {
+            "input_name": "age_years",
+            "input_desc": "年龄，单位为岁",
+            "input_type": "int"
+        },
+        {
+            "input_name": "gender",
+            "input_desc": "性别，男性取值为1，女性取值为0",
+            "input_type": "int"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "calculate_bmi",
+            "step_description": "计算身体质量指数 (BMI)",
+            "step_inputs": [
+                {
+                    "input_name": "weight_kg",
+                    "input_desc": "体重（千克）",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.weight_kg"
+                },
+                {
+                    "input_name": "height_m",
+                    "input_desc": "身高（米）",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.height_m"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "bmi_value",
+                    "output_desc": "计算得到的 BMI 值",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "BMI 是一个基于体重和身高的公式计算，符合 FormulaCalculation 工具模板的适用范围。",
+            "detail": "将体重（千克）除以身高（米）的平方。"
+        },
+        {
+            "step_id": "2",
+            "step_name": "calculate_body_fat_percentage",
+            "step_description": "根据 BMI、年龄和性别计算体脂率",
+            "step_inputs": [
+                {
+                    "input_name": "bmi_value",
+                    "input_desc": "身体质量指数，单位为 kg/m²",
+                    "input_type": "float",
+                    "input_source": "$|1|.bmi_value"
+                },
+                {
+                    "input_name": "age_years",
+                    "input_desc": "年龄，单位为岁",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.age_years"
+                },
+                {
+                    "input_name": "gender",
+                    "input_desc": "性别，男性取值为1，女性取值为0",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.gender"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "body_fat_percentage",
+                    "output_desc": "计算得到的体脂率，单位为 %",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "体脂率的计算是基于 BMI、年龄和性别的数学公式，符合 FormulaCalculation 工具模板的适用范围。",
+            "detail": "体脂率 (%) = 1.20 × BMI + 0.23 × 年龄 - 5.4 - 10.8 × 性别"
+        }
+    ],
+    "output": {
+        "output_name": "body_fat_percentage",
+        "output_desc": "最终的体脂率结果",
+        "output_type": "float"
+    },
+    "code": "import math\n\ndef solve(weight_kg, height_m, age_years, gender):\n    # Step 1: Calculate BMI\n    bmi_value = weight_kg / (height_m ** 2)\n    yield {\n        \"step_name\": \"calculate_bmi\",\n        \"step_description\": \"Calculate body mass index (BMI) using weight (kg) and height (m)\",\n        \"step_result\": bmi_value,\n        \"unit\": \"kg/m²\"\n    }\n\n    # Step 2: Calculate body fat percentage based on BMI, age, and gender\n    body_fat_percentage = 1.20 * bmi_value + 0.23 * age_years - 5.4 - 10.8 * gender\n    yield {\n        \"step_name\": \"calculate_body_fat_percentage\",\n        \"step_description\": \"Estimate body fat percentage using BMI, age, and gender\",\n        \"step_result\": body_fat_percentage,\n        \"unit\": \"%\"\n    }\n\n    # Final result\n    return body_fat_percentage"
+}

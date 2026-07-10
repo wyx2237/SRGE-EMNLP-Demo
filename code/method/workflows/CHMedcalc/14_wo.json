@@ -1,0 +1,98 @@
+{
+    "name": "body_fat_percentage_calculation_workflow",
+    "description": "Calculate body fat percentage based on height, weight, age, and gender using a two-step process: first calculate BMI, then estimate body fat percentage.",
+    "inputs": [
+        {
+            "input_name": "weight_kg",
+            "input_desc": "Weight in kilograms",
+            "input_type": "float"
+        },
+        {
+            "input_name": "height_m",
+            "input_desc": "Height in meters",
+            "input_type": "float"
+        },
+        {
+            "input_name": "age_years",
+            "input_desc": "Age in years",
+            "input_type": "int"
+        },
+        {
+            "input_name": "gender",
+            "input_desc": "Gender: 1 for male, 0 for female",
+            "input_type": "int"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "calculate_bmi",
+            "step_description": "Calculate Body Mass Index (BMI) using weight and height.",
+            "step_inputs": [
+                {
+                    "input_name": "weight_kg",
+                    "input_desc": "Weight in kilograms",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.weight_kg"
+                },
+                {
+                    "input_name": "height_m",
+                    "input_desc": "Height in meters",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.height_m"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "bmi",
+                    "output_desc": "Body Mass Index in kg/m²",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "BMI is calculated using a standard formula involving weight and height.",
+            "detail": "BMI = weight_kg / (height_m * height_m)"
+        },
+        {
+            "step_id": "2",
+            "step_name": "estimate_body_fat_percentage",
+            "step_description": "Estimate body fat percentage using BMI, age, and gender.",
+            "step_inputs": [
+                {
+                    "input_name": "bmi",
+                    "input_desc": "Body Mass Index in kg/m²",
+                    "input_type": "float",
+                    "input_source": "$|1|.bmi"
+                },
+                {
+                    "input_name": "age_years",
+                    "input_desc": "Age in years",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.age_years"
+                },
+                {
+                    "input_name": "gender",
+                    "input_desc": "Gender: 1 for male, 0 for female",
+                    "input_type": "int",
+                    "input_source": "$|inputs|.gender"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "body_fat_percentage",
+                    "output_desc": "Estimated body fat percentage (%)",
+                    "output_type": "float"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "Body fat percentage is estimated using a formula that incorporates BMI, age, and gender.",
+            "detail": "body_fat_percentage = 1.20 * bmi + 0.23 * age_years - 5.4 - 10.8 * gender"
+        }
+    ],
+    "output": {
+        "output_name": "body_fat_percentage",
+        "output_desc": "Estimated body fat percentage",
+        "output_type": "float"
+    },
+    "code": "def solve(weight_kg, height_m, age_years, gender):\n    # Step 1: calculate_bmi\n    # Calculate Body Mass Index (BMI) using weight and height.\n    bmi = weight_kg / (height_m * height_m)\n    yield {\n        \"step_name\": \"calculate_bmi\",\n        \"step_description\": \"Calculate Body Mass Index (BMI) using weight and height.\",\n        \"step_result\": bmi,\n        \"unit\": \"kg/m²\"\n    }\n    \n    # Step 2: estimate_body_fat_percentage\n    # Estimate body fat percentage using BMI, age, and gender.\n    body_fat_percentage = 1.20 * bmi + 0.23 * age_years - 5.4 - 10.8 * gender\n    yield {\n        \"step_name\": \"estimate_body_fat_percentage\",\n        \"step_description\": \"Estimate body fat percentage using BMI, age, and gender.\",\n        \"step_result\": body_fat_percentage,\n        \"unit\": \"%\"\n    }\n    \n    return body_fat_percentage"
+}

@@ -1,0 +1,47 @@
+
+import math
+
+def solve(weight, height):
+    """
+    使用Haycock公式计算儿童体表面积
+    :param weight: 儿童体重（公斤）
+    :param height: 儿童身高（厘米）
+    """
+    # 步骤1：计算体重幂
+    # 计算体重的0.5378次方
+    weight_power = math.pow(weight, 0.5378)
+    yield {
+        "step_name": "计算体重幂",
+        "step_result": weight_power,
+        "unit": None
+    }
+    
+    # 步骤2：计算身高幂
+    # 计算身高的0.3964次方
+    height_power = math.pow(height, 0.3964)
+    yield {
+        "step_name": "计算身高幂",
+        "step_result": height_power,
+        "unit": None
+    }
+    
+    # 步骤3：计算幂乘积
+    # 将体重幂与身高幂相乘
+    power_product = weight_power * height_power
+    yield {
+        "step_name": "计算幂乘积",
+        "step_result": power_product,
+        "unit": None
+    }
+    
+    # 步骤4：乘以系数
+    # 将幂乘积乘以系数0.024265得到体表面积
+    body_surface_area = power_product * 0.024265
+    yield {
+        "step_name": "乘以系数",
+        "step_result": body_surface_area,
+        "unit": "平方米"
+    }
+    
+    # 返回最终结果
+    return body_surface_area

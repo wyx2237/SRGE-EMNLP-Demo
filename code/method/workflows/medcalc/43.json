@@ -1,0 +1,301 @@
+{
+    "name": "sofa_score_calculation_workflow",
+    "description": "Calculate the Sequential Organ Failure Assessment (SOFA) Score by evaluating six organ system criteria and summing their individual scores.",
+    "inputs": [
+        {
+            "input_name": "pao2_fio2_ratio",
+            "input_desc": "PaO₂/FiO₂ ratio in mm Hg",
+            "input_type": "float"
+        },
+        {
+            "input_name": "respiratory_support",
+            "input_desc": "Whether the patient is receiving respiratory support (true or false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "platelets",
+            "input_desc": "Platelet count in x10³/µL",
+            "input_type": "float"
+        },
+        {
+            "input_name": "gcs",
+            "input_desc": "Glasgow Coma Scale value (integer, 3-15)",
+            "input_type": "int"
+        },
+        {
+            "input_name": "bilirubin",
+            "input_desc": "Bilirubin level in mg/dL",
+            "input_type": "float"
+        },
+        {
+            "input_name": "map",
+            "input_desc": "Mean arterial pressure in mmHg",
+            "input_type": "float"
+        },
+        {
+            "input_name": "dopamine_dose",
+            "input_desc": "Dopamine dose in mcg/kg/min (0 if not administered)",
+            "input_type": "float"
+        },
+        {
+            "input_name": "dobutamine_administered",
+            "input_desc": "Whether dobutamine is administered at any dose (true or false)",
+            "input_type": "bool"
+        },
+        {
+            "input_name": "epinephrine_dose",
+            "input_desc": "Epinephrine dose in mcg/kg/min (0 if not administered)",
+            "input_type": "float"
+        },
+        {
+            "input_name": "norepinephrine_dose",
+            "input_desc": "Norepinephrine dose in mcg/kg/min (0 if not administered)",
+            "input_type": "float"
+        },
+        {
+            "input_name": "creatinine",
+            "input_desc": "Creatinine level in mg/dL",
+            "input_type": "float"
+        },
+        {
+            "input_name": "urine_output",
+            "input_desc": "Urine output in mL/day",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "pao2_fio2_ratio_score",
+            "step_description": "Calculate the SOFA score for the PaO₂/FiO₂ ratio criterion based on the ratio value and respiratory support status.",
+            "step_inputs": [
+                {
+                    "input_name": "pao2_fio2_ratio",
+                    "input_desc": "PaO₂/FiO₂ ratio in mm Hg",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.pao2_fio2_ratio"
+                },
+                {
+                    "input_name": "respiratory_support",
+                    "input_desc": "Whether the patient is receiving respiratory support (true or false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.respiratory_support"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "respiratory_score",
+                    "output_desc": "SOFA score for the PaO₂/FiO₂ ratio criterion (0-4)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "threshold_mapping",
+            "reason": "This step maps a continuous numerical value (PaO₂/FiO₂ ratio) to discrete score categories based on predefined thresholds, but also involves a boolean condition (respiratory support). It fits best with ThresholdMapping as the primary logic is threshold-based categorization with an additional condition for the 100-199 range.",
+            "detail": "Score assignment:\n- If pao2_fio2_ratio >= 400: 0 points\n- If 300 <= pao2_fio2_ratio <= 399: 1 point\n- If 200 <= pao2_fio2_ratio <= 299: 2 points\n- If 100 <= pao2_fio2_ratio <= 199 AND respiratory_support is True: 3 points\n- If pao2_fio2_ratio < 100 AND respiratory_support is True: 4 points\n- If 100 <= pao2_fio2_ratio <= 199 AND respiratory_support is False: score cannot be determined by this criterion alone, return 0 points as default (no respiratory support)."
+        },
+        {
+            "step_id": "2",
+            "step_name": "platelets_score",
+            "step_description": "Calculate the SOFA score for the Platelets criterion based on the platelet count.",
+            "step_inputs": [
+                {
+                    "input_name": "platelets",
+                    "input_desc": "Platelet count in x10³/µL",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.platelets"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "platelets_score",
+                    "output_desc": "SOFA score for the Platelets criterion (0-4)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "threshold_mapping",
+            "reason": "This step maps a continuous numerical value (platelet count) to discrete score categories based on predefined thresholds. It is a pure threshold-based categorization.",
+            "detail": "Score assignment based on platelets value (x10³/µL):\n- >= 150: 0 points\n- 100-149: 1 point\n- 50-99: 2 points\n- 20-49: 3 points\n- < 20: 4 points"
+        },
+        {
+            "step_id": "3",
+            "step_name": "gcs_score",
+            "step_description": "Calculate the SOFA score for the Glasgow Coma Scale criterion based on the GCS value.",
+            "step_inputs": [
+                {
+                    "input_name": "gcs",
+                    "input_desc": "Glasgow Coma Scale value (integer, 3-15)",
+                    "input_type": "int",
+                    "input_source": "$|raw input|.gcs"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "gcs_score",
+                    "output_desc": "SOFA score for the GCS criterion (0-4)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "threshold_mapping",
+            "reason": "This step maps a continuous numerical value (GCS) to discrete score categories based on predefined thresholds. It is a pure threshold-based categorization.",
+            "detail": "Score assignment based on GCS value:\n- 15: 0 points\n- 13-14: 1 point\n- 10-12: 2 points\n- 6-9: 3 points\n- <6: 4 points"
+        },
+        {
+            "step_id": "4",
+            "step_name": "bilirubin_score",
+            "step_description": "Calculate the SOFA score for the Bilirubin criterion based on the bilirubin level.",
+            "step_inputs": [
+                {
+                    "input_name": "bilirubin",
+                    "input_desc": "Bilirubin level in mg/dL",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.bilirubin"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "bilirubin_score",
+                    "output_desc": "SOFA score for the Bilirubin criterion (0-4)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "threshold_mapping",
+            "reason": "This step maps a continuous numerical value (bilirubin) to discrete score categories based on predefined thresholds. It is a pure threshold-based categorization.",
+            "detail": "Score assignment based on bilirubin value (mg/dL):\n- < 1.2: 0 points\n- 1.2-1.9: 1 point\n- 2.0-5.9: 2 points\n- 6.0-11.9: 3 points\n- >= 12.0: 4 points"
+        },
+        {
+            "step_id": "5",
+            "step_name": "cardiovascular_score",
+            "step_description": "Calculate the SOFA score for the Cardiovascular criterion based on MAP and vasopressor administration.",
+            "step_inputs": [
+                {
+                    "input_name": "map",
+                    "input_desc": "Mean arterial pressure in mmHg",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.map"
+                },
+                {
+                    "input_name": "dopamine_dose",
+                    "input_desc": "Dopamine dose in mcg/kg/min (0 if not administered)",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.dopamine_dose"
+                },
+                {
+                    "input_name": "dobutamine_administered",
+                    "input_desc": "Whether dobutamine is administered at any dose (true or false)",
+                    "input_type": "bool",
+                    "input_source": "$|raw input|.dobutamine_administered"
+                },
+                {
+                    "input_name": "epinephrine_dose",
+                    "input_desc": "Epinephrine dose in mcg/kg/min (0 if not administered)",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.epinephrine_dose"
+                },
+                {
+                    "input_name": "norepinephrine_dose",
+                    "input_desc": "Norepinephrine dose in mcg/kg/min (0 if not administered)",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.norepinephrine_dose"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "cardiovascular_score",
+                    "output_desc": "SOFA score for the Cardiovascular criterion (0-4)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step involves complex conditional logic with multiple variables (MAP, vasopressor types and doses) and branching rules. It is not a simple threshold mapping but requires evaluating multiple conditions in sequence to determine the score.",
+            "detail": "Score assignment:\n- If no hypotension (MAP >= 70) and no vasopressors (dopamine_dose == 0 and dobutamine_administered == False and epinephrine_dose == 0 and norepinephrine_dose == 0): 0 points\n- If MAP < 70 mmHg and no vasopressors: 1 point\n- If dopamine_dose <= 5 OR dobutamine_administered == True: 2 points\n- If (dopamine_dose > 5 and dopamine_dose <= 15) OR epinephrine_dose <= 0.1 OR norepinephrine_dose <= 0.1: 3 points\n- If dopamine_dose > 15 OR epinephrine_dose > 0.1 OR norepinephrine_dose > 0.1: 4 points\nNote: Prioritize the highest score if multiple conditions are met."
+        },
+        {
+            "step_id": "6",
+            "step_name": "renal_score",
+            "step_description": "Calculate the SOFA score for the Renal criterion based on creatinine level or urine output.",
+            "step_inputs": [
+                {
+                    "input_name": "creatinine",
+                    "input_desc": "Creatinine level in mg/dL",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.creatinine"
+                },
+                {
+                    "input_name": "urine_output",
+                    "input_desc": "Urine output in mL/day",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.urine_output"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "renal_score",
+                    "output_desc": "SOFA score for the Renal criterion (0-4)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "condition_evaluation",
+            "reason": "This step involves conditional logic with two variables (creatinine and urine output) where the score is determined by either one, and the higher score takes precedence. It requires evaluating multiple conditions, making it more complex than a simple threshold mapping.",
+            "detail": "Score assignment based on creatinine (mg/dL) OR urine output (mL/day):\n- If creatinine < 1.2: 0 points\n- If creatinine 1.2-1.9: 1 point\n- If creatinine 2.0-3.4: 2 points\n- If creatinine 3.5-4.9 OR urine_output < 500: 3 points\n- If creatinine >= 5.0 OR urine_output < 200: 4 points\nNote: Use the higher score if both creatinine and urine output criteria are met."
+        },
+        {
+            "step_id": "7",
+            "step_name": "total_sofa_score",
+            "step_description": "Calculate the total SOFA score by summing the individual criterion scores.",
+            "step_inputs": [
+                {
+                    "input_name": "respiratory_score",
+                    "input_desc": "Score from PaO₂/FiO₂ ratio criterion",
+                    "input_type": "int",
+                    "input_source": "$|step1|.respiratory_score"
+                },
+                {
+                    "input_name": "platelets_score",
+                    "input_desc": "Score from Platelets criterion",
+                    "input_type": "int",
+                    "input_source": "$|step2|.platelets_score"
+                },
+                {
+                    "input_name": "gcs_score",
+                    "input_desc": "Score from GCS criterion",
+                    "input_type": "int",
+                    "input_source": "$|step3|.gcs_score"
+                },
+                {
+                    "input_name": "bilirubin_score",
+                    "input_desc": "Score from Bilirubin criterion",
+                    "input_type": "int",
+                    "input_source": "$|step4|.bilirubin_score"
+                },
+                {
+                    "input_name": "cardiovascular_score",
+                    "input_desc": "Score from Cardiovascular criterion",
+                    "input_type": "int",
+                    "input_source": "$|step5|.cardiovascular_score"
+                },
+                {
+                    "input_name": "renal_score",
+                    "input_desc": "Score from Renal criterion",
+                    "input_type": "int",
+                    "input_source": "$|step6|.renal_score"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_sofa_score",
+                    "output_desc": "Total SOFA Score (sum of all six criterion scores, range 0-24)",
+                    "output_type": "int"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This is a simple summation of six integer values, which is a straightforward mathematical formula. No conditional logic or mapping is required.",
+            "detail": "Total SOFA Score = respiratory_score + platelets_score + gcs_score + bilirubin_score + cardiovascular_score + renal_score"
+        }
+    ],
+    "output": {
+        "output_name": "total_sofa_score",
+        "output_desc": "Final total Sequential Organ Failure Assessment (SOFA) score, ranging from 0 to 24",
+        "output_type": "int"
+    },
+    "code": "def solve(pao2_fio2_ratio, respiratory_support, platelets, gcs, bilirubin, map, dopamine_dose, dobutamine_administered, epinephrine_dose, norepinephrine_dose, creatinine, urine_output):\n    # Step 1: PaO2/FiO2 ratio score calculation\n    if pao2_fio2_ratio >= 400:\n        respiratory_score = 0\n    elif 300 <= pao2_fio2_ratio <= 399:\n        respiratory_score = 1\n    elif 200 <= pao2_fio2_ratio <= 299:\n        respiratory_score = 2\n    elif 100 <= pao2_fio2_ratio <= 199:\n        if respiratory_support:\n            respiratory_score = 3\n        else:\n            respiratory_score = 0  # default when no respiratory support\n    else:  # pao2_fio2_ratio < 100\n        if respiratory_support:\n            respiratory_score = 4\n        else:\n            respiratory_score = 0\n    \n    yield {\n        \"step_name\": \"pao2_fio2_ratio_score\",\n        \"step_description\": \"Calculate the SOFA score for the PaO2/FiO2 ratio criterion based on the ratio value and respiratory support status.\",\n        \"step_result\": respiratory_score,\n        \"unit\": None\n    }\n    \n    # Step 2: Platelets score calculation\n    if platelets >= 150:\n        platelets_score = 0\n    elif 100 <= platelets <= 149:\n        platelets_score = 1\n    elif 50 <= platelets <= 99:\n        platelets_score = 2\n    elif 20 <= platelets <= 49:\n        platelets_score = 3\n    else:  # platelets < 20\n        platelets_score = 4\n    \n    yield {\n        \"step_name\": \"platelets_score\",\n        \"step_description\": \"Calculate the SOFA score for the Platelets criterion based on the platelet count.\",\n        \"step_result\": platelets_score,\n        \"unit\": None\n    }\n    \n    # Step 3: GCS score calculation\n    if gcs == 15:\n        gcs_score = 0\n    elif 13 <= gcs <= 14:\n        gcs_score = 1\n    elif 10 <= gcs <= 12:\n        gcs_score = 2\n    elif 6 <= gcs <= 9:\n        gcs_score = 3\n    else:  # gcs < 6\n        gcs_score = 4\n    \n    yield {\n        \"step_name\": \"gcs_score\",\n        \"step_description\": \"Calculate the SOFA score for the Glasgow Coma Scale criterion based on the GCS value.\",\n        \"step_result\": gcs_score,\n        \"unit\": None\n    }\n    \n    # Step 4: Bilirubin score calculation\n    if bilirubin < 1.2:\n        bilirubin_score = 0\n    elif 1.2 <= bilirubin <= 1.9:\n        bilirubin_score = 1\n    elif 2.0 <= bilirubin <= 5.9:\n        bilirubin_score = 2\n    elif 6.0 <= bilirubin <= 11.9:\n        bilirubin_score = 3\n    else:  # bilirubin >= 12.0\n        bilirubin_score = 4\n    \n    yield {\n        \"step_name\": \"bilirubin_score\",\n        \"step_description\": \"Calculate the SOFA score for the Bilirubin criterion based on the bilirubin level.\",\n        \"step_result\": bilirubin_score,\n        \"unit\": None\n    }\n    \n    # Step 5: Cardiovascular score calculation\n    # Check conditions in order of increasing severity, highest score wins\n    cardiovascular_score = 0\n    \n    # Check for no hypotension and no vasopressors\n    no_vasopressors = (dopamine_dose == 0 and dobutamine_administered == False \n                       and epinephrine_dose == 0 and norepinephrine_dose == 0)\n    \n    if map >= 70 and no_vasopressors:\n        cardiovascular_score = max(cardiovascular_score, 0)\n    \n    # MAP < 70 and no vasopressors\n    if map < 70 and no_vasopressors:\n        cardiovascular_score = max(cardiovascular_score, 1)\n    \n    # dopamine <= 5 OR dobutamine administered\n    if dopamine_dose <= 5 or dobutamine_administered:\n        cardiovascular_score = max(cardiovascular_score, 2)\n    \n    # (dopamine > 5 and <= 15) OR epinephrine <= 0.1 OR norepinephrine <= 0.1\n    if (5 < dopamine_dose <= 15) or epinephrine_dose <= 0.1 or norepinephrine_dose <= 0.1:\n        cardiovascular_score = max(cardiovascular_score, 3)\n    \n    # dopamine > 15 OR epinephrine > 0.1 OR norepinephrine > 0.1\n    if dopamine_dose > 15 or epinephrine_dose > 0.1 or norepinephrine_dose > 0.1:\n        cardiovascular_score = max(cardiovascular_score, 4)\n    \n    yield {\n        \"step_name\": \"cardiovascular_score\",\n        \"step_description\": \"Calculate the SOFA score for the Cardiovascular criterion based on MAP and vasopressor administration.\",\n        \"step_result\": cardiovascular_score,\n        \"unit\": None\n    }\n    \n    # Step 6: Renal score calculation (use higher of creatinine or urine output criteria)\n    renal_score = 0\n    \n    # Creatinine-based scoring\n    if creatinine < 1.2:\n        renal_score = max(renal_score, 0)\n    elif 1.2 <= creatinine <= 1.9:\n        renal_score = max(renal_score, 1)\n    elif 2.0 <= creatinine <= 3.4:\n        renal_score = max(renal_score, 2)\n    elif 3.5 <= creatinine <= 4.9:\n        renal_score = max(renal_score, 3)\n    elif creatinine >= 5.0:\n        renal_score = max(renal_score, 4)\n    \n    # Urine output-based scoring\n    if urine_output < 500:\n        renal_score = max(renal_score, 3)\n    if urine_output < 200:\n        renal_score = max(renal_score, 4)\n    \n    yield {\n        \"step_name\": \"renal_score\",\n        \"step_description\": \"Calculate the SOFA score for the Renal criterion based on creatinine level or urine output.\",\n        \"step_result\": renal_score,\n        \"unit\": None\n    }\n    \n    # Step 7: Total SOFA score calculation\n    total_sofa_score = respiratory_score + platelets_score + gcs_score + bilirubin_score + cardiovascular_score + renal_score\n    \n    yield {\n        \"step_name\": \"total_sofa_score\",\n        \"step_description\": \"Calculate the total SOFA score by summing the individual criterion scores.\",\n        \"step_result\": total_sofa_score,\n        \"unit\": None\n    }\n    \n    return total_sofa_score"
+}

@@ -1,0 +1,64 @@
+{
+    "name": "serum_osmolality_calculation_workflow",
+    "description": "Calculate serum osmolality (OSMc) in mOsm/kg using serum sodium, glucose, and blood urea nitrogen (BUN) concentrations.",
+    "inputs": [
+        {
+            "input_name": "serum_sodium_mmol_per_l",
+            "input_desc": "Serum sodium concentration in mmol/L",
+            "input_type": "float"
+        },
+        {
+            "input_name": "glucose_mg_per_dl",
+            "input_desc": "Blood glucose concentration in mg/dL. If originally in mmol/L, convert by multiplying by 18.",
+            "input_type": "float"
+        },
+        {
+            "input_name": "bun_mg_per_dl",
+            "input_desc": "Blood urea nitrogen (BUN) concentration in mg/dL",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "calculate_serum_osmolality",
+            "step_description": "Compute serum osmolality using the formula: OSMc = 2 * Na + Glucose/18 + BUN/2.8",
+            "step_inputs": [
+                {
+                    "input_name": "serum_sodium_mmol_per_l",
+                    "input_desc": "Serum sodium concentration in mmol/L",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.serum_sodium_mmol_per_l"
+                },
+                {
+                    "input_name": "glucose_mg_per_dl",
+                    "input_desc": "Blood glucose concentration in mg/dL",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.glucose_mg_per_dl"
+                },
+                {
+                    "input_name": "bun_mg_per_dl",
+                    "input_desc": "Blood urea nitrogen concentration in mg/dL",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.bun_mg_per_dl"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "osm_c_mosm_per_kg",
+                    "output_desc": "Calculated serum osmolality in mOsm/kg",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step directly applies the standard medical formula for calculating serum osmolality, which is a straightforward arithmetic computation using three lab values.",
+            "detail": "Apply the formula: OSMc (mOsm/kg) = 2 * serum_sodium_mmol_per_l (mmol/L) + glucose_mg_per_dl (mg/dL) / 18 + bun_mg_per_dl (mg/dL) / 2.8. Ensure all inputs are in the correct units before calculation."
+        }
+    ],
+    "output": {
+        "output_name": "osm_c_mosm_per_kg",
+        "output_desc": "Final calculated serum osmolality value in mOsm/kg",
+        "output_type": "float"
+    },
+    "code": "def solve(serum_sodium_mmol_per_l, glucose_mg_per_dl, bun_mg_per_dl):\n    # Step 1: Calculate serum osmolality\n    # Apply the formula: OSMc (mOsm/kg) = 2 * Na + Glucose/18 + BUN/2.8\n    osm_c_mosm_per_kg = 2 * serum_sodium_mmol_per_l + glucose_mg_per_dl / 18 + bun_mg_per_dl / 2.8\n    \n    yield {\n        \"step_name\": \"calculate_serum_osmolality\",\n        \"step_description\": \"Compute serum osmolality using the formula: OSMc = 2 * Na + Glucose/18 + BUN/2.8\",\n        \"step_result\": osm_c_mosm_per_kg,\n        \"unit\": \"mOsm/kg\"\n    }\n    \n    return osm_c_mosm_per_kg"
+}

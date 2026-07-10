@@ -1,0 +1,133 @@
+{
+    "name": "calculate_anca_kidney_risk_score",
+    "description": "Calculate the risk score for progression to end-stage renal disease (ESRD) in a patient with ANCA-related glomerulonephritis (AAGN) based on the ANCA肾脏风险评分 system.",
+    "inputs": [
+        {
+            "input_name": "normal_glomeruli_percentage",
+            "input_desc": "The percentage of normal glomeruli observed in the kidney biopsy (e.g., 25, 10, 5).",
+            "input_type": "float"
+        },
+        {
+            "input_name": "tubular_atrophy_percentage",
+            "input_desc": "The percentage of tubular atrophy and interstitial fibrosis observed in the kidney biopsy (e.g., 25, 30).",
+            "input_type": "float"
+        },
+        {
+            "input_name": "eGFR_mL_per_min_per_1_73_m2",
+            "input_desc": "The estimated glomerular filtration rate (eGFR) at diagnosis in mL/min/1.73 m² (e.g., 15, 20).",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "calculate_n_score",
+            "step_description": "Calculate the score for the normal glomeruli proportion (N) based on the ANCA-related glomerulonephritis (AAGN) patient's kidney biopsy findings.",
+            "step_inputs": [
+                {
+                    "input_name": "normal_glomeruli_percentage",
+                    "input_desc": "The percentage of normal glomeruli observed in the kidney biopsy (e.g., 25, 10, 5).",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.normal_glomeruli_percentage"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "n_score",
+                    "output_desc": "The score assigned based on the normal glomeruli proportion (N0: 0, N1: 4, N2: 6).",
+                    "output_type": "int"
+                }
+            ],
+            "category": "ThresholdMapping",
+            "reason": "This step maps the normal glomeruli percentage to a score using predefined thresholds.",
+            "detail": "If the percentage is >25%, assign 0 points. If it is between 10% and 25%, assign 4 points. If it is <10%, assign 6 points."
+        },
+        {
+            "step_id": "2",
+            "step_name": "calculate_t_score",
+            "step_description": "Calculate the score for the tubular atrophy and interstitial fibrosis proportion (T) based on the ANCA-related glomerulonephritis (AAGN) patient's kidney biopsy findings.",
+            "step_inputs": [
+                {
+                    "input_name": "tubular_atrophy_percentage",
+                    "input_desc": "The percentage of tubular atrophy and interstitial fibrosis observed in the kidney biopsy (e.g., 25, 30).",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.tubular_atrophy_percentage"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "t_score",
+                    "output_desc": "The score assigned based on the tubular atrophy and interstitial fibrosis proportion (T0: 0, T1: 2).",
+                    "output_type": "int"
+                }
+            ],
+            "category": "ThresholdMapping",
+            "reason": "This step maps the tubular atrophy and interstitial fibrosis percentage to a score using predefined thresholds.",
+            "detail": "If the percentage is ≤25%, assign 0 points. If it is >25%, assign 2 points."
+        },
+        {
+            "step_id": "3",
+            "step_name": "calculate_g_score",
+            "step_description": "Calculate the score for the estimated glomerular filtration rate (eGFR) at diagnosis (G) based on the ANCA-related glomerulonephritis (AAGN) patient's renal function.",
+            "step_inputs": [
+                {
+                    "input_name": "eGFR_mL_per_min_per_1_73_m2",
+                    "input_desc": "The estimated glomerular filtration rate (eGFR) at diagnosis in mL/min/1.73 m² (e.g., 15, 20).",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.eGFR_mL_per_min_per_1_73_m2"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "g_score",
+                    "output_desc": "The score assigned based on the eGFR value (G0: 0, G1: 3).",
+                    "output_type": "int"
+                }
+            ],
+            "category": "ThresholdMapping",
+            "reason": "This step maps the eGFR value to a score using predefined thresholds.",
+            "detail": "If the eGFR is >15 mL/min/1.73 m², assign 0 points. If it is ≤15 mL/min/1.73 m², assign 3 points."
+        },
+        {
+            "step_id": "4",
+            "step_name": "calculate_total_risk_score",
+            "step_description": "Calculate the total risk score for the progression to end-stage renal disease (ESRD) based on the ANCA-related glomerulonephritis (AAGN) patient's scores from N, T, and G categories.",
+            "step_inputs": [
+                {
+                    "input_name": "n_score",
+                    "input_desc": "The score assigned for the normal glomeruli proportion (N0: 0, N1: 4, N2: 6).",
+                    "input_type": "int",
+                    "input_source": "$|1|.n_score"
+                },
+                {
+                    "input_name": "t_score",
+                    "input_desc": "The score assigned for the tubular atrophy and interstitial fibrosis proportion (T0: 0, T1: 2).",
+                    "input_type": "int",
+                    "input_source": "$|2|.t_score"
+                },
+                {
+                    "input_name": "g_score",
+                    "input_desc": "The score assigned for the estimated glomerular filtration rate (eGFR) at diagnosis (G0: 0, G1: 3).",
+                    "input_type": "int",
+                    "input_source": "$|3|.g_score"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "total_risk_score",
+                    "output_desc": "The total risk score for progression to end-stage renal disease (ESRD).",
+                    "output_type": "int"
+                }
+            ],
+            "category": "FormulaCalculation",
+            "reason": "This step calculates the final risk score by combining the scores from the N, T, and G categories.",
+            "detail": "The total risk score is calculated by summing the individual scores for N, T, and G categories: total_risk_score = n_score + t_score + g_score."
+        }
+    ],
+    "output": {
+        "output_name": "total_risk_score",
+        "output_desc": "The total risk score for progression to end-stage renal disease (ESRD).",
+        "output_type": "int"
+    },
+    "code": "def solve(normal_glomeruli_percentage, tubular_atrophy_percentage, eGFR_mL_per_min_per_1_73_m2):\n    # Step 1: Calculate the score for normal glomeruli proportion (N)\n    if normal_glomeruli_percentage > 25:\n        n_score = 0\n    elif 10 <= normal_glomeruli_percentage <= 25:\n        n_score = 4\n    else:  # normal_glomeruli_percentage < 10\n        n_score = 6\n\n    yield {\n        \"step_name\": \"calculate_n_score\",\n        \"step_description\": \"Calculate the score for the normal glomeruli proportion (N) based on the ANCA-related glomerulonephritis (AAGN) patient's kidney biopsy findings.\",\n        \"step_result\": n_score,\n        \"unit\": None\n    }\n\n    # Step 2: Calculate the score for tubular atrophy and interstitial fibrosis proportion (T)\n    if tubular_atrophy_percentage <= 25:\n        t_score = 0\n    else:  # tubular_atrophy_percentage > 25\n        t_score = 2\n\n    yield {\n        \"step_name\": \"calculate_t_score\",\n        \"step_description\": \"Calculate the score for the tubular atrophy and interstitial fibrosis proportion (T) based on the ANCA-related glomerulonephritis (AAGN) patient's kidney biopsy findings.\",\n        \"step_result\": t_score,\n        \"unit\": None\n    }\n\n    # Step 3: Calculate the score for estimated glomerular filtration rate (eGFR) at diagnosis (G)\n    if eGFR_mL_per_min_per_1_73_m2 > 15:\n        g_score = 0\n    else:  # eGFR_mL_per_min_per_1_73_m2 <= 15\n        g_score = 3\n\n    yield {\n        \"step_name\": \"calculate_g_score\",\n        \"step_description\": \"Calculate the score for the estimated glomerular filtration rate (eGFR) at diagnosis (G) based on the ANCA-related glomerulonephritis (AAGN) patient's renal function.\",\n        \"step_result\": g_score,\n        \"unit\": None\n    }\n\n    # Step 4: Calculate the total risk score by summing N, T, and G scores\n    total_risk_score = n_score + t_score + g_score\n\n    yield {\n        \"step_name\": \"calculate_total_risk_score\",\n        \"step_description\": \"Calculate the total risk score for the progression to end-stage renal disease (ESRD) based on the ANCA-related glomerulonephritis (AAGN) patient's scores from N, T, and G categories.\",\n        \"step_result\": total_risk_score,\n        \"unit\": None\n    }\n\n    return total_risk_score"
+}

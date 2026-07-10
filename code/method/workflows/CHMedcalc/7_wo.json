@@ -1,0 +1,125 @@
+{
+    "name": "creatinine_clearance_calculation_workflow",
+    "description": "Calculate endogenous creatinine clearance (CCr) using the 24-hour urine collection method, including a unit consistency check.",
+    "inputs": [
+        {
+            "input_name": "urine_creatinine",
+            "input_desc": "Urine creatinine concentration measured from 24-hour urine specimen",
+            "input_type": "float"
+        },
+        {
+            "input_name": "urine_creatinine_unit",
+            "input_desc": "Unit of urine creatinine concentration. Allowed values: 'mg/dL', 'umol/L'",
+            "input_type": "str"
+        },
+        {
+            "input_name": "serum_creatinine",
+            "input_desc": "Serum creatinine concentration measured from fasting venous blood",
+            "input_type": "float"
+        },
+        {
+            "input_name": "serum_creatinine_unit",
+            "input_desc": "Unit of serum creatinine concentration. Allowed values: 'mg/dL', 'umol/L'",
+            "input_type": "str"
+        },
+        {
+            "input_name": "urine_volume_24h",
+            "input_desc": "Total urine volume over 24 hours, in ml",
+            "input_type": "float"
+        }
+    ],
+    "steps": [
+        {
+            "step_id": "1",
+            "step_name": "unit_conversion_check",
+            "step_description": "Check if the urine creatinine and serum creatinine units are consistent. If not, convert one to match the other.",
+            "step_inputs": [
+                {
+                    "input_name": "urine_creatinine",
+                    "input_desc": "Urine creatinine concentration",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.urine_creatinine"
+                },
+                {
+                    "input_name": "urine_creatinine_unit",
+                    "input_desc": "Unit of urine creatinine concentration. Allowed values: 'mg/dL', 'umol/L'",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.urine_creatinine_unit"
+                },
+                {
+                    "input_name": "serum_creatinine",
+                    "input_desc": "Serum creatinine concentration",
+                    "input_type": "float",
+                    "input_source": "$|inputs|.serum_creatinine"
+                },
+                {
+                    "input_name": "serum_creatinine_unit",
+                    "input_desc": "Unit of serum creatinine concentration. Allowed values: 'mg/dL', 'umol/L'",
+                    "input_type": "str",
+                    "input_source": "$|inputs|.serum_creatinine_unit"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "final_urine_creatinine",
+                    "output_desc": "Urine creatinine concentration in the target unit, consistent with serum creatinine",
+                    "output_type": "float"
+                },
+                {
+                    "output_name": "final_serum_creatinine",
+                    "output_desc": "Serum creatinine concentration in the target unit, consistent with urine creatinine",
+                    "output_type": "float"
+                },
+                {
+                    "output_name": "final_unit",
+                    "output_desc": "The common unit used for both creatinine values after conversion",
+                    "output_type": "str"
+                }
+            ],
+            "category": "unit_conversion",
+            "reason": "This step handles conditional logic and arithmetic conversion to ensure input parameters are in a consistent unit before a formula calculation.",
+            "detail": "If urine_creatinine_unit equals serum_creatinine_unit, set final_urine_creatinine = urine_creatinine, final_serum_creatinine = serum_creatinine, and final_unit = urine_creatinine_unit. If units differ, the target unit is mg/dL. Convert as follows: if urine_creatinine_unit is 'umol/L', final_urine_creatinine = urine_creatinine / 88.4; else final_urine_creatinine = urine_creatinine. If serum_creatinine_unit is 'umol/L', final_serum_creatinine = serum_creatinine / 88.4; else final_serum_creatinine = serum_creatinine. Set final_unit = 'mg/dL'."
+        },
+        {
+            "step_id": "2",
+            "step_name": "creatinine_clearance_calculation",
+            "step_description": "Calculate endogenous creatinine clearance (CCr) using the 24-hour urine collection method.",
+            "step_inputs": [
+                {
+                    "input_name": "final_urine_creatinine",
+                    "input_desc": "Urine creatinine concentration in a consistent unit (e.g., mg/dL or umol/L)",
+                    "input_type": "float",
+                    "input_source": "$|step1|.final_urine_creatinine"
+                },
+                {
+                    "input_name": "urine_volume_24h",
+                    "input_desc": "Total urine volume over 24 hours, in ml",
+                    "input_type": "float",
+                    "input_source": "$|raw input|.urine_volume_24h"
+                },
+                {
+                    "input_name": "final_serum_creatinine",
+                    "input_desc": "Serum creatinine concentration in a consistent unit (e.g., mg/dL or umol/L)",
+                    "input_type": "float",
+                    "input_source": "$|step1|.final_serum_creatinine"
+                }
+            ],
+            "step_outputs": [
+                {
+                    "output_name": "creatinine_clearance",
+                    "output_desc": "Endogenous creatinine clearance in ml/min",
+                    "output_type": "float"
+                }
+            ],
+            "category": "formula_calculation",
+            "reason": "This step directly applies the provided medical formula using pre-processed inputs.",
+            "detail": "CCr (ml/min) = (final_urine_creatinine * urine_volume_24h) / (final_serum_creatinine * 1440). The units of the creatinine concentrations cancel out, yielding a result in ml/min."
+        }
+    ],
+    "output": {
+        "output_name": "creatinine_clearance",
+        "output_desc": "Calculated endogenous creatinine clearance in ml/min",
+        "output_type": "float"
+    },
+    "code": "import math\n\ndef solve(urine_creatinine, urine_creatinine_unit, serum_creatinine, serum_creatinine_unit, urine_volume_24h):\n    # Step 1: unit_conversion_check\n    # Check if the urine creatinine and serum creatinine units are consistent.\n    # If not, convert one to match the other. Target unit is mg/dL if they differ.\n    if urine_creatinine_unit == serum_creatinine_unit:\n        final_urine_creatinine = urine_creatinine\n        final_serum_creatinine = serum_creatinine\n        final_unit = urine_creatinine_unit\n    else:\n        # Units differ, convert both to mg/dL\n        if urine_creatinine_unit == 'umol/L':\n            final_urine_creatinine = urine_creatinine / 88.4\n        else:\n            final_urine_creatinine = urine_creatinine\n        if serum_creatinine_unit == 'umol/L':\n            final_serum_creatinine = serum_creatinine / 88.4\n        else:\n            final_serum_creatinine = serum_creatinine\n        final_unit = 'mg/dL'\n    \n    yield {\n        \"step_name\": \"unit_conversion_check\",\n        \"step_description\": \"Check urine and serum creatinine unit consistency. If different, convert both to mg/dL. Return converted values and the common unit.\",\n        \"step_result\": f\"final_urine_creatinine={final_urine_creatinine}, final_serum_creatinine={final_serum_creatinine}, final_unit={final_unit}\",\n        \"unit\": None\n    }\n\n    # Step 2: creatinine_clearance_calculation\n    # Calculate endogenous creatinine clearance (CCr) using the 24-hour urine collection method.\n    # CCr (ml/min) = (final_urine_creatinine * urine_volume_24h) / (final_serum_creatinine * 1440)\n    creatinine_clearance = (final_urine_creatinine * urine_volume_24h) / (final_serum_creatinine * 1440)\n    \n    yield {\n        \"step_name\": \"creatinine_clearance_calculation\",\n        \"step_description\": \"Calculate endogenous creatinine clearance (CCr) using formula CCr = (urine creatinine * urine volume) / (serum creatinine * 1440).\",\n        \"step_result\": creatinine_clearance,\n        \"unit\": \"ml/min\"\n    }\n\n    # Final output\n    return creatinine_clearance"
+}
