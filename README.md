@@ -9,3 +9,6 @@ https://www.youtube.com/watch?v=IGhF_0347E4
 
 ### Online Demo
 http://47.103.145.106/
+
+### User Manual
+[User Manual](./User Manual/User Manual_en.md)
